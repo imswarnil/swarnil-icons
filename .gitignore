@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+*.log
+__pycache__/
+*.pyc
+
+# Nothing generated is committed. `npm run build` rebuilds both.
+dist/
+site/

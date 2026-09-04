@@ -1,0 +1,33 @@
+{
+  "name": "@imswarnil/swarnil-icons",
+  "version": "0.1.0",
+  "description": "Swarnil Icons — a 24-grid stroked icon set drawn from scratch. Five variants from one geometry, MIT, no dependencies.",
+  "keywords": ["icons", "svg", "icon-set", "sprite", "design-system", "open-source"],
+  "homepage": "https://icons.imswarnil.com",
+  "bugs": "https://github.com/imswarnil/swarnil-icons/issues",
+  "repository": { "type": "git", "url": "git+https://github.com/imswarnil/swarnil-icons.git" },
+  "author": { "name": "Swarnil Singhai", "url": "https://imswarnil.com" },
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": ["*.css"],
+  "style": "dist/swarnil-icons.css",
+  "exports": {
+    ".": "./dist/icons.json",
+    "./css": "./dist/swarnil-icons.css",
+    "./sprite": "./dist/sprite.svg",
+    "./json": "./dist/icons.json",
+    "./svg/*": "./dist/svg/*",
+    "./icons/*": "./icons/*",
+    "./package.json": "./package.json"
+  },
+  "files": ["icons", "dist", "STYLE.md", "README.md", "LICENSE"],
+  "scripts": {
+    "author": "python3 scripts/author.py",
+    "validate": "python3 scripts/validate.py --strict",
+    "build": "npm run validate && python3 scripts/build.py && python3 docs/build.py",
+    "docs": "python3 docs/build.py",
+    "dev": "npm run build && python3 -m http.server 8082 --directory site",
+    "test": "npm run validate"
+  },
+  "engines": { "node": ">=18" }
+}

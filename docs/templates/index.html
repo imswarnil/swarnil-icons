@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{name} — {count} open-source icons, drawn from scratch</title>
+<meta name="description" content="A 24-grid stroked icon set. Five variants from one geometry, any size, SVG, PNG or JPG. MIT, no dependencies." />
+<link rel="canonical" href="{site}/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="{name}" />
+<meta property="og:description" content="{count} icons on a 24 grid. Five variants from one geometry. MIT." />
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+
+<script>
+try {
+  var t = localStorage.getItem('si-theme');
+  if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.dataset.theme = t;
+} catch (e) { document.documentElement.dataset.theme = 'light'; }
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/swarnil-icons.css" />
+<link rel="stylesheet" href="/assets/site.css" />
+<script src="/assets/site.js" defer></script>
+</head>
+
+<body>
+<a class="skip" href="#grid">Skip to the icons</a>
+
+<header class="bar">
+  <a class="brand" href="/">
+    <span class="brand__mark" aria-hidden="true"></span>
+    <span class="brand__name">Swarnil</span>
+    <span class="brand__sub">Icons</span>
+  </a>
+  <div class="bar__end">
+    <button class="btn btn-quiet" type="button" data-theme-toggle aria-label="Switch theme">
+      <span class="themedot" aria-hidden="true"></span><span data-theme-label>Light</span>
+    </button>
+    <a class="btn btn-quiet" href="https://github.com/imswarnil/swarnil-icons" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="kicker">MIT · {count} icons · {catcount} categories · 24 grid</p>
+    <h1 class="hero__title">Icons that know<br />what they are for.</h1>
+    <p class="hero__lead">Drawn from scratch on a 24&nbsp;grid — nothing traced, nothing re-licensed. Five variants generated from one geometry, so <code class="code">bold</code> can never drift away from <code class="code">line</code>. Take any icon at any size as SVG, PNG or JPG.</p>
+  </section>
+
+  <div class="tools">
+    <label class="search">
+      <span class="u-sr-only">Search icons</span>
+      <input class="search__input" type="search" placeholder="Search 55 icons — try 'camera' or 'arrow'" autocomplete="off" data-search />
+      <kbd class="kbd">/</kbd>
+    </label>
+
+    <div class="cluster" role="group" aria-label="Filter by category">
+      <button class="chip" type="button" data-cat="" aria-pressed="true">all</button>
+      {cats}
+    </div>
+
+    <div class="cluster" role="group" aria-label="Variant">
+      <button class="chip" type="button" data-variant="thin" aria-pressed="false">thin</button>
+      <button class="chip" type="button" data-variant="line" aria-pressed="true">line</button>
+      <button class="chip" type="button" data-variant="bold" aria-pressed="false">bold</button>
+      <button class="chip" type="button" data-variant="solid" aria-pressed="false">solid</button>
+      <button class="chip" type="button" data-variant="duo" aria-pressed="false">duo</button>
+    </div>
+  </div>
+
+  <p class="count" data-count aria-live="polite"></p>
+
+  <div class="grid" id="grid" data-grid></div>
+
+  <p class="empty" data-empty hidden>Nothing matches that. Every icon is named for <b>what it is</b>, not what it does — try <code class="code">circle-check</code> rather than <code class="code">success</code>.</p>
+</main>
+
+<!-- The export panel. Opens on click; Escape closes it. -->
+<dialog class="panel" data-panel>
+  <form method="dialog" class="panel__close-form">
+    <button class="btn btn-quiet panel__close" aria-label="Close">Close</button>
+  </form>
+
+  <div class="panel__stage">
+    <svg class="panel__icon" data-panel-icon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></svg>
+  </div>
+
+  <h2 class="panel__name" data-panel-name></h2>
+  <p class="panel__cat" data-panel-cat></p>
+
+  <div class="panel__row">
+    <label class="field">
+      <span class="field__label">Size</span>
+      <input class="range" type="range" min="16" max="512" step="8" value="24" data-size />
+    </label>
+    <output class="panel__size" data-size-out>24 px</output>
+  </div>
+
+  <div class="cluster" role="group" aria-label="Variant">
+    <button class="chip" type="button" data-pvariant="thin">thin</button>
+    <button class="chip" type="button" data-pvariant="line" aria-pressed="true">line</button>
+    <button class="chip" type="button" data-pvariant="bold">bold</button>
+    <button class="chip" type="button" data-pvariant="solid">solid</button>
+    <button class="chip" type="button" data-pvariant="duo">duo</button>
+  </div>
+
+  <p class="panel__note" data-panel-note hidden>This icon has no solid variant — its paths are open, and a filled open path is a blob rather than an icon. A solid needs its own declared geometry.</p>
+
+  <div class="panel__grabs">
+    <button class="btn btn-primary" type="button" data-dl="svg">SVG</button>
+    <button class="btn btn-outline" type="button" data-dl="png">PNG</button>
+    <button class="btn btn-outline" type="button" data-dl="jpg">JPG</button>
+    <button class="btn btn-outline" type="button" data-copy-svg>Copy SVG</button>
+    <button class="btn btn-outline" type="button" data-copy-use>Copy &lt;use&gt;</button>
+  </div>
+
+  <pre class="panel__code"><code data-panel-code></code></pre>
+</dialog>
+
+<footer class="foot">
+  <div class="foot__in">
+    <p class="foot__brand"><span class="brand__mark" aria-hidden="true"></span> Swarnil Icons</p>
+    <p class="foot__note">Drawn from scratch on a 24 grid. The rules are in <a href="https://github.com/imswarnil/swarnil-icons/blob/main/STYLE.md">STYLE.md</a> and enforced by <code class="code">validate.py</code>.</p>
+    <p class="foot__fine">MIT · &copy; 2026 Swarnil Singhai · Built to sit beside <a href="https://design.imswarnil.com">Swarnil Design System</a></p>
+  </div>
+</footer>
+
+<script id="icon-data" type="application/json">{data}</script>
+</body>
+</html>
