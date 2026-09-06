@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 """build.py — the icons.imswarnil.com site.
 
-One page. It is a browser, not a manual: search, filter, pick a variant and a
-size, copy the markup, download the file. The whole set is inlined as JSON so
-the page works from a static host with no API and no build step for the reader.
+Two pages, and they answer different questions.
+
+    /        the BROWSER — what is in the set. Search, filter, pick a weight
+             and a size, copy the markup, download the file. The whole set is
+             inlined as JSON so it works from a static host with no API.
+
+    /usage/  the SHOWCASE — what the set looks like in place. A browser can
+             tell you an icon exists; it cannot tell you whether the thing is
+             any good on a marketing card or a video thumbnail. So this page
+             is the icons doing real jobs, built out of the same classes the
+             README documents rather than out of screenshots.
 
     docs/    source
     site/    output — generated, gitignored
@@ -27,7 +35,8 @@ NAME = 'Swarnil Icons'
 # The stylesheets and script this page links. Long-lived at the edge, which is
 # the whole problem below.
 VERSIONED = ('/swarnil-icons.css', '/swarnil-icons-motion.css',
-             '/assets/site.css', '/assets/site.js')
+             '/assets/site.css', '/assets/site.js',
+             '/assets/usage.css', '/assets/usage.js')
 
 
 def fingerprint(page):
@@ -93,9 +102,17 @@ def main():
             .replace('{sprite}', sprite)
             .replace('{data}', json.dumps(icons, separators=(',', ':'))))
 
-    page = fingerprint(page)
+    (OUT / 'index.html').write_text(fingerprint(page))
 
-    (OUT / 'index.html').write_text(page)
+    # The showcase. Same sprite, same stylesheets, no icon data — it is a page
+    # of worked examples, not a second browser, so it needs no index.
+    usage = ((DOCS / 'templates' / 'usage.html').read_text()
+             .replace('{name}', NAME)
+             .replace('{site}', SITE)
+             .replace('{count}', str(len(icons)))
+             .replace('{sprite}', sprite))
+    (OUT / 'usage').mkdir()
+    (OUT / 'usage' / 'index.html').write_text(fingerprint(usage))
 
     (OUT / '.nojekyll').write_text('')
     (OUT / 'CNAME').write_text(SITE.split('//')[1] + '\n')
@@ -103,9 +120,11 @@ def main():
     (OUT / 'sitemap.xml').write_text(
         '<?xml version="1.0" encoding="UTF-8"?>'
         f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-        f'<url><loc>{SITE}/</loc></url></urlset>')
+        f'<url><loc>{SITE}/</loc></url>'
+        f'<url><loc>{SITE}/usage/</loc></url></urlset>')
 
-    print(f'built the icons site: {len(icons)} icons, {catcount} categories -> site/')
+    print(f'built the icons site: {len(icons)} icons, {catcount} categories '
+          f'-> site/ (browser + showcase)')
     return 0
 
 

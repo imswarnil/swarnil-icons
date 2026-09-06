@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Usage — {name} in place</title>
+<meta name="description" content="The icons doing real jobs: marketing cards, video thumbnails, interface chrome, scroll-triggered sections and the scanline treatment." />
+<link rel="canonical" href="{site}/usage/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="{name} — in place" />
+<meta property="og:description" content="What the set looks like on a marketing card, a thumbnail and a live badge — not a grid of glyphs." />
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+
+<script>
+try {
+  var t = localStorage.getItem('si-theme');
+  if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.dataset.theme = t;
+} catch (e) { document.documentElement.dataset.theme = 'light'; }
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/swarnil-icons.css" />
+<link rel="stylesheet" href="/swarnil-icons-motion.css" />
+<link rel="stylesheet" href="/assets/site.css" />
+<link rel="stylesheet" href="/assets/usage.css" />
+<script src="/assets/usage.js" defer></script>
+</head>
+
+<body>
+<a class="skip" href="#cards">Skip to the examples</a>
+
+{sprite}
+
+<header class="bar">
+  <a class="brand" href="/">
+    <span class="brand__mark" aria-hidden="true"></span>
+    <span class="brand__name">Swarnil</span>
+    <span class="brand__sub">Icons</span>
+  </a>
+
+  <nav class="tabs" aria-label="Sections">
+    <a class="tab" href="/">Browse</a>
+    <a class="tab tab--on" href="/usage/" aria-current="page">Usage</a>
+  </nav>
+
+  <div class="bar__end">
+    <button class="iconbtn" type="button" data-theme-toggle aria-label="Switch theme">
+      <svg class="ic ic-md" aria-hidden="true"><use href="#i-moon" data-theme-icon /></svg>
+    </button>
+    <a class="iconbtn" href="https://github.com/imswarnil/swarnil-icons" rel="noopener" aria-label="This set on GitHub">
+      <svg class="ic ic-md" aria-hidden="true"><use href="#i-code" /></svg>
+    </a>
+  </div>
+</header>
+
+<main class="usage">
+  <section class="uhero">
+    <p class="kicker">
+      <svg class="ic ic-sm ic-inline ic-primary" aria-hidden="true"><use href="#i-record" /></svg>
+      Usage · {count} icons
+    </p>
+    <h1 class="uhero__title">What they look like<br />once they have a job.</h1>
+    <p class="uhero__lead">A grid of glyphs tells you an icon exists. It does not tell you whether the set holds together on a marketing card, a video thumbnail or a row of settings. Everything below is built from the classes in the README — nothing here is a screenshot.</p>
+  </section>
+
+  <!-- ── 1 · marketing cards ───────────────────────────────────────────── -->
+  <section class="demo" id="cards">
+    <div class="demo__head">
+      <h2 class="demo__title">Marketing cards</h2>
+      <p class="demo__note">The commonest job an icon set ever does. <code class="code">ic-lg ic-primary</code> in a soft tile, one hue for the lot — a feature grid is not the place for six colours.</p>
+    </div>
+
+    <div class="cards">
+      <article class="card">
+        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-capture" /></svg></span>
+        <h3 class="card__title">Drawn from scratch</h3>
+        <p class="card__text">Nothing traced, nothing re-licensed. The geometry is original, which is what lets the set ship MIT without inheriting anyone's attribution clause.</p>
+      </article>
+      <article class="card">
+        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-type" /></svg></span>
+        <h3 class="card__title">Five weights, one path</h3>
+        <p class="card__text">Every weight is generated from the same geometry, so <code class="code">bold</code> cannot drift away from <code class="code">line</code> the way two hand-drawn files always eventually do.</p>
+      </article>
+      <article class="card">
+        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-activity" /></svg></span>
+        <h3 class="card__title">Motion included</h3>
+        <p class="card__text">Six animations, each with an in, an out and a loop. The draw needs no JavaScript — the build stamps a normalised path length so one CSS rule animates all of them.</p>
+      </article>
+      <article class="card">
+        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-aperture" /></svg></span>
+        <h3 class="card__title">Colour that follows yours</h3>
+        <p class="card__text">Every token reads your design system's <code class="code">--accent</code> first and falls back to ours. Repoint one line and the icons rebrand with everything else.</p>
+      </article>
+      <article class="card">
+        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-box" /></svg></span>
+        <h3 class="card__title">No dependencies</h3>
+        <p class="card__text">A sprite, a stylesheet and a JSON index. Nothing to install, nothing to build, nothing that can go stale in a lockfile.</p>
+      </article>
+      <article class="card">
+        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-circle-check" /></svg></span>
+        <h3 class="card__title">Enforced, not described</h3>
+        <p class="card__text">Every rule in STYLE.md is a number, and the build fails when an icon breaks one. A style guide that is not executable is a wish.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ── 2 · thumbnails and the scanline ───────────────────────────────── -->
+  <section class="demo">
+    <div class="demo__head">
+      <h2 class="demo__title">Thumbnails and the scanline</h2>
+      <p class="demo__note">The scanline's real job. <code class="code">ic-scan ic-tv-loop</code> over a filled icon reads as a screen, which is exactly what a video tile is — and the record dot marks the one that is live.</p>
+    </div>
+
+    <div class="thumbs">
+      <a class="thumb" href="#cards">
+        <span class="thumb__art">
+          <svg class="ic ic-2xl ic-solid ic-primary ic-scan ic-tv-loop" aria-hidden="true"><use href="#i-video" /></svg>
+        </span>
+        <span class="thumb__meta">
+          <span class="thumb__title">Drawing the set</span>
+          <span class="thumb__sub"><svg class="ic ic-xs ic-inline" aria-hidden="true"><use href="#i-clock" /></svg> 12:04</span>
+        </span>
+        <span class="badge badge--live"><svg class="ic ic-xs" aria-hidden="true"><use href="#i-record" /></svg> Live</span>
+      </a>
+
+      <a class="thumb" href="#cards">
+        <span class="thumb__art">
+          <svg class="ic ic-2xl ic-solid ic-primary ic-scan" aria-hidden="true"><use href="#i-camera" /></svg>
+        </span>
+        <span class="thumb__meta">
+          <span class="thumb__title">Frame &amp; Signal</span>
+          <span class="thumb__sub"><svg class="ic ic-xs ic-inline" aria-hidden="true"><use href="#i-clock" /></svg> 8:20</span>
+        </span>
+      </a>
+
+      <a class="thumb" href="#cards">
+        <span class="thumb__art">
+          <svg class="ic ic-2xl ic-solid ic-primary ic-scan" aria-hidden="true"><use href="#i-headphones" /></svg>
+        </span>
+        <span class="thumb__meta">
+          <span class="thumb__title">On the grid</span>
+          <span class="thumb__sub"><svg class="ic ic-xs ic-inline" aria-hidden="true"><use href="#i-clock" /></svg> 31:57</span>
+        </span>
+      </a>
+
+      <a class="thumb" href="#cards">
+        <span class="thumb__art">
+          <svg class="ic ic-2xl ic-rgb ic-rgb-loop" aria-hidden="true"><use href="#i-browser" /></svg>
+        </span>
+        <span class="thumb__meta">
+          <span class="thumb__title">Losing lock</span>
+          <span class="thumb__sub"><svg class="ic ic-xs ic-inline" aria-hidden="true"><use href="#i-clock" /></svg> 4:11</span>
+        </span>
+        <span class="badge"><code class="code">ic-rgb</code></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── 3 · animated on scroll ────────────────────────────────────────── -->
+  <section class="demo">
+    <div class="demo__head">
+      <h2 class="demo__title">Sections that draw themselves in</h2>
+      <p class="demo__note">The class is added when the row enters the viewport, so the stroke draws on arrival instead of on load. <code class="code">ic-draw-in</code> with a per-step <code class="code">--ic-delay</code>. Scroll it past and back to replay.</p>
+    </div>
+
+    <ol class="steps" data-reveal>
+      <li class="step" style="--ic-delay: 0ms">
+        <span class="step__n">01</span>
+        <span class="step__art"><svg class="ic ic-2xl ic-primary" data-draw aria-hidden="true"><use href="#i-download" /></svg></span>
+        <h3 class="step__title">Take the sprite</h3>
+        <p class="step__text">One request for the whole set, or the npm package if you would rather have the source files.</p>
+      </li>
+      <li class="step" style="--ic-delay: 140ms">
+        <span class="step__n">02</span>
+        <span class="step__art"><svg class="ic ic-2xl ic-primary" data-draw aria-hidden="true"><use href="#i-edit" /></svg></span>
+        <h3 class="step__title">Point it at your accent</h3>
+        <p class="step__text">The colour tokens read <code class="code">--accent</code> before their own fallback, so the set adopts whatever you already have.</p>
+      </li>
+      <li class="step" style="--ic-delay: 280ms">
+        <span class="step__n">03</span>
+        <span class="step__art"><svg class="ic ic-2xl ic-primary" data-draw aria-hidden="true"><use href="#i-circle-check" /></svg></span>
+        <h3 class="step__title">Ship it</h3>
+        <p class="step__text">No build step, no runtime, nothing to keep in a lockfile. It is a stylesheet and an SVG.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ── 4 · interface chrome ──────────────────────────────────────────── -->
+  <section class="demo">
+    <div class="demo__head">
+      <h2 class="demo__title">Interface</h2>
+      <p class="demo__note">Where the set spends most of its life, and the reason the stroke does not scale with the size: at 16px beside a label an icon has to sit, not shout. <code class="code">ic-sm ic-inline</code>.</p>
+    </div>
+
+    <div class="ui">
+      <div class="ui__panel">
+        <p class="ui__label">Buttons</p>
+        <div class="ui__row">
+          <button class="btn btn-primary" type="button"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-upload" /></svg> Publish</button>
+          <button class="btn btn-outline" type="button"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-refresh" /></svg> Rebuild</button>
+          <button class="btn btn-outline" type="button"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-share" /></svg> Share</button>
+          <button class="btn btn-outline btn--danger" type="button"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-trash" /></svg> Delete</button>
+        </div>
+
+        <p class="ui__label">Working</p>
+        <div class="ui__row">
+          <span class="pill"><svg class="ic ic-sm ic-spin-loop" aria-hidden="true"><use href="#i-refresh" /></svg> Building…</span>
+          <span class="pill"><svg class="ic ic-sm ic-pulse-loop ic-info" aria-hidden="true"><use href="#i-upload" /></svg> Uploading</span>
+          <span class="pill"><svg class="ic ic-sm ic-primary" aria-hidden="true"><use href="#i-live" /></svg> Streaming</span>
+        </div>
+      </div>
+
+      <div class="ui__panel">
+        <p class="ui__label">Settings list</p>
+        <ul class="list">
+          <li class="list__row">
+            <svg class="ic ic-md ic-muted" aria-hidden="true"><use href="#i-bell" /></svg>
+            <span class="list__name">Notifications<em>Email and in-app</em></span>
+            <svg class="ic ic-sm ic-subtle" aria-hidden="true"><use href="#i-chevron-right" /></svg>
+          </li>
+          <li class="list__row">
+            <svg class="ic ic-md ic-muted" aria-hidden="true"><use href="#i-users" /></svg>
+            <span class="list__name">Members<em>Four people</em></span>
+            <svg class="ic ic-sm ic-subtle" aria-hidden="true"><use href="#i-chevron-right" /></svg>
+          </li>
+          <li class="list__row">
+            <svg class="ic ic-md ic-muted" aria-hidden="true"><use href="#i-folder" /></svg>
+            <span class="list__name">Storage<em>2.4 GB of 10 GB</em></span>
+            <svg class="ic ic-sm ic-subtle" aria-hidden="true"><use href="#i-chevron-right" /></svg>
+          </li>
+        </ul>
+      </div>
+
+      <div class="ui__panel">
+        <p class="ui__label">Status</p>
+        <div class="notes">
+          <p class="note note--ok"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-circle-check" /></svg> Every icon passed the style audit.</p>
+          <p class="note note--info"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-circle-info" /></svg> 49 icons have no solid variant, on purpose.</p>
+          <p class="note note--warn"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-circle-alert" /></svg> The scanline wants lg or larger.</p>
+          <p class="note note--bad"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-x" /></svg> A hard-coded colour will fail the build.</p>
+        </div>
+      </div>
+
+      <div class="ui__panel ui__panel--empty">
+        <p class="ui__label">Empty state</p>
+        <div class="empty-state">
+          <svg class="ic ic-2xl ic-subtle" aria-hidden="true"><use href="#i-archive" /></svg>
+          <p class="empty-state__title">Nothing archived yet</p>
+          <p class="empty-state__text">Anything you archive will wait here until you need it.</p>
+          <button class="btn btn-outline" type="button"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-plus" /></svg> Add the first</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5 · stats ─────────────────────────────────────────────────────── -->
+  <section class="demo">
+    <div class="demo__head">
+      <h2 class="demo__title">Numbers</h2>
+      <p class="demo__note">An icon beside a figure has to be quiet enough not to compete with it. <code class="code">ic-md ic-muted</code> next to a large numeral, never the other way round.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><svg class="ic ic-md ic-muted" aria-hidden="true"><use href="#i-box" /></svg><b>{count}</b><span>icons drawn</span></div>
+      <div class="stat"><svg class="ic ic-md ic-muted" aria-hidden="true"><use href="#i-users" /></svg><b>1</b><span>hand</span></div>
+      <div class="stat"><svg class="ic ic-md ic-muted" aria-hidden="true"><use href="#i-clock" /></svg><b>0</b><span>build steps</span></div>
+      <div class="stat"><svg class="ic ic-md ic-muted" aria-hidden="true"><use href="#i-heart" /></svg><b>MIT</b><span>no attribution</span></div>
+    </div>
+  </section>
+
+  <section class="uclose">
+    <h2 class="uclose__title">Take the set</h2>
+    <p class="uclose__text">Every example above is markup you can copy off the browser page — same classes, same sprite, no extra stylesheet.</p>
+    <div class="hero__cta">
+      <a class="btn btn-primary" href="/"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-search" /></svg> Browse the set</a>
+      <a class="btn btn-outline" href="https://github.com/imswarnil/swarnil-icons" rel="noopener"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-star" /></svg> Star on GitHub</a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot__in">
+    <p class="foot__brand"><span class="brand__mark" aria-hidden="true"></span> Swarnil Icons</p>
+    <p class="foot__note">Drawn from scratch on a 24 grid. The rules are in <a href="https://github.com/imswarnil/swarnil-icons/blob/main/STYLE.md">STYLE.md</a> and enforced by <code class="code">validate.py</code>.</p>
+    <p class="foot__fine">MIT · &copy; 2026 Swarnil Singhai · Built to sit beside <a href="https://design.imswarnil.com">Swarnil Design System</a></p>
+  </div>
+</footer>
+</body>
+</html>

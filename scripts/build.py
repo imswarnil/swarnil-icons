@@ -432,11 +432,15 @@ CSS = """/* ====================================================================
    overlap they cancel back to neutral, so the icon's own colour is untouched
    and only the edges shear. Any other pairing tints the middle.
 
-   The shift is in em, so it tracks the icon rather than staying a fixed number
-   of pixels that vanishes at 48px and swamps the glyph at 16. */
+   The shift is derived from --ic-size, NOT from em. On an SVG element `em`
+   resolves against the inherited FONT-SIZE — the surrounding text, usually
+   16px — and not against the icon's own dimensions, so an em offset stays the
+   same fraction of a pixel whether the icon renders at 16px or 160px. It looks
+   correct at one size by accident and wrong at every other. Every offset in
+   the motion layer is derived the same way, for the same reason. */
 
 .ic-rgb {
-	--ic-rgb-shift: 0.045em;
+	--ic-rgb-shift: calc(var(--ic-size, 1.5rem) * 0.035);
 	--ic-rgb-a: oklch(63% 0.24 25);
 	--ic-rgb-b: oklch(78% 0.14 195);
 
@@ -573,8 +577,8 @@ MOTION = """/* =================================================================
 .ic-fade-out  { animation-name: ic-fade-out; }
 .ic-fade-loop { animation-name: ic-fade-loop; animation-iteration-count: infinite; animation-duration: var(--ic-dur, 1.8s); }
 
-@keyframes ic-fade-in   { from { opacity: 0; transform: translateY(0.15em); } to { opacity: 1; transform: none; } }
-@keyframes ic-fade-out  { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-0.15em); } }
+@keyframes ic-fade-in   { from { opacity: 0; transform: translateY(calc(var(--ic-size, 1.5rem) * 0.15)); } to { opacity: 1; transform: none; } }
+@keyframes ic-fade-out  { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(calc(var(--ic-size, 1.5rem) * -0.15)); } }
 @keyframes ic-fade-loop { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 /* ── Pop ──────────────────────────────────────────────────────────────────
@@ -646,16 +650,16 @@ MOTION = """/* =================================================================
 .ic-glitch-loop { animation-name: ic-glitch-loop; animation-iteration-count: infinite; animation-duration: var(--ic-dur, 3.2s); }
 
 @keyframes ic-glitch-in {
-	0%   { opacity: 0; transform: translateX(-0.12em); filter: drop-shadow(0.1em 0 var(--ic-primary)); }
-	35%  { opacity: 1; transform: translateX(0.08em); filter: drop-shadow(-0.08em 0 var(--ic-primary)); }
-	65%  { transform: translateX(-0.03em); filter: drop-shadow(0.03em 0 var(--ic-primary)); }
+	0%   { opacity: 0; transform: translateX(calc(var(--ic-size, 1.5rem) * -0.12)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.1) 0 var(--ic-primary)); }
+	35%  { opacity: 1; transform: translateX(calc(var(--ic-size, 1.5rem) * 0.08)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * -0.08) 0 var(--ic-primary)); }
+	65%  { transform: translateX(calc(var(--ic-size, 1.5rem) * -0.03)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.03) 0 var(--ic-primary)); }
 	100% { opacity: 1; transform: none; filter: none; }
 }
 
 @keyframes ic-glitch-out {
 	0%   { opacity: 1; transform: none; filter: none; }
-	40%  { opacity: 1; transform: translateX(0.08em); filter: drop-shadow(-0.08em 0 var(--ic-primary)); }
-	100% { opacity: 0; transform: translateX(-0.12em); filter: drop-shadow(0.1em 0 var(--ic-primary)); }
+	40%  { opacity: 1; transform: translateX(calc(var(--ic-size, 1.5rem) * 0.08)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * -0.08) 0 var(--ic-primary)); }
+	100% { opacity: 0; transform: translateX(calc(var(--ic-size, 1.5rem) * -0.12)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.1) 0 var(--ic-primary)); }
 }
 
 /* The clip-path steps are the dropout: for one frame only a band of the icon
@@ -663,10 +667,10 @@ MOTION = """/* =================================================================
    alone reads as a wobble; losing part of the picture reads as a glitch. */
 @keyframes ic-glitch-loop {
 	0%, 86%   { transform: none; filter: none; clip-path: inset(0); }
-	87%       { transform: translateX(-0.08em); filter: drop-shadow(0.08em 0 var(--ic-primary)); clip-path: inset(26% 0 42% 0); }
-	89%       { transform: translateX(0.07em); filter: drop-shadow(-0.07em 0 var(--ic-primary)); clip-path: inset(0); }
-	91%       { transform: translateX(-0.04em); filter: drop-shadow(0.04em 0 var(--ic-primary)); clip-path: inset(62% 0 8% 0); }
-	93%       { transform: translateX(0.02em); filter: none; clip-path: inset(0); }
+	87%       { transform: translateX(calc(var(--ic-size, 1.5rem) * -0.08)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.08) 0 var(--ic-primary)); clip-path: inset(26% 0 42% 0); }
+	89%       { transform: translateX(calc(var(--ic-size, 1.5rem) * 0.07)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * -0.07) 0 var(--ic-primary)); clip-path: inset(0); }
+	91%       { transform: translateX(calc(var(--ic-size, 1.5rem) * -0.04)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.04) 0 var(--ic-primary)); clip-path: inset(62% 0 8% 0); }
+	93%       { transform: translateX(calc(var(--ic-size, 1.5rem) * 0.02)); filter: none; clip-path: inset(0); }
 	95%, 100% { transform: none; filter: none; clip-path: inset(0); }
 }
 
@@ -745,24 +749,24 @@ MOTION = """/* =================================================================
 
 @keyframes ic-rgb-loop {
 	0%, 84%, 100% {
-		filter: drop-shadow(0.045em 0 var(--ic-rgb-a)) drop-shadow(-0.045em 0 var(--ic-rgb-b));
+		filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.045) 0 var(--ic-rgb-a)) drop-shadow(calc(var(--ic-size, 1.5rem) * -0.045) 0 var(--ic-rgb-b));
 		transform: none;
 	}
 	86% {
-		filter: drop-shadow(0.14em 0 var(--ic-rgb-a)) drop-shadow(-0.09em 0 var(--ic-rgb-b));
-		transform: translateX(-0.035em);
+		filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.14) 0 var(--ic-rgb-a)) drop-shadow(calc(var(--ic-size, 1.5rem) * -0.09) 0 var(--ic-rgb-b));
+		transform: translateX(calc(var(--ic-size, 1.5rem) * -0.035));
 	}
 	89% {
-		filter: drop-shadow(-0.11em 0 var(--ic-rgb-a)) drop-shadow(0.12em 0 var(--ic-rgb-b));
-		transform: translateX(0.03em);
+		filter: drop-shadow(calc(var(--ic-size, 1.5rem) * -0.11) 0 var(--ic-rgb-a)) drop-shadow(calc(var(--ic-size, 1.5rem) * 0.12) 0 var(--ic-rgb-b));
+		transform: translateX(calc(var(--ic-size, 1.5rem) * 0.03));
 	}
 	92% {
-		filter: drop-shadow(0.02em 0 var(--ic-rgb-a)) drop-shadow(-0.02em 0 var(--ic-rgb-b));
+		filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.02) 0 var(--ic-rgb-a)) drop-shadow(calc(var(--ic-size, 1.5rem) * -0.02) 0 var(--ic-rgb-b));
 		transform: none;
 	}
 	95% {
-		filter: drop-shadow(0.09em 0 var(--ic-rgb-a)) drop-shadow(-0.13em 0 var(--ic-rgb-b));
-		transform: translateX(0.02em);
+		filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.09) 0 var(--ic-rgb-a)) drop-shadow(calc(var(--ic-size, 1.5rem) * -0.13) 0 var(--ic-rgb-b));
+		transform: translateX(calc(var(--ic-size, 1.5rem) * 0.02));
 	}
 }
 

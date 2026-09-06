@@ -13,13 +13,26 @@ icons.imswarnil.com/          (repo root — this is the whole project)
 ├── scripts/new_icon.py       writes a table entry for you (`npm run new`)
 ├── scripts/validate.py       enforces STYLE.md, --strict for CI
 ├── scripts/build.py          icons/ -> dist/ (sprite, css, motion css, json, svg)
-├── docs/build.py             dist/ -> site/ (the one-page browser at the domain)
+├── docs/build.py             dist/ -> site/ (two pages: browser + showcase)
 ├── dist/                     generated, gitignored
 └── site/                     generated, gitignored — the whole Pages deploy artifact
 ```
 
 Read `README.md` for the public-facing pitch and `STYLE.md` for the geometry rules
 `validate.py` enforces — both are already thorough; don't duplicate them here.
+
+## The site is two pages
+
+`/` is the **browser** — what is in the set: search, filter, weight, size, colour,
+motion, copy, download. `/usage/` is the **showcase** — what the set looks like once
+it has a job: marketing cards, video thumbnails, interface chrome, scroll-triggered
+sections, the scanline and the RGB split.
+
+The rule for the showcase is that **every icon on it wears a class the package
+ships**. `usage.css` styles the surrounding cards, tiles and panels; it never
+restyles an icon. If a demo needs a rule in that file to look right, the demo is
+lying about what a consumer would get. The one exception is `--ic-size`, which is
+the package's own sizing token and fair game.
 
 ## Adding or fixing an icon
 

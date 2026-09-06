@@ -2,7 +2,8 @@
 
 **61 icons on a 24 grid. Drawn from scratch, MIT, no dependencies.**
 
-<https://icons.imswarnil.com>
+<https://icons.imswarnil.com> — the browser.
+<https://icons.imswarnil.com/usage/> — the same icons doing real jobs.
 
 Five weights and five animations generated from one geometry, so `bold` can
 never drift away from `line`. Take any icon at any size, in any colour, as SVG,

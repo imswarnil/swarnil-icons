@@ -1,0 +1,207 @@
+/* =============================================================================
+   icons.imswarnil.com/usage — the showcase
+
+   site.css carries the tokens, the bar, the buttons and the footer; this file
+   is only the worked examples. Nothing here restyles an icon — every icon on
+   the page is wearing a class the package ships and the README documents, so
+   what you see is what you get by copying the markup. If a demo needed a rule
+   in this file to look right, the demo would be a lie.
+   ========================================================================== */
+
+.usage { max-width: 78rem; margin-inline: auto; }
+
+/* ── Hero ─────────────────────────────────────────────────────────────────── */
+
+.uhero { padding-block: 4rem 3rem; max-width: 46rem; }
+
+.uhero__title {
+	font-family: var(--font-display); font-weight: 700;
+	font-size: clamp(2rem, 1.3rem + 3vw, 3.25rem);
+	line-height: 1.05; letter-spacing: -.035em;
+}
+
+.uhero__lead { font-size: 1.125rem; color: var(--fg-muted); margin-top: 1.25rem; text-wrap: pretty; }
+
+/* ── A demo block ─────────────────────────────────────────────────────────── */
+
+.demo { padding-block: 3rem; border-top: 1px solid var(--line-subtle); }
+.demo__head { max-width: 46rem; margin-bottom: 1.75rem; }
+
+.demo__title {
+	font-family: var(--font-display); font-size: 1.5rem; font-weight: 600;
+	letter-spacing: -.02em;
+}
+
+.demo__note { color: var(--fg-muted); margin-top: .5rem; text-wrap: pretty; }
+
+/* ── 1 · marketing cards ──────────────────────────────────────────────────── */
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem; }
+
+.card {
+	padding: 1.5rem;
+	background: var(--bg-surface);
+	border: 1px solid var(--line-default);
+	border-radius: var(--radius-lg);
+	transition: border-color var(--dur) var(--ease);
+}
+
+.card:hover { border-color: var(--line-strong); }
+
+/* The tile is the accent's soft tone, the mark is the accent itself — a card
+   grid wants one hue repeated, not one per card. Six colours in a feature grid
+   reads as six unrelated products. */
+.card__mark {
+	display: grid; place-items: center;
+	inline-size: 2.75rem; block-size: 2.75rem;
+	border-radius: var(--radius-md);
+	background: var(--accent-soft); color: var(--accent);
+	margin-bottom: 1rem;
+}
+
+.card__title { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 600; }
+.card__text { color: var(--fg-muted); font-size: .9375rem; margin-top: .375rem; text-wrap: pretty; }
+
+/* ── 2 · thumbnails ───────────────────────────────────────────────────────── */
+
+.thumbs { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; }
+
+.thumb {
+	position: relative; display: flex; flex-direction: column;
+	text-decoration: none; color: inherit;
+	border: 1px solid var(--line-default); border-radius: var(--radius-lg);
+	overflow: hidden;
+	transition: border-color var(--dur) var(--ease);
+}
+
+.thumb:hover { border-color: var(--accent); }
+
+/* A sunken plate with the grid on it, so the scanline has a surface to be a
+   screen ON. Floating on the page ground it reads as a damaged icon. */
+.thumb__art {
+	display: grid; place-items: center;
+	aspect-ratio: 16 / 9;
+	background:
+		linear-gradient(var(--line-subtle) 1px, transparent 1px) 0 0 / 100% 1.25rem,
+		linear-gradient(90deg, var(--line-subtle) 1px, transparent 1px) 0 0 / 1.25rem 100%;
+	background-color: var(--bg-sunken);
+}
+
+/* Bigger than ic-2xl, set through the package's own --ic-size rather than by
+   overriding width — a 16:9 plate leaves a 48px icon looking lost in it, and
+   the scanline needs area before it reads as a raster at all. */
+.thumb__art .ic { --ic-size: 4.75rem; }
+
+.thumb__meta { display: flex; flex-direction: column; gap: .125rem; padding: .75rem .875rem .875rem; }
+.thumb__title { font-weight: 600; font-size: .9375rem; }
+.thumb__sub { display: inline-flex; align-items: center; gap: .3125rem; font-size: .8125rem; color: var(--fg-faint); }
+
+.badge {
+	position: absolute; top: .625rem; left: .625rem;
+	display: inline-flex; align-items: center; gap: .3125rem;
+	padding: .1875rem .4375rem;
+	border-radius: var(--radius-sm);
+	background: var(--bg-surface); border: 1px solid var(--line-default);
+	font-size: .6875rem; font-weight: 600;
+}
+
+.badge--live { color: var(--accent-fg); border-color: var(--accent); }
+.badge--live .ic { color: var(--accent); }
+
+/* ── 3 · scroll-triggered steps ───────────────────────────────────────────── */
+
+.steps {
+	display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+	gap: 1.5rem; list-style: none; padding: 0; counter-reset: step;
+}
+
+.step { padding-top: 1.25rem; border-top: 2px solid var(--line-default); }
+.step__n { font-family: var(--font-slate); font-size: .75rem; color: var(--fg-faint); }
+.step__art { display: block; margin: .875rem 0 1rem; }
+.step__title { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 600; }
+.step__text { color: var(--fg-muted); font-size: .9375rem; margin-top: .375rem; text-wrap: pretty; }
+
+/* Before the row is revealed the strokes are hidden the same way ic-draw-in
+   starts them, so nothing pops into view at full strength and then redraws. */
+.steps:not(.is-in) [data-draw] { stroke-dasharray: 1; stroke-dashoffset: 1; }
+
+/* ── 4 · interface ────────────────────────────────────────────────────────── */
+
+.ui { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1rem; align-items: start; }
+
+.ui__panel {
+	padding: 1.25rem;
+	background: var(--bg-surface);
+	border: 1px solid var(--line-default);
+	border-radius: var(--radius-lg);
+}
+
+.ui__label {
+	font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+	color: var(--fg-faint); margin-bottom: .75rem;
+}
+
+.ui__label + * + .ui__label { margin-top: 1.5rem; }
+.ui__row { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+.btn--danger { color: var(--ic-danger); }
+.btn--danger .ic { color: var(--ic-danger); }
+
+.pill {
+	display: inline-flex; align-items: center; gap: .4375rem;
+	height: 2rem; padding-inline: .625rem;
+	border: 1px solid var(--line-default); border-radius: var(--radius-full);
+	font-size: .8125rem; color: var(--fg-muted);
+}
+
+.list { list-style: none; padding: 0; }
+
+.list__row {
+	display: flex; align-items: center; gap: .875rem;
+	padding: .75rem .25rem;
+	border-bottom: 1px solid var(--line-subtle);
+}
+
+.list__row:last-child { border-bottom: 0; }
+.list__name { flex: 1; display: flex; flex-direction: column; font-size: .9375rem; }
+.list__name em { font-style: normal; font-size: .8125rem; color: var(--fg-faint); }
+
+.notes { display: flex; flex-direction: column; gap: .5rem; }
+
+.note {
+	display: flex; align-items: flex-start; gap: .5rem;
+	padding: .5rem .625rem; border-radius: var(--radius-md);
+	font-size: .875rem; line-height: 1.5;
+}
+
+/* The status colours are the package's own --ic-* tokens, not a set invented
+   for this page, so a warning here is the same warning a consumer gets. */
+.note--ok   { background: color-mix(in oklab, var(--ic-success) 10%, transparent); color: var(--ic-success); }
+.note--info { background: color-mix(in oklab, var(--ic-info) 10%, transparent); color: var(--ic-info); }
+.note--warn { background: color-mix(in oklab, var(--ic-warning) 12%, transparent); color: var(--ic-warning); }
+.note--bad  { background: color-mix(in oklab, var(--ic-danger) 10%, transparent); color: var(--ic-danger); }
+
+.empty-state { display: grid; justify-items: center; text-align: center; gap: .375rem; padding: 1.5rem 1rem 1rem; }
+.empty-state__title { font-weight: 600; margin-top: .5rem; }
+.empty-state__text { font-size: .875rem; color: var(--fg-muted); max-width: 20rem; }
+.empty-state .btn { margin-top: .75rem; }
+
+/* ── 5 · numbers ──────────────────────────────────────────────────────────── */
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 1rem; }
+
+.stat {
+	display: grid; gap: .125rem;
+	padding: 1.25rem;
+	background: var(--bg-muted);
+	border-radius: var(--radius-lg);
+}
+
+.stat b { font-family: var(--font-display); font-size: 2rem; font-weight: 700; letter-spacing: -.03em; line-height: 1.1; }
+.stat span { font-size: .875rem; color: var(--fg-muted); }
+
+/* ── Close ────────────────────────────────────────────────────────────────── */
+
+.uclose { padding-block: 3.5rem 5rem; border-top: 1px solid var(--line-subtle); max-width: 46rem; }
+.uclose__title { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; letter-spacing: -.02em; }
+.uclose__text { color: var(--fg-muted); margin-top: .5rem; }
