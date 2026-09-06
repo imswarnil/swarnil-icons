@@ -135,8 +135,8 @@ height, so the pattern can be scrolled by animating `mask-position` exactly one
 pitch and it loops seamlessly. A percentage-stop gradient has nothing to move.
 
 ```css
---ic-scan-pitch: calc(var(--ic-size, 1.5rem) / 14);   /* line spacing */
---ic-scan-duty: 66%;                                  /* how much survives */
+--ic-scan-pitch: calc(var(--ic-size, 1.5rem) / 22);   /* line spacing */
+--ic-scan-duty: 62%;                                  /* how much survives */
 --ic-scan-dur: 1.8s;                                  /* one full roll */
 ```
 
@@ -156,6 +156,35 @@ Being a mask it cuts strokes as well as fills, so pair it with a fill and
 `ic-lg` or larger. It is a display style, not a UI one. `ic-tv-*` uses the
 animation shorthand, so it replaces another motion class rather than stacking
 with it — pick one.
+
+### RGB split
+
+```html
+<svg class="ic ic-xl ic-rgb ic-rgb-loop"><use href="/sprite.svg#i-camera"/></svg>
+```
+
+Chromatic aberration: the red channel pulled one way, the cyan the other, the
+way a mistracked tube shears colour off an edge.
+
+It is **two drop-shadows, not three copies**. `drop-shadow` takes the alpha of
+what it is drawn on and floods it with a colour, so one element gives you the
+fringe on both sides — and because it follows the alpha rather than a box, it
+traces the real shape of the icon, strokes and all. Three stacked copies would
+need three elements and would not survive a `<use>`.
+
+Red and cyan because they are complementary: where the two fringes overlap they
+cancel back to neutral, so the icon's own colour is untouched and only the
+edges shear. Any other pairing tints the middle.
+
+`ic-rgb-loop` makes it mistrack, on a `steps(1)` timeline so the channels
+*snap* between alignments — eased, it reads as a wobble; stepped, it reads as a
+signal losing lock. The filter is animated with literal values rather than by
+animating `--ic-rgb-shift`, because an unregistered custom property cannot be
+interpolated, and it cannot be registered either: `@property` forbids a relative
+initial value, and the shift being in `em` is the whole reason it tracks the
+icon's size.
+
+Tune it with `--ic-rgb-shift`, `--ic-rgb-a` and `--ic-rgb-b`.
 
 ### The values track the design system
 
@@ -212,8 +241,9 @@ stylesheet, so a project that wants none of it pays nothing:
 | `pulse` | a slow breath, for something waiting | | |
 | `glitch` | a signal dropping out and recovering | | |
 | `tv` | a tube switching on, off, or humming | | |
+| `rgb` | colour channels losing lock (loop only) | | |
 
-So `ic-draw-in`, `ic-pop-loop`, `ic-fade-out` — twenty-one classes.
+So `ic-draw-in`, `ic-pop-loop`, `ic-fade-out` — twenty-two classes.
 
 `glitch` is the other half of the scanline's idea, and its restraint is the
 design: the loop sits perfectly still for nine tenths of its cycle and breaks

@@ -461,14 +461,14 @@ main { padding-inline: var(--gutter); }
    exported — the panel's own size slider (16…512px) still owns that. This
    only changes what browsing looks like. */
 
-.sections[data-size='sm'] .grid { grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)); }
-.sections[data-size='sm'] .cell svg { width: 1.25rem; height: 1.25rem; --ic-size: 1.25rem; }
+.sections[data-gridsize='sm'] .grid { grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)); }
+.sections[data-gridsize='sm'] .cell svg { width: 1.25rem; height: 1.25rem; --ic-size: 1.25rem; }
 
-.sections[data-size='lg'] .grid { grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); }
-.sections[data-size='lg'] .cell svg { width: 2rem; height: 2rem; --ic-size: 2rem; }
+.sections[data-gridsize='lg'] .grid { grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); }
+.sections[data-gridsize='lg'] .cell svg { width: 2rem; height: 2rem; --ic-size: 2rem; }
 
-.sections[data-size='xl'] .grid { grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); }
-.sections[data-size='xl'] .cell svg { width: 3rem; height: 3rem; --ic-size: 3rem; }
+.sections[data-gridsize='xl'] .grid { grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); }
+.sections[data-gridsize='xl'] .cell svg { width: 3rem; height: 3rem; --ic-size: 3rem; }
 
 /* ── Colour mode ──────────────────────────────────────────────────────────
    Off by default — the shipped icons are currentColor, full stop. This is a
@@ -489,7 +489,14 @@ main { padding-inline: var(--gutter); }
 
 .empty { padding: 3rem 0 5rem; color: var(--fg-muted); max-width: 34rem; }
 
-/* ── The panel ────────────────────────────────────────────────────────────── */
+/* ── The panel ────────────────────────────────────────────────────────────
+   Two columns: everything you can change on the left, the icon on the right.
+   The single-column version put the preview above six groups of controls, so
+   changing a weight scrolled you away from the thing the change was meant to
+   show. A dialog whose whole job is "look at this while you adjust it" cannot
+   afford that.
+
+   The header and the code block span both columns; only the middle splits. */
 
 .panel {
 	/* The reset's `* { margin: 0 }` overrides the UA stylesheet's own
@@ -498,10 +505,10 @@ main { padding-inline: var(--gutter); }
 	   the dialog opens pinned to the top-left of the viewport instead of in
 	   the centre of the screen. */
 	margin: auto;
+	width: min(66rem, 94vw);
 	max-height: calc(100dvh - 2 * var(--gutter));
 	overflow-y: auto;
-	width: min(30rem, 92vw);
-	padding: 1.5rem;
+	padding: 0;
 	border: 1px solid var(--line-default);
 	border-radius: var(--radius-xl);
 	background: var(--bg-surface);
@@ -509,37 +516,108 @@ main { padding-inline: var(--gutter); }
 }
 
 .panel::backdrop { background: oklch(12.5% 0.012 275 / 0.55); backdrop-filter: blur(2px); }
-.panel__close-form { display: flex; justify-content: flex-end; }
+
+.panel__bar {
+	position: sticky; top: 0; z-index: 2;
+	display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+	padding: 1.125rem 1.25rem .875rem;
+	background: var(--bg-surface);
+	border-bottom: 1px solid var(--line-subtle);
+}
+
+.panel__close-form { display: flex; }
+.panel__name { font-family: var(--font-display); font-size: 1.375rem; font-weight: 600; letter-spacing: -.02em; }
+.panel__cat { font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-faint); }
+
+.panel__body {
+	display: grid;
+	grid-template-columns: minmax(0, 19rem) minmax(0, 1fr);
+	gap: 1.75rem;
+	padding: 1.25rem;
+	align-items: start;
+}
+
+.panel__controls { display: flex; flex-direction: column; gap: .5rem; }
+.panel__controls .field__label { margin-top: .625rem; }
+
+.panel__preview { display: flex; flex-direction: column; gap: 1rem; }
 
 .panel__stage {
 	display: grid; place-items: center;
-	min-height: 11rem; margin-block: .5rem 1.25rem;
+	min-height: 20rem; padding: 1.5rem;
 	border-radius: var(--radius-lg);
 	background:
 		linear-gradient(var(--line-subtle) 1px, transparent 1px) 0 0 / 100% 1.5rem,
 		linear-gradient(90deg, var(--line-subtle) 1px, transparent 1px) 0 0 / 1.5rem 100%;
 	background-color: var(--bg-sunken);
+	overflow: hidden;
 }
 
-.panel__icon { width: 4rem; height: 4rem; }
-.panel__name { font-family: var(--font-display); font-size: 1.375rem; font-weight: 600; letter-spacing: -.02em; }
-.panel__cat { font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-faint); margin-bottom: 1.25rem; }
+/* The icon is rendered at the size the slider says, so dragging it actually
+   changes what you are looking at. max-* is the stage's limit, not the icon's:
+   past ~17rem it scales to fit rather than bursting the dialog, and the
+   readout keeps telling you the real number. */
+.panel__icon { max-inline-size: 100%; max-block-size: 17rem; }
 
-.panel__row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.panel__row { display: flex; align-items: center; gap: 1rem; }
 .field { flex: 1; display: flex; flex-direction: column; gap: .25rem; }
 .field__label { font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-subtle); }
 .range { width: 100%; accent-color: var(--accent); }
-.panel__size { font-family: var(--font-slate); font-size: .8125rem; color: var(--fg-muted); font-variant-numeric: tabular-nums; min-width: 5rem; text-align: right; }
+.panel__size { font-family: var(--font-slate); font-size: .8125rem; color: var(--fg-muted); font-variant-numeric: tabular-nums; min-width: 4.5rem; text-align: right; }
 
-.panel__note { margin-top: 1rem; font-size: .8125rem; color: var(--fg-muted); border-left: 2px solid var(--accent); padding-left: .75rem; }
+.panel__note { margin-top: .75rem; font-size: .8125rem; color: var(--fg-muted); border-left: 2px solid var(--accent); padding-left: .75rem; }
 
-.panel__grabs { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+.panel__grabs { display: flex; flex-wrap: wrap; gap: .5rem; }
 
-.panel__code {
-	margin-top: 1rem; padding: .875rem;
-	background: var(--bg-sunken); border: 1px solid var(--line-subtle); border-radius: var(--radius-lg);
-	font-family: var(--font-slate); font-size: .75rem; line-height: 1.6;
+/* ── The code block ───────────────────────────────────────────────────────
+   Spans both columns, because the markup is the width it is and squeezing it
+   into a 19rem column would wrap every attribute onto its own line. */
+
+.code { margin: 0 1.25rem 1.25rem; }
+
+/* The button gets its own row rather than floating over the block. The snippet
+   scrolls sideways, so anything sitting on top of it ends up overlapping the
+   very markup it is offering to copy. */
+.code__bar {
+	display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+	padding: .5rem .625rem .5rem .875rem;
+	background: var(--bg-muted);
+	border: 1px solid var(--line-subtle); border-bottom: 0;
+	border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.code__label {
+	font-size: .6875rem; font-weight: 600; letter-spacing: .08em;
+	text-transform: uppercase; color: var(--fg-faint);
+}
+
+.code__copy { height: 1.75rem; padding-inline: .625rem; font-size: .75rem; }
+
+.code__pre {
+	padding: .875rem;
+	background: var(--bg-sunken);
+	border: 1px solid var(--line-subtle);
+	border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+	font-family: var(--font-slate); font-size: .75rem; line-height: 1.7;
 	overflow-x: auto; color: var(--fg-muted);
+}
+
+/* Syntax colours, from the design system's own hues rather than a borrowed
+   theme — the same ladder as everything else on the page, so the block sits in
+   the design instead of looking like a screenshot of an editor. */
+.t-tag  { color: var(--hue-iris); }
+.t-attr { color: var(--accent-fg); }
+.t-val  { color: var(--hue-mint); }
+.t-com  { color: var(--fg-faint); font-style: italic; }
+
+@media (max-width: 60rem) {
+	.panel { width: min(34rem, 94vw); }
+	.panel__body { grid-template-columns: 1fr; gap: 1.25rem; }
+	/* Preview first on a narrow screen: the thing you came to look at should
+	   not be below six groups of controls. */
+	.panel__preview { order: -1; }
+	.panel__stage { min-height: 13rem; }
+	.panel__icon { max-block-size: 11rem; }
 }
 
 /* ── Footer ───────────────────────────────────────────────────────────────── */

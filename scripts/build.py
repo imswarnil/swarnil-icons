@@ -406,8 +406,8 @@ CSS = """/* ====================================================================
    ic-lg or larger. It is a display style, not a UI one. */
 
 .ic-scan {
-	--ic-scan-pitch: calc(var(--ic-size, 1.5rem) / 14);
-	--ic-scan-duty: 66%;
+	--ic-scan-pitch: calc(var(--ic-size, 1.5rem) / 22);
+	--ic-scan-duty: 62%;
 
 	-webkit-mask-image: linear-gradient(to bottom, #000 0 var(--ic-scan-duty), transparent var(--ic-scan-duty) 100%);
 	        mask-image: linear-gradient(to bottom, #000 0 var(--ic-scan-duty), transparent var(--ic-scan-duty) 100%);
@@ -415,6 +415,33 @@ CSS = """/* ====================================================================
 	        mask-size: 100% var(--ic-scan-pitch);
 	-webkit-mask-repeat: repeat;
 	        mask-repeat: repeat;
+}
+
+/* ── RGB split ────────────────────────────────────────────────────────────
+   Chromatic aberration: the red channel pulled one way, the cyan the other,
+   the way a mistracked tube or a badly aligned lens shears colour off an edge.
+
+   It is two drop-shadows rather than three copies of the icon. drop-shadow
+   takes the ALPHA of what it is drawn on and floods it with a colour, so a
+   single element gives you the fringe on both sides for free — and because it
+   follows the alpha rather than a box, it traces the actual shape of the icon,
+   strokes and all. Three stacked copies would need three elements and would
+   not survive a <use>.
+
+   Red and cyan because they are the complementary pair: where the two fringes
+   overlap they cancel back to neutral, so the icon's own colour is untouched
+   and only the edges shear. Any other pairing tints the middle.
+
+   The shift is in em, so it tracks the icon rather than staying a fixed number
+   of pixels that vanishes at 48px and swamps the glyph at 16. */
+
+.ic-rgb {
+	--ic-rgb-shift: 0.045em;
+	--ic-rgb-a: oklch(63% 0.24 25);
+	--ic-rgb-b: oklch(78% 0.14 195);
+
+	filter: drop-shadow(var(--ic-rgb-shift) 0 var(--ic-rgb-a))
+	        drop-shadow(calc(var(--ic-rgb-shift) * -1) 0 var(--ic-rgb-b));
 }
 
 /* ── Two-tone ─────────────────────────────────────────────────────────────
@@ -462,6 +489,7 @@ MOTION = """/* =================================================================
      glitch  a signal dropping out for two frames and recovering
      tv      a tube switching on, switching off, or humming — the loop
              scrolls the .ic-scan mask, so the two are built to pair
+     rgb     .ic-rgb losing lock: the colour channels mistracking (loop only)
 
    times three:  -in    plays once and ends VISIBLE
                  -out   plays once and ends HIDDEN
@@ -699,6 +727,45 @@ MOTION = """/* =================================================================
 	100% { opacity: 0; transform: scaleY(0.01) scaleX(0.25); filter: brightness(3); }
 }
 
+/* ── RGB glitch ───────────────────────────────────────────────────────────
+   The split from .ic-rgb, but mistracking. The filter is animated with literal
+   values rather than by animating --ic-rgb-shift, because an unregistered
+   custom property is substituted at computed-value time and cannot be
+   interpolated — and it cannot be registered either, since @property forbids a
+   relative initial value and the whole point of the shift being in em is that
+   it tracks the icon's size.
+
+   steps(1) so the channels SNAP between alignments. Eased, it reads as a
+   wobble; stepped, it reads as a signal losing lock. Still for most of the
+   cycle, like the rest of the motion here. */
+
+.ic-rgb-loop {
+	animation: ic-rgb-loop var(--ic-dur, 3.4s) steps(1, end) infinite;
+}
+
+@keyframes ic-rgb-loop {
+	0%, 84%, 100% {
+		filter: drop-shadow(0.045em 0 var(--ic-rgb-a)) drop-shadow(-0.045em 0 var(--ic-rgb-b));
+		transform: none;
+	}
+	86% {
+		filter: drop-shadow(0.14em 0 var(--ic-rgb-a)) drop-shadow(-0.09em 0 var(--ic-rgb-b));
+		transform: translateX(-0.035em);
+	}
+	89% {
+		filter: drop-shadow(-0.11em 0 var(--ic-rgb-a)) drop-shadow(0.12em 0 var(--ic-rgb-b));
+		transform: translateX(0.03em);
+	}
+	92% {
+		filter: drop-shadow(0.02em 0 var(--ic-rgb-a)) drop-shadow(-0.02em 0 var(--ic-rgb-b));
+		transform: none;
+	}
+	95% {
+		filter: drop-shadow(0.09em 0 var(--ic-rgb-a)) drop-shadow(-0.13em 0 var(--ic-rgb-b));
+		transform: translateX(0.02em);
+	}
+}
+
 /* ── Stagger ──────────────────────────────────────────────────────────────
    Parts of the icon arriving one after another rather than together. It reads
    beautifully on the multi-stroke icons and it is INLINE-SVG ONLY: a sprite
@@ -729,6 +796,7 @@ MOTION = """/* =================================================================
 	.ic-pulse-in, .ic-pulse-out, .ic-pulse-loop,
 	.ic-glitch-in, .ic-glitch-out, .ic-glitch-loop,
 	.ic-tv-in, .ic-tv-out, .ic-tv-loop,
+	.ic-rgb-loop,
 	.ic-stagger > * {
 		animation: none !important;
 		stroke-dasharray: none !important;

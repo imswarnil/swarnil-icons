@@ -242,15 +242,15 @@
 			art: function (v) { return svgMarkup(DEMO, 'line', { sm: 13, md: 16, lg: 20, xl: 26 }[v]); }
 		},
 		colormode: {
-			values: ['mono', 'multi', 'fill', 'scan', 'tv'],
-			label: { mono: 'Mono', multi: 'Multi', fill: 'Fill', scan: 'Scanline', tv: 'TV' },
+			values: ['mono', 'multi', 'fill', 'scan', 'rgb'],
+			label: { mono: 'Mono', multi: 'Multi', fill: 'Fill', scan: 'Scanline', rgb: 'RGB' },
 			// Each sample is the real class doing the real thing, so a toggle
 			// cannot promise one look and deliver another.
 			art: function (v) {
 				if (v === 'multi') return svgMarkup(DEMO, 'line', 20, 'ic-multi ic-multi-fill');
 				if (v === 'fill') return svgMarkup(DEMO, 'solid', 20, 'ic-primary');
-				if (v === 'scan') return svgMarkup(DEMO, 'solid', 20, 'ic-primary ic-scan');
-				if (v === 'tv') return svgMarkup(DEMO, 'solid', 20, 'ic-primary ic-scan ic-tv-loop');
+				if (v === 'scan') return svgMarkup(DEMO, 'solid', 20, 'ic-primary ic-scan ic-tv-loop');
+				if (v === 'rgb') return svgMarkup(DEMO, 'line', 20, 'ic-rgb ic-rgb-loop');
 				return svgMarkup(DEMO, 'line', 20);
 			}
 		},
@@ -343,11 +343,16 @@
 	var sections = $('[data-sections]');
 
 	function cellsFor(rows) {
-		// TV drives its own animation, so a motion selection would fight it.
-		var mcls = state.color === 'tv' ? '' : motionClass(state.motion, state.mode);
+		// Scanline and RGB drive their own animation, so a motion selection
+		// would fight them for the same property.
+		var selfAnimating = state.color === 'scan' || state.color === 'rgb';
+		var mcls = selfAnimating ? '' : motionClass(state.motion, state.mode);
 		var multi = state.color === 'multi';
-		var tv = state.color === 'tv';
-		var scanned = state.color === 'scan' || tv;
+		var rgb = state.color === 'rgb';
+		// Scanline and TV were two picks for one look — the mask is what makes
+		// the roll possible and the roll is what makes the mask read as a
+		// screen, so they are one style now.
+		var scanned = state.color === 'scan';
 		var filled = state.color === 'fill' || scanned;
 		return rows.map(function (i, n) {
 			var v = state.variant;
@@ -375,11 +380,11 @@
 			// Scanline is a mask, so it needs something solid to band — on a
 			// bare stroke it just dashes the line. `filled` is already true for
 			// this mode, so the colour class is on; only the mask is left.
-			if (scanned) cls.push('ic-scan');
-			// TV brings its own animation — the scanline scroll and the
-			// flicker — using the animation shorthand, so a motion class here
-			// too would simply cancel one of them. The rail says so.
-			if (tv) cls.push('ic-tv-loop');
+			// Both of these carry their own animation via the shorthand, so a
+			// motion class alongside would simply cancel one of them. The rail
+			// says so, and cellsFor drops the motion class below.
+			if (scanned) cls.push('ic-scan', 'ic-tv-loop');
+			if (rgb) cls.push('ic-rgb', 'ic-rgb-loop');
 			// A tiny per-cell delay so a grid of 61 icons arrives as a sweep
 			// rather than as one flash. Capped, or the last cell waits a
 			// second and a half to appear.
@@ -398,7 +403,10 @@
 				&& (!q || i.name.indexOf(q) !== -1 || i.category.indexOf(q) !== -1);
 		});
 
-		sections.dataset.size = state.size;
+		// gridsize, not size: the panel's range input is [data-size], and
+		// `sections` sits before the dialog in document order, so a bare
+		// [data-size] lookup would find this div instead of the slider.
+		sections.dataset.gridsize = state.size;
 		sections.dataset.colormode = state.color;
 
 		if (state.cat) {
@@ -421,13 +429,12 @@
 		$('[data-count]').textContent = rows.length + (rows.length === 1 ? ' icon' : ' icons');
 		$('[data-empty]').hidden = rows.length > 0;
 		var note = $('[data-motion-note]');
-		if (state.color === 'tv') {
-			note.textContent = 'TV rolls the scanline and flickers on its own, so it ' +
-				'overrides the motion below. Both want the large sizes.';
+		if (state.color === 'scan') {
+			note.textContent = 'Scanline rolls and flickers on its own, so it overrides ' +
+				'the motion below. It is a mask over the filled form — give it lg or xl.';
 			note.hidden = false;
-		} else if (state.color === 'scan') {
-			note.textContent = 'Scanline is a mask over the filled form — it wants ' +
-				'the large sizes. At sm it reads as a broken icon rather than a style.';
+		} else if (state.color === 'rgb') {
+			note.textContent = 'RGB mistracks on its own, so it overrides the motion below.';
 			note.hidden = false;
 		} else if (state.motion === 'draw' && state.variant === 'solid') {
 			note.textContent = 'Draw needs a stroke to draw, so it does nothing on the solid weight.';
@@ -595,8 +602,12 @@
 		$('[data-panel-note]').hidden = !(v === 'solid' && !has);
 		if (v === 'solid' && !has) v = 'line';
 
+		// Rendered AT the chosen size, not at a fixed preview size — dragging
+		// the slider has to change what you are looking at, or the number is
+		// the only feedback you get. The stage caps how large it can draw
+		// (see .panel__icon); the readout keeps reporting the real value.
 		var holder = $('[data-panel-icon]').parentNode;
-		holder.innerHTML = svgMarkup(current, v, 64, motionClass(panelMotion, panelMode))
+		holder.innerHTML = svgMarkup(current, v, size, motionClass(panelMotion, panelMode))
 			.replace('<svg ', '<svg data-panel-icon ');
 		var ico = $('[data-panel-icon]');
 		ico.classList.add('panel__icon');
@@ -607,9 +618,12 @@
 		// the markup keeps currentColor and the reader can paste it anywhere.
 		// Any OTHER choice is a deliberate colour, so it is baked in and the
 		// snippet matches the file the download button writes.
-		$('[data-panel-code]').textContent = panelColour === 'ink'
+		var snippet = panelColour === 'ink'
 			? svgMarkup(current, v, size)
 			: svgMarkup(current, v, size).replace(/currentColor/g, exportColour());
+		// innerHTML, because highlight() returns markup. It escapes its input
+		// first, so the icon's own angle brackets can never become elements.
+		$('[data-panel-code]').innerHTML = highlight(snippet);
 	}
 
 	function open(name) {
@@ -666,6 +680,27 @@
 		size = parseInt(e.target.value, 10);
 		paint();
 	});
+
+	/* ── Syntax highlighting ─────────────────────────────────────────────────
+	   Forty lines instead of a highlighting library, because this set has no
+	   dependencies and one code block is not a reason to acquire one. It only
+	   has to handle SVG, which is a far smaller problem than "any language".
+
+	   ORDER MATTERS and it is the only subtle part. Everything is escaped
+	   first, so the source's own < and > become entities. Attributes are
+	   wrapped next, and tags last — and the tag pattern matches `&lt;name`,
+	   which the real <span> tags just inserted cannot look like. Wrap tags
+	   first and the attribute pass would happily mangle class="t-tag". */
+	function highlight(src) {
+		var out = src.replace(/[&<>]/g, function (c) {
+			return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c];
+		});
+		out = out.replace(/([a-zA-Z-:]+)="([^"]*)"/g,
+			'<span class="t-attr">$1</span>=<span class="t-val">"$2"</span>');
+		out = out.replace(/(&lt;\/?)([a-zA-Z][\w-]*)/g,
+			'$1<span class="t-tag">$2</span>');
+		return out;
+	}
 
 	/* ── Export ──────────────────────────────────────────────────────────── */
 

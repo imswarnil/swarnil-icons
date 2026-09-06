@@ -195,73 +195,91 @@ ic-draw-in              draws itself on</code></pre>
   </section>
 </main>
 
-<!-- The export panel. Opens on click; Escape closes it. -->
+<!-- The export panel. Opens on click; Escape closes it.
+     Two columns: everything you can change on the left, the icon itself on the
+     right. The single column it replaced put the preview above six groups of
+     controls, so changing a weight meant scrolling away from the thing the
+     change was supposed to show you. -->
 <dialog class="panel" data-panel>
-  <form method="dialog" class="panel__close-form">
-    <button class="iconbtn" aria-label="Close">
-      <svg class="ic ic-md" aria-hidden="true"><use href="#i-x" /></svg>
-    </button>
-  </form>
+  <header class="panel__bar">
+    <div class="panel__id">
+      <h2 class="panel__name" data-panel-name></h2>
+      <p class="panel__cat" data-panel-cat></p>
+    </div>
+    <form method="dialog" class="panel__close-form">
+      <button class="iconbtn" aria-label="Close">
+        <svg class="ic ic-md" aria-hidden="true"><use href="#i-x" /></svg>
+      </button>
+    </form>
+  </header>
 
-  <div class="panel__stage">
-    <svg class="panel__icon" data-panel-icon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></svg>
+  <div class="panel__body">
+    <div class="panel__controls">
+      <div class="panel__row">
+        <label class="field">
+          <span class="field__label">Size</span>
+          <input class="range" type="range" min="16" max="512" step="8" value="24" data-size />
+        </label>
+        <output class="panel__size" data-size-out>24 px</output>
+      </div>
+
+      <p class="field__label">Weight</p>
+      <div class="cluster" role="group" aria-label="Variant">
+        <button class="chip" type="button" data-pvariant="thin">thin</button>
+        <button class="chip" type="button" data-pvariant="line" aria-pressed="true">line</button>
+        <button class="chip" type="button" data-pvariant="bold">bold</button>
+        <button class="chip" type="button" data-pvariant="solid">solid</button>
+        <button class="chip" type="button" data-pvariant="duo">duo</button>
+      </div>
+
+      <!-- The colour row. These are the tokens the package actually ships
+           (.ic-primary, .ic-success, …), not a swatch box invented for the
+           site, so the colour you export is the colour the class gives you. -->
+      <p class="field__label">Colour</p>
+      <div class="cluster cluster--swatches" role="group" aria-label="Colour">
+        <button class="swatch" type="button" data-pcolor="ink" aria-pressed="true"><span class="swatch__dot"></span>Ink</button>
+        <button class="swatch" type="button" data-pcolor="primary" aria-pressed="false"><span class="swatch__dot"></span>Primary</button>
+        <button class="swatch" type="button" data-pcolor="muted" aria-pressed="false"><span class="swatch__dot"></span>Muted</button>
+        <button class="swatch" type="button" data-pcolor="success" aria-pressed="false"><span class="swatch__dot"></span>Success</button>
+        <button class="swatch" type="button" data-pcolor="info" aria-pressed="false"><span class="swatch__dot"></span>Info</button>
+        <button class="swatch" type="button" data-pcolor="warning" aria-pressed="false"><span class="swatch__dot"></span>Warning</button>
+        <button class="swatch" type="button" data-pcolor="danger" aria-pressed="false"><span class="swatch__dot"></span>Danger</button>
+        <label class="swatch swatch--custom" title="Any other colour">
+          <input class="swatch__input" type="color" value="#e2593a" data-pcolor-custom />
+          <span class="u-sr-only">Custom colour</span>Custom
+        </label>
+      </div>
+
+      <p class="field__label">Motion</p>
+      <div class="cluster" role="group" aria-label="Animation" data-optgroup="pmotion"></div>
+      <div class="cluster" role="group" aria-label="Play mode" data-optgroup="pmode"></div>
+
+      <p class="panel__note" data-panel-note hidden>This icon has no solid variant — its paths are open, and a filled open path is a blob rather than an icon. A solid needs its own declared geometry.</p>
+    </div>
+
+    <div class="panel__preview">
+      <div class="panel__stage">
+        <svg class="panel__icon" data-panel-icon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </div>
+
+      <div class="panel__grabs">
+        <button class="btn btn-primary" type="button" data-dl="svg">
+          <svg class="ic ic-sm" aria-hidden="true"><use href="#i-download" /></svg>SVG</button>
+        <button class="btn btn-outline" type="button" data-dl="png">PNG</button>
+        <button class="btn btn-outline" type="button" data-dl="jpg">JPG</button>
+        <button class="btn btn-outline" type="button" data-copy-use>Copy &lt;use&gt;</button>
+        <button class="btn btn-outline" type="button" data-copy-class>Copy class</button>
+      </div>
+    </div>
   </div>
 
-  <h2 class="panel__name" data-panel-name></h2>
-  <p class="panel__cat" data-panel-cat></p>
-
-  <div class="panel__row">
-    <label class="field">
-      <span class="field__label">Size</span>
-      <input class="range" type="range" min="16" max="512" step="8" value="24" data-size />
-    </label>
-    <output class="panel__size" data-size-out>24 px</output>
+  <div class="code">
+    <div class="code__bar">
+      <span class="code__label">Markup</span>
+      <button class="code__copy btn btn-outline" type="button" data-copy-svg>Copy SVG</button>
+    </div>
+    <pre class="code__pre"><code data-panel-code></code></pre>
   </div>
-
-  <p class="field__label">Weight</p>
-  <div class="cluster" role="group" aria-label="Variant">
-    <button class="chip" type="button" data-pvariant="thin">thin</button>
-    <button class="chip" type="button" data-pvariant="line" aria-pressed="true">line</button>
-    <button class="chip" type="button" data-pvariant="bold">bold</button>
-    <button class="chip" type="button" data-pvariant="solid">solid</button>
-    <button class="chip" type="button" data-pvariant="duo">duo</button>
-  </div>
-
-  <!-- The colour row. These are the tokens the package actually ships
-       (.ic-primary, .ic-success, …), not a swatch box invented for the site,
-       so the colour you export is the colour the class gives you. -->
-  <p class="field__label">Colour</p>
-  <div class="cluster cluster--swatches" role="group" aria-label="Colour">
-    <button class="swatch" type="button" data-pcolor="ink" aria-pressed="true"><span class="swatch__dot"></span>Ink</button>
-    <button class="swatch" type="button" data-pcolor="primary" aria-pressed="false"><span class="swatch__dot"></span>Primary</button>
-    <button class="swatch" type="button" data-pcolor="muted" aria-pressed="false"><span class="swatch__dot"></span>Muted</button>
-    <button class="swatch" type="button" data-pcolor="success" aria-pressed="false"><span class="swatch__dot"></span>Success</button>
-    <button class="swatch" type="button" data-pcolor="info" aria-pressed="false"><span class="swatch__dot"></span>Info</button>
-    <button class="swatch" type="button" data-pcolor="warning" aria-pressed="false"><span class="swatch__dot"></span>Warning</button>
-    <button class="swatch" type="button" data-pcolor="danger" aria-pressed="false"><span class="swatch__dot"></span>Danger</button>
-    <label class="swatch swatch--custom" title="Any other colour">
-      <input class="swatch__input" type="color" value="#e2593a" data-pcolor-custom />
-      <span class="u-sr-only">Custom colour</span>Custom
-    </label>
-  </div>
-
-  <p class="field__label">Motion</p>
-  <div class="cluster" role="group" aria-label="Animation" data-optgroup="pmotion"></div>
-  <div class="cluster" role="group" aria-label="Play mode" data-optgroup="pmode"></div>
-
-  <p class="panel__note" data-panel-note hidden>This icon has no solid variant — its paths are open, and a filled open path is a blob rather than an icon. A solid needs its own declared geometry.</p>
-
-  <div class="panel__grabs">
-    <button class="btn btn-primary" type="button" data-dl="svg">
-      <svg class="ic ic-sm" aria-hidden="true"><use href="#i-download" /></svg>SVG</button>
-    <button class="btn btn-outline" type="button" data-dl="png">PNG</button>
-    <button class="btn btn-outline" type="button" data-dl="jpg">JPG</button>
-    <button class="btn btn-outline" type="button" data-copy-svg>Copy SVG</button>
-    <button class="btn btn-outline" type="button" data-copy-use>Copy &lt;use&gt;</button>
-    <button class="btn btn-outline" type="button" data-copy-class>Copy class</button>
-  </div>
-
-  <pre class="panel__code"><code data-panel-code></code></pre>
 </dialog>
 
 <footer class="foot">
