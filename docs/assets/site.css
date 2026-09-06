@@ -704,3 +704,56 @@ main { padding-inline: var(--gutter); }
 }
 
 .use__code code { white-space: pre; }
+
+/* ── Palette swatches ─────────────────────────────────────────────────────
+   Smaller than the other toggles, because a colour needs no room to be read
+   and seven of them still have to sit on one line. */
+
+.opts--swatch { gap: .25rem; }
+.opts--swatch .opt { inline-size: 1.5rem; block-size: 1.5rem; }
+.opts--swatch .opt__art { inline-size: 100%; block-size: 100%; }
+
+.dot {
+	inline-size: .625rem; block-size: .625rem; border-radius: var(--radius-full);
+	box-shadow: inset 0 0 0 1px oklch(50% 0 0 / 0.25);
+}
+
+/* Ink is not a hue — it is "whatever colour the text is", so the swatch shows
+   the page's own foreground rather than a colour of its own. */
+.dot--ink { background: var(--fg-default); }
+
+.rail__head--sub { padding-top: .75rem; }
+
+/* ── Search results ───────────────────────────────────────────────────────
+   The dropdown answers a different question from the grid: the grid filters so
+   you can browse, this lists the closest few so you can take one and go. It
+   sits over the page, so it needs the page's surface under it — a transparent
+   panel over a scrolling grid of icons is unreadable. */
+
+.ac {
+	position: absolute; top: calc(100% + .375rem); left: 0; right: 0; z-index: 40;
+	max-height: 20rem; overflow-y: auto;
+	margin: 0; padding: .25rem; list-style: none;
+	background: var(--bg-surface);
+	border: 1px solid var(--line-default);
+	border-radius: var(--radius-lg);
+	box-shadow: 0 12px 32px oklch(12.5% 0.012 275 / 0.14);
+}
+
+.ac__row {
+	display: flex; align-items: center; gap: .625rem;
+	padding: .4375rem .5rem; border-radius: var(--radius-md);
+	font-size: .875rem; cursor: pointer;
+}
+
+.ac__row svg { inline-size: 1.25rem; block-size: 1.25rem; flex: none; color: var(--fg-default); }
+.ac__name { flex: 1; }
+
+.ac__cat {
+	font-size: .6875rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+	color: var(--fg-faint);
+}
+
+.ac__row:hover,
+.ac__row[aria-selected='true'] { background: var(--accent-soft); }
+.ac__row[aria-selected='true'] .ac__name { color: var(--accent-fg); font-weight: 600; }

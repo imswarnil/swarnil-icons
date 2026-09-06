@@ -44,12 +44,16 @@ try {
     <span class="brand__name">Swarnil</span>
     <span class="brand__sub">Icons</span>
   </a>
-  <label class="search search--bar">
-    <span class="u-sr-only">Search icons</span>
+  <div class="search search--bar" role="combobox" aria-haspopup="listbox" aria-expanded="false" data-searchbox>
+    <label class="u-sr-only" for="q">Search icons</label>
     <svg class="ic ic-sm search__icon" aria-hidden="true"><use href="#i-search" /></svg>
-    <input class="search__input" type="search" placeholder="Search {count} icons — try 'camera' or 'arrow'" autocomplete="off" data-search />
+    <input class="search__input" id="q" type="search" placeholder="Search {count} icons — try 'camera' or 'arrow'"
+           autocomplete="off" aria-autocomplete="list" aria-controls="results" data-search />
     <kbd class="kbd">/</kbd>
-  </label>
+    <!-- Matches as you type, on top of the grid filtering below. The grid
+         answers "what is there"; this answers "the one I already had in mind". -->
+    <ul class="ac" id="results" role="listbox" aria-label="Matching icons" data-ac hidden></ul>
+  </div>
 
   <div class="bar__end">
     <button class="iconbtn" type="button" data-theme-toggle aria-label="Switch theme">
@@ -118,8 +122,20 @@ try {
       </div>
 
       <div class="rail">
-        <p class="rail__head">Colour <span class="rail__now" data-now="colormode"></span></p>
-        <div class="opts" role="group" aria-label="Colour" data-optgroup="colormode"></div>
+        <p class="rail__head">Style <span class="rail__now" data-now="colormode"></span></p>
+        <div class="opts" role="group" aria-label="Colour style" data-optgroup="colormode"></div>
+      </div>
+
+      <div class="rail">
+        <!-- Choosing here sets --accent on :root. Everything downstream reads
+             it — the icons through --ic-primary, and this page's own chrome —
+             so one click rebrands the lot. Signal red is the design system's
+             own accent and the default. -->
+        <p class="rail__head">Primary <span class="rail__now" data-now="primary"></span></p>
+        <div class="opts opts--swatch" role="group" aria-label="Primary colour" data-optgroup="primary"></div>
+
+        <p class="rail__head rail__head--sub">Secondary <span class="rail__now" data-now="secondary"></span></p>
+        <div class="opts opts--swatch" role="group" aria-label="Secondary colour" data-optgroup="secondary"></div>
       </div>
 
       <div class="rail">

@@ -70,6 +70,35 @@
 	};
 	var panelColour = 'ink', customColour = '#e2593a';
 
+	function stored(key, fallback) {
+		try { return localStorage.getItem(key) || fallback; } catch (e) { return fallback; }
+	}
+	var primary = stored('si-primary', 'signal');
+	var secondary = stored('si-secondary', 'ink');
+
+	/* The design system's tier-1 hues at their ~63% "full voice" step — one
+	   shared lightness ladder, so swapping between them changes the hue and
+	   nothing else. Signal is the system's own accent and the default here.
+
+	   Picking one sets --accent on :root, and because swarnil-icons.css reads
+	   `var(--accent, <signal>)` for --ic-primary, the icons rebrand along with
+	   the page. That is the same mechanism a real consumer gets by loading the
+	   design system; this rail is just proving it. */
+	var PALETTE = {
+		signal: 'oklch(63% 0.190 34)',
+		craft:  'oklch(66% 0.110 78)',
+		mint:   'oklch(64% 0.130 155)',
+		teal:   'oklch(65% 0.105 195)',
+		azure:  'oklch(62% 0.145 240)',
+		iris:   'oklch(62% 0.170 285)',
+		rose:   'oklch(60% 0.185 15)'
+	};
+	// Secondary is the ink the strokes are drawn in. Default is the text
+	// colour, which is the whole point of the set — it disappears into its
+	// surroundings unless told otherwise.
+	var INKS = { ink: '', signal: PALETTE.signal, azure: PALETTE.azure,
+	             iris: PALETTE.iris, mint: PALETTE.mint, craft: PALETTE.craft };
+
 	var MOTIONS = ['off', 'draw', 'fade', 'pop', 'spin', 'pulse'];
 	var MODES = ['in', 'out', 'loop'];
 	var MODEICON = { in: 'arrow-down', out: 'arrow-up', loop: 'refresh' };
@@ -93,6 +122,36 @@
 		try { localStorage.setItem('si-theme', next); } catch (e) {}
 		themeIcon();
 	});
+
+	/* ── The palette ─────────────────────────────────────────────────────── */
+
+	function applyPalette() {
+		var root = document.documentElement.style;
+		var c = PALETTE[primary] || PALETTE.signal;
+
+		root.setProperty('--accent', c);
+		// The two derived accent tones are mixed from the chosen hue rather
+		// than listed per colour, so adding a hue above needs nothing here.
+		// --accent-soft is an alpha wash, which lands correctly on a light or
+		// a dark ground; --accent-fg is pulled toward the page's own text
+		// colour so it stays readable in both themes.
+		root.setProperty('--accent-soft', 'color-mix(in oklab, ' + c + ' 14%, transparent)');
+		root.setProperty('--accent-fg', 'color-mix(in oklab, ' + c + ' 72%, var(--fg-default))');
+		// --ic-primary-soft reads --accent-soft, which is now an alpha wash;
+		// give the icons a slightly stronger one so a fill still reads as a
+		// fill rather than as a smudge.
+		root.setProperty('--ic-primary-soft', 'color-mix(in oklab, ' + c + ' 20%, transparent)');
+
+		var ink = INKS[secondary];
+		if (ink) root.setProperty('--ic-ink', ink);
+		else root.removeProperty('--ic-ink');
+
+		try {
+			localStorage.setItem('si-primary', primary);
+			localStorage.setItem('si-secondary', secondary);
+		} catch (e) {}
+	}
+	applyPalette();
 
 	/* ── Building one icon's SVG ─────────────────────────────────────────── */
 
@@ -183,14 +242,29 @@
 			art: function (v) { return svgMarkup(DEMO, 'line', { sm: 13, md: 16, lg: 20, xl: 26 }[v]); }
 		},
 		colormode: {
-			values: ['mono', 'multi'],
-			label: { mono: 'Mono', multi: 'Multi' },
-			// The sample is the real .ic-multi class doing the real thing, so
-			// the toggle cannot promise one look and deliver another.
+			values: ['mono', 'multi', 'fill'],
+			label: { mono: 'Mono', multi: 'Multi', fill: 'Fill' },
+			// Each sample is the real class doing the real thing, so a toggle
+			// cannot promise one look and deliver another.
 			art: function (v) {
-				return v === 'multi'
-					? svgMarkup(DEMO, 'line', 20, 'ic-multi ic-multi-fill')
-					: svgMarkup(DEMO, 'line', 20);
+				if (v === 'multi') return svgMarkup(DEMO, 'line', 20, 'ic-multi ic-multi-fill');
+				if (v === 'fill') return svgMarkup(DEMO, 'solid', 20, 'ic-primary');
+				return svgMarkup(DEMO, 'line', 20);
+			}
+		},
+		primary: {
+			values: Object.keys(PALETTE),
+			label: { signal: 'Signal', craft: 'Craft', mint: 'Mint', teal: 'Teal',
+			         azure: 'Azure', iris: 'Iris', rose: 'Rose' },
+			art: function (v) { return '<span class="dot" style="background:' + PALETTE[v] + '"></span>'; }
+		},
+		secondary: {
+			values: Object.keys(INKS),
+			label: { ink: 'Ink', signal: 'Signal', azure: 'Azure', iris: 'Iris',
+			         mint: 'Mint', craft: 'Craft' },
+			art: function (v) {
+				return '<span class="dot' + (v === 'ink' ? ' dot--ink' : '') + '"'
+					+ (INKS[v] ? ' style="background:' + INKS[v] + '"' : '') + '></span>';
 			}
 		},
 		motion: {
@@ -255,6 +329,8 @@
 	paintOpts('variant', state.variant);
 	paintOpts('psize', state.size);
 	paintOpts('colormode', state.color);
+	paintOpts('primary', primary);
+	paintOpts('secondary', secondary);
 	paintOpts('motion', state.motion);
 	paintOpts('mode', state.mode);
 	paintOpts('pmotion', panelMotion);
@@ -267,9 +343,15 @@
 	function cellsFor(rows) {
 		var mcls = motionClass(state.motion, state.mode);
 		var multi = state.color === 'multi';
+		var filled = state.color === 'fill';
 		return rows.map(function (i, n) {
 			var v = state.variant;
 			var canFill = i.variants.indexOf('solid') !== -1;
+			// Fill style means the shape carries the primary rather than the
+			// outline, so it draws the solid form wherever the geometry allows
+			// one. An open path cannot be filled without becoming a blob, so
+			// those keep their stroke and take the colour on that instead.
+			if (filled && canFill) v = 'solid';
 			// An icon with no solid falls back to line rather than vanishing —
 			// a hole in the grid would read as a missing icon, not a missing
 			// variant.
@@ -284,6 +366,7 @@
 				cls.push('ic-multi');
 				if (canFill && v !== 'solid') cls.push('ic-multi-fill');
 			}
+			if (filled) cls.push('ic-primary');
 			// A tiny per-cell delay so a grid of 61 icons arrives as a sweep
 			// rather than as one flash. Capped, or the last cell waits a
 			// second and a half to appear.
@@ -329,26 +412,114 @@
 
 	/* ── Filters ─────────────────────────────────────────────────────────── */
 
-	$('[data-search]').addEventListener('input', function (e) {
+	/* ── Search ──────────────────────────────────────────────────────────────
+	   Two answers to one query, because they are different questions. The grid
+	   below filters, which answers "what is there" — you browse the result. The
+	   dropdown lists the closest few, which answers "the one I already had in
+	   mind" — you take it and go. A set this size needs both. */
+
+	var input = $('[data-search]');
+	var ac = $('[data-ac]');
+	var box = $('[data-searchbox]');
+	var hits = [], cursor = -1;
+
+	function score(icon, q) {
+		var n = icon.name;
+		if (n === q) return 0;
+		if (n.indexOf(q) === 0) return 1;          // prefix beats
+		if (n.indexOf(q) !== -1) return 2;         // anywhere in the name
+		if (icon.category.indexOf(q) !== -1) return 3;
+		return -1;
+	}
+
+	function closeAc() {
+		ac.hidden = true;
+		box.setAttribute('aria-expanded', 'false');
+		cursor = -1;
+	}
+
+	function markCursor() {
+		$$('.ac__row', ac).forEach(function (el, i) {
+			el.setAttribute('aria-selected', String(i === cursor));
+		});
+	}
+
+	function openAc(q) {
+		hits = ICONS.map(function (i) { return { i: i, s: score(i, q) }; })
+			.filter(function (r) { return r.s !== -1; })
+			.sort(function (a, b) { return a.s - b.s || a.i.name.localeCompare(b.i.name); })
+			.slice(0, 8)
+			.map(function (r) { return r.i; });
+
+		if (!hits.length) return closeAc();
+
+		ac.innerHTML = hits.map(function (i, n) {
+			return '<li class="ac__row" role="option" aria-selected="false" data-pick="' + i.name + '" id="ac-' + n + '">'
+				+ svgMarkup(i, 'line', 20)
+				+ '<span class="ac__name">' + i.name + '</span>'
+				+ '<span class="ac__cat">' + label(i.category) + '</span></li>';
+		}).join('');
+		ac.hidden = false;
+		box.setAttribute('aria-expanded', 'true');
+		cursor = -1;
+		markCursor();
+	}
+
+	input.addEventListener('input', function (e) {
 		state.q = e.target.value.trim();
 		render();
+		if (state.q) openAc(state.q.toLowerCase()); else closeAc();
+	});
+
+	input.addEventListener('keydown', function (e) {
+		if (ac.hidden) return;
+		if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+			e.preventDefault();
+			cursor = (cursor + (e.key === 'ArrowDown' ? 1 : -1) + hits.length + 1) % (hits.length + 1);
+			// The extra slot is "nothing selected", so arrowing past the end
+			// returns you to the raw query rather than wrapping silently.
+			if (cursor === hits.length) cursor = -1;
+			markCursor();
+			input.setAttribute('aria-activedescendant', cursor < 0 ? '' : 'ac-' + cursor);
+		} else if (e.key === 'Enter' && cursor > -1) {
+			e.preventDefault();
+			open(hits[cursor].name);
+			closeAc();
+		} else if (e.key === 'Escape') {
+			closeAc();
+		}
+	});
+
+	ac.addEventListener('mousedown', function (e) {
+		// mousedown, not click: the input's blur would hide the row before a
+		// click ever landed on it.
+		var row = e.target.closest('[data-pick]');
+		if (!row) return;
+		e.preventDefault();
+		open(row.dataset.pick);
+		closeAc();
+	});
+
+	document.addEventListener('click', function (e) {
+		if (!box.contains(e.target)) closeAc();
 	});
 
 	document.addEventListener('keydown', function (e) {
 		if (e.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) {
 			e.preventDefault();
-			$('[data-search]').focus();
+			input.focus();
 		}
 	});
 
 	// One delegated listener for every generated control, rather than rebinding
 	// after each repaint.
 	document.addEventListener('click', function (e) {
-		var b = e.target.closest('[data-variant],[data-psize],[data-colormode],[data-motion],[data-mode],[data-pmotion],[data-pmode]');
-		if (!b) return;
+		var GROUPS_ = ['variant', 'psize', 'colormode', 'motion', 'mode',
+		               'primary', 'secondary', 'pmotion', 'pmode'];
+		var b = e.target.closest(GROUPS_.map(function (g) { return '[data-' + g + ']'; }).join(','));
+		if (!b || !b.classList.contains('opt')) return;
 
-		var group = ['variant', 'psize', 'colormode', 'motion', 'mode', 'pmotion', 'pmode']
-			.filter(function (g) { return b.hasAttribute('data-' + g); })[0];
+		var group = GROUPS_.filter(function (g) { return b.hasAttribute('data-' + g); })[0];
 		var v = b.getAttribute('data-' + group);
 
 		if (group === 'variant') state.variant = v;
@@ -356,10 +527,20 @@
 		if (group === 'colormode') state.color = v;
 		if (group === 'motion') state.motion = v;
 		if (group === 'mode') state.mode = v;
+		if (group === 'primary') primary = v;
+		if (group === 'secondary') secondary = v;
 		if (group === 'pmotion') panelMotion = v;
 		if (group === 'pmode') panelMode = v;
 
 		paintOpts(group, v);
+		if (group === 'primary' || group === 'secondary') {
+			applyPalette();
+			// The sidebar samples are drawn markup, not live classes, so they
+			// have to be redrawn for the new hue to reach them.
+			paintOpts('colormode', state.color);
+			paintOpts('primary', primary);
+			paintOpts('secondary', secondary);
+		}
 		if (group === 'pmotion' || group === 'pmode') paint(); else render();
 	});
 
