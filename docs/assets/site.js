@@ -99,7 +99,7 @@
 	var INKS = { ink: '', signal: PALETTE.signal, azure: PALETTE.azure,
 	             iris: PALETTE.iris, mint: PALETTE.mint, craft: PALETTE.craft };
 
-	var MOTIONS = ['off', 'draw', 'fade', 'pop', 'spin', 'pulse'];
+	var MOTIONS = ['off', 'draw', 'fade', 'pop', 'spin', 'pulse', 'glitch'];
 	var MODES = ['in', 'out', 'loop'];
 	var MODEICON = { in: 'arrow-down', out: 'arrow-up', loop: 'refresh' };
 
@@ -242,13 +242,14 @@
 			art: function (v) { return svgMarkup(DEMO, 'line', { sm: 13, md: 16, lg: 20, xl: 26 }[v]); }
 		},
 		colormode: {
-			values: ['mono', 'multi', 'fill'],
-			label: { mono: 'Mono', multi: 'Multi', fill: 'Fill' },
+			values: ['mono', 'multi', 'fill', 'scan'],
+			label: { mono: 'Mono', multi: 'Multi', fill: 'Fill', scan: 'Scanline' },
 			// Each sample is the real class doing the real thing, so a toggle
 			// cannot promise one look and deliver another.
 			art: function (v) {
 				if (v === 'multi') return svgMarkup(DEMO, 'line', 20, 'ic-multi ic-multi-fill');
 				if (v === 'fill') return svgMarkup(DEMO, 'solid', 20, 'ic-primary');
+				if (v === 'scan') return svgMarkup(DEMO, 'solid', 20, 'ic-primary ic-scan');
 				return svgMarkup(DEMO, 'line', 20);
 			}
 		},
@@ -343,7 +344,8 @@
 	function cellsFor(rows) {
 		var mcls = motionClass(state.motion, state.mode);
 		var multi = state.color === 'multi';
-		var filled = state.color === 'fill';
+		var scanned = state.color === 'scan';
+		var filled = state.color === 'fill' || scanned;
 		return rows.map(function (i, n) {
 			var v = state.variant;
 			var canFill = i.variants.indexOf('solid') !== -1;
@@ -367,6 +369,10 @@
 				if (canFill && v !== 'solid') cls.push('ic-multi-fill');
 			}
 			if (filled) cls.push('ic-primary');
+			// Scanline is a mask, so it needs something solid to band — on a
+			// bare stroke it just dashes the line. `filled` is already true for
+			// this mode, so the colour class is on; only the mask is left.
+			if (scanned) cls.push('ic-scan');
 			// A tiny per-cell delay so a grid of 61 icons arrives as a sweep
 			// rather than as one flash. Capped, or the last cell waits a
 			// second and a half to appear.
@@ -407,7 +413,17 @@
 
 		$('[data-count]').textContent = rows.length + (rows.length === 1 ? ' icon' : ' icons');
 		$('[data-empty]').hidden = rows.length > 0;
-		$('[data-motion-note]').hidden = !(state.motion === 'draw' && state.variant === 'solid');
+		var note = $('[data-motion-note]');
+		if (state.color === 'scan') {
+			note.textContent = 'Scanline is a mask over the filled form — it wants ' +
+				'the large sizes. At sm it reads as a broken icon rather than a style.';
+			note.hidden = false;
+		} else if (state.motion === 'draw' && state.variant === 'solid') {
+			note.textContent = 'Draw needs a stroke to draw, so it does nothing on the solid weight.';
+			note.hidden = false;
+		} else {
+			note.hidden = true;
+		}
 	}
 
 	/* ── Filters ─────────────────────────────────────────────────────────── */

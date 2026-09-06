@@ -267,7 +267,7 @@ main { padding-inline: var(--gutter); }
    the six motion toggles — fits on ONE line at the sizes below. A rail whose
    groups wrap onto a second row reads as a pile rather than as a set of
    choices. */
-.layout { display: grid; grid-template-columns: 15.5rem 1fr; align-items: start; gap: 2.5rem; }
+.layout { display: grid; grid-template-columns: 16.5rem 1fr; align-items: start; gap: 2.5rem; }
 
 .sidebar {
 	position: sticky; top: calc(3.75rem + 1.5rem);
@@ -576,7 +576,7 @@ main { padding-inline: var(--gutter); }
 .opt {
 	position: relative;
 	display: inline-flex; align-items: center; justify-content: center; gap: .375rem;
-	inline-size: 2rem; block-size: 2rem; padding: 0;
+	inline-size: 1.875rem; block-size: 1.875rem; padding: 0;
 	border: 1px solid var(--line-default); border-radius: var(--radius-md);
 	color: var(--fg-muted);
 	transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);

@@ -117,6 +117,26 @@ and CSS cannot reach into its shadow content. A sprite still gets the ink
 stroke, the primary marks and the wash, because those ride on inherited
 properties — it just misses the fourth touch.
 
+### Scanline
+
+```html
+<svg class="ic ic-xl ic-solid ic-primary ic-scan"><use href="/sprite.svg#i-heart"/></svg>
+```
+
+The one decorative device that belongs to a set sitting beside a viewfinder and
+a record light: the line a screen already makes. It is a **mask**, not geometry
+— nothing is redrawn, so an icon in this style is still the same icon, which is
+the promise the five weights make too.
+
+The stops are percentages, and that is the whole trick. Percentages in a
+repeating gradient resolve against the element's own height, so it is always
+**eight lines** whether the icon renders at 16px or 160px; a fixed pixel pitch
+would give eight lines at one size and a grey smear at another.
+
+Being a mask it cuts strokes as well as fills, which reads as deliberate at
+24px and up and as a broken icon below it. Pair it with a fill and `ic-lg` or
+larger — it is a display style, not a UI one.
+
 ### The values track the design system
 
 Each token reads the [Swarnil Design System](https://design.imswarnil.com)'s
@@ -170,8 +190,15 @@ stylesheet, so a project that wants none of it pays nothing:
 | `pop` | scale with an overshoot — for a confirmation | `-loop` | repeats forever |
 | `spin` | rotation | | |
 | `pulse` | a slow breath, for something waiting | | |
+| `glitch` | a signal dropping out and recovering | | |
 
-So `ic-draw-in`, `ic-pop-loop`, `ic-fade-out` — fifteen classes. Four custom
+So `ic-draw-in`, `ic-pop-loop`, `ic-fade-out` — eighteen classes.
+
+`glitch` is the other half of the scanline's idea, and its restraint is the
+design: the loop sits perfectly still for nine tenths of its cycle and breaks
+for the last tenth. A permanent shudder is a broken page, not a style. Its
+coloured fringe is drawn in `--ic-primary`, so it inherits whatever your accent
+is rather than hard-coding a cyan-and-magenta that would fight every palette. Four custom
 properties tune them, set anywhere from a theme down to one element:
 
 ```html

@@ -379,6 +379,29 @@ CSS = """/* ====================================================================
 	fill: var(--ic-primary-soft);
 }
 
+/* ── Scanline ─────────────────────────────────────────────────────────────
+   The set sits beside a design system whose identity is a viewfinder and a
+   record light, so the one decorative device that belongs here is the one a
+   screen already makes: a raster line.
+
+   It is a MASK, not geometry. Nothing is redrawn, so an icon in this style is
+   the same icon — which is the same promise the five weights make.
+
+   The stops are percentages, and that is the whole trick: percentages in a
+   repeating gradient resolve against the element's own height, so this is
+   always EIGHT lines whether the icon is rendered at 16px or 160px. A fixed
+   pixel pitch would give you eight lines at one size and a grey smear at
+   another.
+
+   Being a mask, it cuts the strokes as well as the fills, which reads as
+   deliberate at 24px and up and as broken below it. It is a display style —
+   pair it with .ic-lg or larger, or with a fill. */
+
+.ic-scan {
+	-webkit-mask-image: repeating-linear-gradient(to bottom, #000 0 6.25%, transparent 6.25% 12.5%);
+	        mask-image: repeating-linear-gradient(to bottom, #000 0 6.25%, transparent 6.25% 12.5%);
+}
+
 /* ── Two-tone ─────────────────────────────────────────────────────────────
    Stroke and fill pulled apart: the outline stays ink while the shape carries
    a wash of the accent. It is the one way to use colour on a stroked icon
@@ -421,6 +444,7 @@ MOTION = """/* =================================================================
      pop     scale with an overshoot — the one for a confirmation
      spin    rotation
      pulse   a slow breath, for something that is waiting
+     glitch  a signal dropping out for two frames and recovering
 
    times three:  -in    plays once and ends VISIBLE
                  -out   plays once and ends HIDDEN
@@ -469,7 +493,8 @@ MOTION = """/* =================================================================
 .ic-fade-in, .ic-fade-out, .ic-fade-loop,
 .ic-pop-in, .ic-pop-out, .ic-pop-loop,
 .ic-spin-in, .ic-spin-out, .ic-spin-loop,
-.ic-pulse-in, .ic-pulse-out, .ic-pulse-loop {
+.ic-pulse-in, .ic-pulse-out, .ic-pulse-loop,
+.ic-glitch-in, .ic-glitch-out, .ic-glitch-loop {
 	animation-duration: var(--ic-dur, 600ms);
 	animation-delay: var(--ic-delay, 0ms);
 	animation-timing-function: var(--ic-ease, cubic-bezier(0.65, 0, 0.35, 1));
@@ -557,6 +582,45 @@ MOTION = """/* =================================================================
 @keyframes ic-pulse-out  { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(0.88); } }
 @keyframes ic-pulse-loop { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.65; transform: scale(1.08); } }
 
+/* ── Glitch ───────────────────────────────────────────────────────────────
+   A signal dropping out for two frames and recovering. It is the other half of
+   the same idea as the scanline: the design system is a record light, and this
+   is what a record light does when the feed stutters.
+
+   The restraint is the design. The loop sits PERFECTLY STILL for nine tenths
+   of its cycle and breaks for the last tenth — a permanent shudder is a broken
+   page, not a style. The displacement is in em so it tracks the icon's size,
+   and the coloured fringe is drop-shadow in the accent, so a glitch inherits
+   whatever the primary happens to be rather than hard-coding a cyan/magenta
+   that would fight every palette.
+
+   Off entirely under prefers-reduced-motion, with the rest. */
+
+.ic-glitch-in   { animation-name: ic-glitch-in; }
+.ic-glitch-out  { animation-name: ic-glitch-out; }
+.ic-glitch-loop { animation-name: ic-glitch-loop; animation-iteration-count: infinite; animation-duration: var(--ic-dur, 3.2s); }
+
+@keyframes ic-glitch-in {
+	0%   { opacity: 0; transform: translateX(-0.12em); filter: drop-shadow(0.1em 0 var(--ic-primary)); }
+	35%  { opacity: 1; transform: translateX(0.08em); filter: drop-shadow(-0.08em 0 var(--ic-primary)); }
+	65%  { transform: translateX(-0.03em); filter: drop-shadow(0.03em 0 var(--ic-primary)); }
+	100% { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes ic-glitch-out {
+	0%   { opacity: 1; transform: none; filter: none; }
+	40%  { opacity: 1; transform: translateX(0.08em); filter: drop-shadow(-0.08em 0 var(--ic-primary)); }
+	100% { opacity: 0; transform: translateX(-0.12em); filter: drop-shadow(0.1em 0 var(--ic-primary)); }
+}
+
+@keyframes ic-glitch-loop {
+	0%, 86%   { transform: none; filter: none; }
+	88%       { transform: translateX(-0.07em); filter: drop-shadow(0.07em 0 var(--ic-primary)); }
+	90%       { transform: translateX(0.06em); filter: drop-shadow(-0.06em 0 var(--ic-primary)); }
+	92%       { transform: translateX(-0.03em); filter: drop-shadow(0.03em 0 var(--ic-primary)); }
+	94%, 100% { transform: none; filter: none; }
+}
+
 /* ── Stagger ──────────────────────────────────────────────────────────────
    Parts of the icon arriving one after another rather than together. It reads
    beautifully on the multi-stroke icons and it is INLINE-SVG ONLY: a sprite
@@ -585,12 +649,14 @@ MOTION = """/* =================================================================
 	.ic-pop-in, .ic-pop-out, .ic-pop-loop,
 	.ic-spin-in, .ic-spin-out, .ic-spin-loop,
 	.ic-pulse-in, .ic-pulse-out, .ic-pulse-loop,
+	.ic-glitch-in, .ic-glitch-out, .ic-glitch-loop,
 	.ic-stagger > * {
 		animation: none !important;
 		stroke-dasharray: none !important;
 		stroke-dashoffset: 0 !important;
 		opacity: 1 !important;
 		transform: none !important;
+		filter: none !important;
 	}
 }
 """
