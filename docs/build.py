@@ -37,18 +37,16 @@ def main():
     OUT.mkdir()
 
     shell = (DOCS / 'templates' / 'index.html').read_text()
-    cats = sorted({i['category'] for i in icons})
-
-    chips = ''.join(
-        f'<button class="chip" type="button" data-cat="{c}" aria-pressed="false">{c}</button>'
-        for c in cats)
+    # The sidebar and the grouped grid are both built client-side from
+    # #icon-data (see site.js) — categories only need counting here, for
+    # the kicker line ("N icons · N categories").
+    catcount = len({i['category'] for i in icons})
 
     page = (shell
             .replace('{name}', NAME)
             .replace('{site}', SITE)
             .replace('{count}', str(len(icons)))
-            .replace('{cats}', chips)
-            .replace('{catcount}', str(len(cats)))
+            .replace('{catcount}', str(catcount))
             .replace('{data}', json.dumps(icons, separators=(',', ':'))))
 
     (OUT / 'index.html').write_text(page)
@@ -66,7 +64,7 @@ def main():
         f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
         f'<url><loc>{SITE}/</loc></url></urlset>')
 
-    print(f'built the icons site: {len(icons)} icons, {len(cats)} categories -> site/')
+    print(f'built the icons site: {len(icons)} icons, {catcount} categories -> site/')
     return 0
 
 

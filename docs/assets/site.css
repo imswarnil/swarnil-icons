@@ -14,6 +14,11 @@
 	--bg-canvas:  light-dark(oklch(99.2% 0.002 275), oklch(12.5% 0.012 275));
 	--bg-surface: light-dark(oklch(99.2% 0.002 275), oklch(17.5% 0.014 275));
 	--bg-sunken:  light-dark(oklch(96.6% 0.004 275), oklch(12.5% 0.012 275));
+	/* Unlike surface/sunken above, this one reads as a distinct panel in BOTH
+	   themes — surface matches canvas exactly in light mode and sunken matches
+	   it exactly in dark mode, so neither alone works for a rail that has to
+	   stay visibly a panel regardless of theme. */
+	--bg-muted:   light-dark(oklch(94.0% 0.005 275), oklch(23.0% 0.016 275));
 
 	--fg-default: light-dark(oklch(23% 0.016 275), oklch(96.6% 0.004 275));
 	--fg-muted:   light-dark(oklch(39% 0.020 275), oklch(82% 0.009 275));
@@ -29,8 +34,23 @@
 	--accent-fg:   light-dark(oklch(47% 0.155 34), oklch(86% 0.078 34));
 	--on-accent:   oklch(99.2% 0.002 275);
 
-	--font-display: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+	/* Colour mode's palette — the design system's other tier-1 hues at their
+	   ~63% "full voice" step. Deliberately the SAME lightness across all
+	   seven (one shared ladder, per the design system's colour doctrine), so
+	   no category's icons read as louder than another's — this is a wayfinding
+	   accent, not a semantic one. --accent above already IS --hue-signal. */
+	--hue-craft: oklch(66% 0.110 78);
+	--hue-mint:  oklch(64% 0.130 155);
+	--hue-azure: oklch(62% 0.145 240);
+	--hue-rose:  oklch(60% 0.185 15);
+	--hue-iris:  oklch(62% 0.170 285);
+	--hue-teal:  oklch(65% 0.105 195);
+
+	/* One face, per the design system's typography doctrine: Inter sets the
+	   headline and the sentence alike. --font-display survives as a token,
+	   not a second family, so re-pointing it later is a one-line change. */
 	--font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--font-display: var(--font-body);
 	--font-slate: 'IBM Plex Mono', ui-monospace, monospace;
 
 	--radius-sm: 4px;
@@ -101,7 +121,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 .brand { display: flex; align-items: baseline; gap: .5rem; text-decoration: none; color: inherit; }
 .brand__mark { width: .5rem; height: .5rem; border-radius: var(--radius-full); background: var(--accent); align-self: center; flex: none; }
-.brand__name { font-family: var(--font-display); font-weight: 700; font-size: 1.125rem; letter-spacing: -.02em; }
+.brand__name { font-family: var(--font-display); font-weight: 600; font-size: 1.125rem; letter-spacing: -.02em; }
 .brand__sub { font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-faint); }
 .bar__end { margin-left: auto; display: flex; gap: .5rem; }
 .themedot { width: .5rem; height: .5rem; border-radius: var(--radius-full); background: currentColor; }
@@ -142,14 +162,92 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* ── Hero + tools ─────────────────────────────────────────────────────────── */
 
-main { max-width: 78rem; margin-inline: auto; padding-inline: var(--gutter); }
+/* Full width — the icon grid is the content, and it should use whatever
+   window the browser has rather than sit in a centred column with the rest
+   of the screen empty. The hero and footer keep their own reading-width caps
+   below, so prose doesn't stretch edge to edge on a wide monitor. */
+main { padding-inline: var(--gutter); }
 
 .hero { padding-block: 4rem 2.5rem; max-width: 46rem; }
+
+/* ── Layout: a sticky category rail beside the grid ──────────────────────── */
+
+.layout { display: grid; grid-template-columns: 13rem 1fr; align-items: start; gap: 2.5rem; }
+
+.sidebar {
+	position: sticky; top: calc(3.75rem + 1.5rem);
+	max-height: calc(100dvh - 3.75rem - 3rem);
+	overflow-y: auto;
+	/* A persistent light grey/cream panel — --bg-muted, the one neutral that
+	   stays visibly a panel in both themes — so the rail reads as a fixed
+	   part of the frame rather than loose text floating in the page
+	   background. */
+	background: var(--bg-muted);
+	border: 1px solid var(--line-subtle);
+	border-radius: var(--radius-lg);
+	padding: 1rem .75rem 1.5rem;
+}
+
+.nav__section { padding-block: .75rem; border-bottom: 1px solid var(--line-subtle); }
+.nav__section:last-child { border-bottom: 0; }
+
+.nav__group {
+	font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+	color: var(--fg-faint); padding: .5rem .625rem .25rem;
+}
+
+.nav__item {
+	display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+	width: 100%; padding: .5rem .625rem; border-radius: var(--radius-md);
+	font-size: .875rem; color: var(--fg-muted); text-align: left;
+	transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+
+.nav__item:hover { color: var(--fg-default); background: var(--bg-surface); }
+
+.nav__item[aria-pressed='true'] {
+	background: var(--accent-soft); color: var(--accent-fg); font-weight: 600;
+}
+
+.nav__item--child { padding-inline-start: 1.25rem; }
+
+.nav__count {
+	font-family: var(--font-slate); font-size: .6875rem; color: var(--fg-faint);
+	font-variant-numeric: tabular-nums;
+}
+
+.nav__item[aria-pressed='true'] .nav__count { color: inherit; opacity: .7; }
+
+@media (max-width: 56rem) {
+	.layout { grid-template-columns: 1fr; }
+	.sidebar {
+		position: static; max-height: none; overflow: visible;
+		display: flex; flex-wrap: wrap; gap: .375rem; padding-bottom: 0;
+	}
+	.nav__section { display: contents; }
+	.nav__group { width: 100%; padding-block: .5rem .125rem; }
+	.nav__item { width: auto; border: 1px solid var(--line-default); border-radius: var(--radius-full); }
+}
+
+/* ── Grouped sections in the grid ─────────────────────────────────────────── */
+
+.section + .section { margin-top: 2rem; }
+
+.section__title {
+	display: flex; align-items: baseline; gap: .5rem;
+	font-family: var(--font-display); font-weight: 600; font-size: 1.0625rem;
+	letter-spacing: -.01em; margin-bottom: .875rem;
+}
+
+.section__count {
+	font-family: var(--font-slate); font-size: .75rem; font-weight: 400;
+	color: var(--fg-faint); font-variant-numeric: tabular-nums;
+}
 
 .kicker { font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-faint); margin-bottom: .75rem; }
 
 .hero__title {
-	font-family: var(--font-display); font-weight: 700;
+	font-family: var(--font-display); font-weight: 600;
 	font-size: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem);
 	line-height: 1.06; letter-spacing: -.035em; text-wrap: balance;
 }
@@ -199,11 +297,45 @@ main { max-width: 78rem; margin-inline: auto; padding-inline: var(--gutter); }
 .cell:hover .cell__name { color: var(--fg-muted); }
 .cell svg { width: 1.5rem; height: 1.5rem; }
 
+/* ── Preview size ─────────────────────────────────────────────────────────
+   Sizes the icon drawn inside each cell without touching the SVG that gets
+   exported — the panel's own size slider (16…512px) still owns that. This
+   only changes what browsing looks like. */
+
+.sections[data-size='sm'] .grid { grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)); }
+.sections[data-size='sm'] .cell svg { width: 1.25rem; height: 1.25rem; }
+
+.sections[data-size='lg'] .grid { grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); }
+.sections[data-size='lg'] .cell svg { width: 2rem; height: 2rem; }
+
+.sections[data-size='xl'] .grid { grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); }
+.sections[data-size='xl'] .cell svg { width: 3rem; height: 3rem; }
+
+/* ── Colour mode ──────────────────────────────────────────────────────────
+   Off by default — the shipped icons are currentColor, full stop. This is a
+   browsing-only accent, one hue per category, purely for telling sections
+   apart at a glance; it never touches the SVG that gets exported. */
+
+.sections[data-colormode='color'] .cell[data-cat='frame']  svg { color: var(--accent); }
+.sections[data-colormode='color'] .cell[data-cat='editor'] svg { color: var(--hue-craft); }
+.sections[data-colormode='color'] .cell[data-cat='media']  svg { color: var(--hue-iris); }
+.sections[data-colormode='color'] .cell[data-cat='social'] svg { color: var(--hue-rose); }
+.sections[data-colormode='color'] .cell[data-cat='status'] svg { color: var(--hue-mint); }
+.sections[data-colormode='color'] .cell[data-cat='ui']     svg { color: var(--hue-azure); }
+
 .empty { padding: 3rem 0 5rem; color: var(--fg-muted); max-width: 34rem; }
 
 /* ── The panel ────────────────────────────────────────────────────────────── */
 
 .panel {
+	/* The reset's `* { margin: 0 }` overrides the UA stylesheet's own
+	   `dialog:modal { margin: auto }` — author styles beat UA styles
+	   regardless of specificity — so centering has to be restated here or
+	   the dialog opens pinned to the top-left of the viewport instead of in
+	   the centre of the screen. */
+	margin: auto;
+	max-height: calc(100dvh - 2 * var(--gutter));
+	overflow-y: auto;
 	width: min(30rem, 92vw);
 	padding: 1.5rem;
 	border: 1px solid var(--line-default);

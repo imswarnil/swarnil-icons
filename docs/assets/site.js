@@ -16,7 +16,21 @@
 	var ICONS = JSON.parse($('#icon-data').textContent);
 	var STROKE = { thin: 1, line: 1.5, bold: 2, solid: 1.5, duo: 1.5 };
 
-	var state = { q: '', cat: '', variant: 'line' };
+	// Categories are a flat field on each icon (the folder they live in).
+	// Grouping two or more of them under one nav label is a display concern
+	// only, kept here rather than in the data so adding a new flat category
+	// never requires touching the build. Anything not listed here renders as
+	// its own top-level item — empty for now, no categories need grouping.
+	var GROUPS = [];
+	var LABELS = { ui: 'UI' };
+	var grouped = {};
+	GROUPS.forEach(function (g) { g.categories.forEach(function (c) { grouped[c] = g; }); });
+
+	function label(cat) {
+		return LABELS[cat] || (cat.charAt(0).toUpperCase() + cat.slice(1));
+	}
+
+	var state = { q: '', cat: '', variant: 'line', size: 'md', color: 'mono' };
 	var current = null, size = 24, panelVariant = 'line';
 
 	/* ── Theme ───────────────────────────────────────────────────────────── */
@@ -49,9 +63,67 @@
 			+ ' stroke-linecap="round" stroke-linejoin="round"' + op + '>' + body + '</svg>';
 	}
 
+	/* ── The sidebar ─────────────────────────────────────────────────────── */
+
+	// Display order: ungrouped categories A→Z, then each group in GROUPS
+	// order with its children A→Z. Counts come from the data, not hand-kept.
+	var cats = {};
+	ICONS.forEach(function (i) { cats[i.category] = (cats[i.category] || 0) + 1; });
+
+	var ungrouped = Object.keys(cats).filter(function (c) { return !grouped[c]; }).sort();
+
+	function navItem(cat, child) {
+		return '<button class="nav__item' + (child ? ' nav__item--child' : '') + '" type="button"'
+			+ ' data-cat="' + cat + '" aria-pressed="false">'
+			+ '<span>' + label(cat) + '</span><span class="nav__count">' + cats[cat] + '</span></button>';
+	}
+
+	var nav = '<div class="nav__section">'
+		+ '<button class="nav__item" type="button" data-cat="" aria-pressed="true">'
+		+ '<span>All</span><span class="nav__count">' + ICONS.length + '</span></button>'
+		+ '</div><div class="nav__section">' + ungrouped.map(function (c) { return navItem(c, false); }).join('') + '</div>';
+
+	GROUPS.forEach(function (g) {
+		var present = g.categories.filter(function (c) { return cats[c]; });
+		if (!present.length) return;
+		nav += '<div class="nav__section">'
+			+ '<p class="nav__group">' + g.label + '</p>'
+			+ present.map(function (c) { return navItem(c, true); }).join('')
+			+ '</div>';
+	});
+
+	$('[data-catnav]').innerHTML = nav;
+
+	function setActiveCat(cat) {
+		$$('[data-catnav] [data-cat]').forEach(function (b) {
+			b.setAttribute('aria-pressed', String(b.dataset.cat === cat));
+		});
+	}
+
+	$('[data-catnav]').addEventListener('click', function (e) {
+		var b = e.target.closest('[data-cat]');
+		if (!b) return;
+		state.cat = b.dataset.cat;
+		setActiveCat(state.cat);
+		render();
+	});
+
 	/* ── The grid ────────────────────────────────────────────────────────── */
 
-	var grid = $('[data-grid]');
+	var sections = $('[data-sections]');
+
+	function cellsFor(rows) {
+		return rows.map(function (i) {
+			var v = state.variant;
+			// An icon with no solid falls back to line rather than vanishing —
+			// a hole in the grid would read as a missing icon, not a missing
+			// variant.
+			if (v === 'solid' && i.variants.indexOf('solid') === -1) v = 'line';
+			return '<button class="cell" type="button" data-name="' + i.name + '" data-cat="' + i.category + '" title="' + i.name + '">'
+				+ svgMarkup(i, v, 24)
+				+ '<span class="cell__name">' + i.name + '</span></button>';
+		}).join('');
+	}
 
 	function render() {
 		var q = state.q.toLowerCase();
@@ -60,16 +132,24 @@
 				&& (!q || i.name.indexOf(q) !== -1 || i.category.indexOf(q) !== -1);
 		});
 
-		grid.innerHTML = rows.map(function (i) {
-			var v = state.variant;
-			// An icon with no solid falls back to line rather than vanishing —
-			// a hole in the grid would read as a missing icon, not a missing
-			// variant.
-			if (v === 'solid' && i.variants.indexOf('solid') === -1) v = 'line';
-			return '<button class="cell" type="button" data-name="' + i.name + '" title="' + i.name + '">'
-				+ svgMarkup(i, v, 24)
-				+ '<span class="cell__name">' + i.name + '</span></button>';
-		}).join('');
+		sections.dataset.size = state.size;
+		sections.dataset.colormode = state.color;
+
+		if (state.cat) {
+			// One category already named in the sidebar — a repeated header
+			// above the grid would just say the same word twice.
+			sections.innerHTML = '<div class="grid">' + cellsFor(rows) + '</div>';
+		} else {
+			var order = ungrouped.slice();
+			GROUPS.forEach(function (g) { order = order.concat(g.categories); });
+			sections.innerHTML = order.map(function (cat) {
+				var inCat = rows.filter(function (i) { return i.category === cat; });
+				if (!inCat.length) return '';
+				return '<section class="section">'
+					+ '<h2 class="section__title">' + label(cat) + ' <span class="section__count">' + inCat.length + '</span></h2>'
+					+ '<div class="grid">' + cellsFor(inCat) + '</div></section>';
+			}).join('');
+		}
 
 		$('[data-count]').textContent = rows.length + (rows.length === 1 ? ' icon' : ' icons');
 		$('[data-empty]').hidden = rows.length > 0;
@@ -99,8 +179,9 @@
 		});
 	}
 
-	group('data-cat', function (v) { state.cat = v; render(); });
 	group('data-variant', function (v) { state.variant = v; render(); });
+	group('data-psize', function (v) { state.size = v; render(); });
+	group('data-colormode', function (v) { state.color = v; render(); });
 
 	/* ── The panel ───────────────────────────────────────────────────────── */
 
@@ -129,7 +210,7 @@
 		panel.showModal();
 	}
 
-	grid.addEventListener('click', function (e) {
+	sections.addEventListener('click', function (e) {
 		var cell = e.target.closest('.cell');
 		if (cell) open(cell.dataset.name);
 	});

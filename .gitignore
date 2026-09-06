@@ -7,3 +7,8 @@ __pycache__/
 # Nothing generated is committed. `npm run build` rebuilds both.
 dist/
 site/
+
+# Reference images used while drawing a representational icon (see STYLE.md
+# 9) — local-only, unknown licence, never traced exactly and never shipped.
+# Same role as theme.imswarnil.com/abstract/.
+inspirations/
