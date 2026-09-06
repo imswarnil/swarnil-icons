@@ -10,8 +10,9 @@ another icon set".)
 icons.imswarnil.com/          (repo root — this is the whole project)
 ├── icons/<category>/*.svg    hand-authored source geometry, one file per icon
 ├── scripts/author.py         the single geometry table — add an icon here
+├── scripts/new_icon.py       writes a table entry for you (`npm run new`)
 ├── scripts/validate.py       enforces STYLE.md, --strict for CI
-├── scripts/build.py          icons/ -> dist/ (sprite, css, json, per-variant svg)
+├── scripts/build.py          icons/ -> dist/ (sprite, css, motion css, json, svg)
 ├── docs/build.py             dist/ -> site/ (the one-page browser at the domain)
 ├── dist/                     generated, gitignored
 └── site/                     generated, gitignored — the whole Pages deploy artifact
@@ -21,6 +22,21 @@ Read `README.md` for the public-facing pitch and `STYLE.md` for the geometry rul
 `validate.py` enforces — both are already thorough; don't duplicate them here.
 
 ## Adding or fixing an icon
+
+The short way, which does steps 1–3 for you:
+
+```bash
+npm run new -- <name> <category> '<path-d>' ['<shapes>']
+npm run new -- flag ui 'M6 4v16M6 5h11l-2 3 2 3H6'
+```
+
+It writes the entry into the right category block of the geometry table,
+creates the category if it is new, refuses a name already in the set, then
+authors and validates. A rule violation is reported and the entry is **left in
+the table** to fix — re-run `npm run new-check` after. It is a front door to the
+table, not a second source of truth.
+
+By hand, which is the same thing:
 
 1. Add a line to the geometry table at the top of `scripts/author.py` (or edit an
    existing entry to fix one).
@@ -36,8 +52,29 @@ otherwise regenerate for you, and never hand-edit `dist/` or `site/` at all — 
 fully generated and gitignored.
 
 A closed path gets a solid variant for free (build.py fills it); an open path (arrow,
-chevron, check, …) does not — see README.md's "45 icons without a solid variant" for
+chevron, check, …) does not — see README.md's "49 icons without a solid variant" for
 why that's a deliberate gap, not a bug.
+
+## Two things build.py will let you break quietly
+
+**`raw` vs `body`.** build.py stamps `pathLength="1"` onto every path and circle in
+the *generated* output, which is what lets the motion layer draw an icon on with no
+JavaScript (README explains why). But `is_fillable()` and the solid generator both
+match on the literal string `<path d="`, and pathLength lands between the tag name
+and that attribute. They are therefore handed `raw`, the unmeasured body; everything
+emitted is handed `body`. Feed them `body` by mistake and no icon looks fillable any
+more — the set silently loses its solid variant and the build still reports success.
+The "49 icons have no solid variant" line in the build output is the canary: if it
+jumps to 61, this is what happened.
+
+**Colour is a layer, never geometry.** The source SVGs carry no colour and
+`validate.py` fails on a hard-coded one. `--ic-primary` and friends live in the
+generated `swarnil-icons.css`, each reading the design system's token first —
+`var(--accent, <the same value copied>)` — so the set adopts a loaded design system
+and still works standalone. Those fallbacks are hand-synced from
+`design.imswarnil.com/src/1-foundation/01-color.css`; this repo deliberately has no
+dependency on it, so they are copied, not imported. If that palette moves, update
+the `CSS` constant in `scripts/build.py`.
 
 ## Running it locally
 

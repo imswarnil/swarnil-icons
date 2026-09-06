@@ -14,6 +14,7 @@
   "exports": {
     ".": "./dist/icons.json",
     "./css": "./dist/swarnil-icons.css",
+    "./motion": "./dist/swarnil-icons-motion.css",
     "./sprite": "./dist/sprite.svg",
     "./json": "./dist/icons.json",
     "./svg/*": "./dist/svg/*",
@@ -23,6 +24,8 @@
   "files": ["icons", "dist", "STYLE.md", "README.md", "LICENSE"],
   "scripts": {
     "author": "python3 scripts/author.py",
+    "new": "python3 scripts/new_icon.py",
+    "new-check": "python3 scripts/author.py && npm run validate",
     "validate": "python3 scripts/validate.py --strict",
     "build": "npm run validate && python3 scripts/build.py && python3 docs/build.py",
     "docs": "python3 docs/build.py",

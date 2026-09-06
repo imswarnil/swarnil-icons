@@ -4,11 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{name} — {count} open-source icons, drawn from scratch</title>
-<meta name="description" content="A 24-grid stroked icon set. Five variants from one geometry, any size, SVG, PNG or JPG. MIT, no dependencies." />
+<meta name="description" content="A 24-grid stroked icon set. Five variants and five animations from one geometry, any size, SVG, PNG or JPG. MIT, no dependencies." />
 <link rel="canonical" href="{site}/" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="{name}" />
-<meta property="og:description" content="{count} icons on a 24 grid. Five variants from one geometry. MIT." />
+<meta property="og:description" content="{count} icons on a 24 grid. Five variants and five animations from one geometry. MIT." />
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
 
 <script>
@@ -23,6 +23,7 @@ try {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/swarnil-icons.css" />
+<link rel="stylesheet" href="/swarnil-icons-motion.css" />
 <link rel="stylesheet" href="/assets/site.css" />
 <script src="/assets/site.js" defer></script>
 </head>
@@ -30,60 +31,98 @@ try {
 <body>
 <a class="skip" href="#icons">Skip to the icons</a>
 
+<!-- The sprite, inlined. Every icon in the CHROME of this page — the theme
+     toggle, the category markers, the control icons — is an icon from the set
+     it is documenting, so the page is its own first consumer. Inlining it
+     costs one round trip less than fetching /sprite.svg and removes the flash
+     of un-iconed buttons on load. -->
+{sprite}
+
 <header class="bar">
   <a class="brand" href="/">
     <span class="brand__mark" aria-hidden="true"></span>
     <span class="brand__name">Swarnil</span>
     <span class="brand__sub">Icons</span>
   </a>
+  <label class="search search--bar">
+    <span class="u-sr-only">Search icons</span>
+    <svg class="ic ic-sm search__icon" aria-hidden="true"><use href="#i-search" /></svg>
+    <input class="search__input" type="search" placeholder="Search {count} icons — try 'camera' or 'arrow'" autocomplete="off" data-search />
+    <kbd class="kbd">/</kbd>
+  </label>
+
   <div class="bar__end">
-    <button class="btn btn-quiet" type="button" data-theme-toggle aria-label="Switch theme">
-      <span class="themedot" aria-hidden="true"></span><span data-theme-label>Light</span>
+    <button class="iconbtn" type="button" data-theme-toggle aria-label="Switch theme">
+      <svg class="ic ic-md" aria-hidden="true"><use href="#i-moon" data-theme-icon /></svg>
     </button>
-    <a class="btn btn-quiet" href="https://github.com/imswarnil/swarnil-icons" rel="noopener">GitHub</a>
+    <a class="iconbtn" href="https://github.com/imswarnil/swarnil-icons" rel="noopener" aria-label="This set on GitHub">
+      <svg class="ic ic-md" aria-hidden="true"><use href="#i-code" /></svg>
+    </a>
   </div>
 </header>
 
 <main>
   <section class="hero">
-    <p class="kicker">MIT · {count} icons · {catcount} categories · 24 grid</p>
-    <h1 class="hero__title">Icons that know<br />what they are for.</h1>
-    <p class="hero__lead">Drawn from scratch on a 24&nbsp;grid — nothing traced, nothing re-licensed. Five variants generated from one geometry, so <code class="code">bold</code> can never drift away from <code class="code">line</code>. Take any icon at any size as SVG, PNG or JPG.</p>
+    <div class="hero__copy">
+      <p class="kicker">
+        <svg class="ic ic-sm ic-inline ic-primary" aria-hidden="true"><use href="#i-record" /></svg>
+        MIT · {count} icons · {catcount} categories · 24 grid
+      </p>
+      <h1 class="hero__title">Icons that know<br />what they are for.</h1>
+      <p class="hero__lead">Drawn from scratch on a 24&nbsp;grid — nothing traced, nothing re-licensed. Five weights and five animations generated from one geometry, so <code class="code">bold</code> can never drift away from <code class="code">line</code>. Take any icon at any size, in any colour, as SVG, PNG or JPG.</p>
+      <div class="hero__cta">
+        <a class="btn btn-primary" href="#icons">
+          <svg class="ic ic-sm" aria-hidden="true"><use href="#i-search" /></svg>
+          Browse the set
+        </a>
+        <a class="btn btn-outline" href="https://github.com/imswarnil/swarnil-icons" rel="noopener">
+          <svg class="ic ic-sm" aria-hidden="true"><use href="#i-star" /></svg>
+          Star on GitHub
+        </a>
+      </div>
+    </div>
+
+    <!-- The showcase draws itself on a loop: the motion layer running live
+         rather than a paragraph describing it. aria-hidden because it says
+         nothing the heading has not already said. -->
+    <div class="showcase" data-showcase aria-hidden="true"></div>
   </section>
 
   <div class="layout">
-    <nav class="sidebar" data-catnav aria-label="Categories"></nav>
+    <nav class="sidebar" aria-label="Filters and display">
+      <div class="rail" data-catnav></div>
+
+      <div class="rail">
+        <p class="rail__head">Weight <span class="rail__now" data-now="variant"></span></p>
+        <!-- Every toggle in this rail renders a REAL icon in the state it
+             selects, so each control shows you its answer instead of naming
+             it — the weight buttons are drawn at their weight, the motion
+             buttons play their animation. -->
+        <div class="opts" role="group" aria-label="Weight" data-optgroup="variant"></div>
+      </div>
+
+      <div class="rail">
+        <p class="rail__head">Size <span class="rail__now" data-now="psize"></span></p>
+        <div class="opts opts--size" role="group" aria-label="Preview size" data-optgroup="psize"></div>
+      </div>
+
+      <div class="rail">
+        <p class="rail__head">Colour <span class="rail__now" data-now="colormode"></span></p>
+        <div class="opts" role="group" aria-label="Colour" data-optgroup="colormode"></div>
+      </div>
+
+      <div class="rail">
+        <p class="rail__head">Motion <span class="rail__now" data-now="motion"></span></p>
+        <div class="opts" role="group" aria-label="Animation" data-optgroup="motion"></div>
+        <div class="modes" role="group" aria-label="Play mode" data-optgroup="mode"></div>
+        <p class="rail__note" data-motion-note hidden>Draw needs a stroke to draw, so it does nothing on the solid weight.</p>
+      </div>
+    </nav>
 
     <div class="layout__main">
       <div class="tools">
-        <label class="search">
-          <span class="u-sr-only">Search icons</span>
-          <input class="search__input" type="search" placeholder="Search {count} icons — try 'camera' or 'arrow'" autocomplete="off" data-search />
-          <kbd class="kbd">/</kbd>
-        </label>
-
-        <div class="cluster" role="group" aria-label="Variant">
-          <button class="chip" type="button" data-variant="thin" aria-pressed="false">thin</button>
-          <button class="chip" type="button" data-variant="line" aria-pressed="true">line</button>
-          <button class="chip" type="button" data-variant="bold" aria-pressed="false">bold</button>
-          <button class="chip" type="button" data-variant="solid" aria-pressed="false">solid</button>
-          <button class="chip" type="button" data-variant="duo" aria-pressed="false">duo</button>
-        </div>
-
-        <div class="cluster" role="group" aria-label="Preview size">
-          <button class="chip" type="button" data-psize="sm" aria-pressed="false">sm</button>
-          <button class="chip" type="button" data-psize="md" aria-pressed="true">md</button>
-          <button class="chip" type="button" data-psize="lg" aria-pressed="false">lg</button>
-          <button class="chip" type="button" data-psize="xl" aria-pressed="false">xl</button>
-        </div>
-
-        <div class="cluster" role="group" aria-label="Colour">
-          <button class="chip" type="button" data-colormode="mono" aria-pressed="true">mono</button>
-          <button class="chip" type="button" data-colormode="color" aria-pressed="false">colour</button>
-        </div>
+        <p class="count" data-count aria-live="polite"></p>
       </div>
-
-      <p class="count" data-count aria-live="polite"></p>
 
       <div class="sections" id="icons" data-sections></div>
 
@@ -95,7 +134,9 @@ try {
 <!-- The export panel. Opens on click; Escape closes it. -->
 <dialog class="panel" data-panel>
   <form method="dialog" class="panel__close-form">
-    <button class="btn btn-quiet panel__close" aria-label="Close">Close</button>
+    <button class="iconbtn" aria-label="Close">
+      <svg class="ic ic-md" aria-hidden="true"><use href="#i-x" /></svg>
+    </button>
   </form>
 
   <div class="panel__stage">
@@ -113,6 +154,7 @@ try {
     <output class="panel__size" data-size-out>24 px</output>
   </div>
 
+  <p class="field__label">Weight</p>
   <div class="cluster" role="group" aria-label="Variant">
     <button class="chip" type="button" data-pvariant="thin">thin</button>
     <button class="chip" type="button" data-pvariant="line" aria-pressed="true">line</button>
@@ -121,14 +163,38 @@ try {
     <button class="chip" type="button" data-pvariant="duo">duo</button>
   </div>
 
+  <!-- The colour row. These are the tokens the package actually ships
+       (.ic-primary, .ic-success, …), not a swatch box invented for the site,
+       so the colour you export is the colour the class gives you. -->
+  <p class="field__label">Colour</p>
+  <div class="cluster cluster--swatches" role="group" aria-label="Colour">
+    <button class="swatch" type="button" data-pcolor="ink" aria-pressed="true"><span class="swatch__dot"></span>Ink</button>
+    <button class="swatch" type="button" data-pcolor="primary" aria-pressed="false"><span class="swatch__dot"></span>Primary</button>
+    <button class="swatch" type="button" data-pcolor="muted" aria-pressed="false"><span class="swatch__dot"></span>Muted</button>
+    <button class="swatch" type="button" data-pcolor="success" aria-pressed="false"><span class="swatch__dot"></span>Success</button>
+    <button class="swatch" type="button" data-pcolor="info" aria-pressed="false"><span class="swatch__dot"></span>Info</button>
+    <button class="swatch" type="button" data-pcolor="warning" aria-pressed="false"><span class="swatch__dot"></span>Warning</button>
+    <button class="swatch" type="button" data-pcolor="danger" aria-pressed="false"><span class="swatch__dot"></span>Danger</button>
+    <label class="swatch swatch--custom" title="Any other colour">
+      <input class="swatch__input" type="color" value="#e2593a" data-pcolor-custom />
+      <span class="u-sr-only">Custom colour</span>Custom
+    </label>
+  </div>
+
+  <p class="field__label">Motion</p>
+  <div class="cluster" role="group" aria-label="Animation" data-optgroup="pmotion"></div>
+  <div class="cluster" role="group" aria-label="Play mode" data-optgroup="pmode"></div>
+
   <p class="panel__note" data-panel-note hidden>This icon has no solid variant — its paths are open, and a filled open path is a blob rather than an icon. A solid needs its own declared geometry.</p>
 
   <div class="panel__grabs">
-    <button class="btn btn-primary" type="button" data-dl="svg">SVG</button>
+    <button class="btn btn-primary" type="button" data-dl="svg">
+      <svg class="ic ic-sm" aria-hidden="true"><use href="#i-download" /></svg>SVG</button>
     <button class="btn btn-outline" type="button" data-dl="png">PNG</button>
     <button class="btn btn-outline" type="button" data-dl="jpg">JPG</button>
     <button class="btn btn-outline" type="button" data-copy-svg>Copy SVG</button>
     <button class="btn btn-outline" type="button" data-copy-use>Copy &lt;use&gt;</button>
+    <button class="btn btn-outline" type="button" data-copy-class>Copy class</button>
   </div>
 
   <pre class="panel__code"><code data-panel-code></code></pre>

@@ -124,7 +124,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .brand__name { font-family: var(--font-display); font-weight: 600; font-size: 1.125rem; letter-spacing: -.02em; }
 .brand__sub { font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-faint); }
 .bar__end { margin-left: auto; display: flex; gap: .5rem; }
-.themedot { width: .5rem; height: .5rem; border-radius: var(--radius-full); background: currentColor; }
+.iconbtn {
+	display: inline-flex; align-items: center; justify-content: center;
+	inline-size: 2.25rem; block-size: 2.25rem;
+	border: 1px solid transparent; border-radius: var(--radius-md);
+	color: var(--fg-muted); text-decoration: none;
+	transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.iconbtn:hover { color: var(--fg-default); background: var(--bg-muted); border-color: var(--line-subtle); }
 
 /* ── Buttons + chips ──────────────────────────────────────────────────────── */
 
@@ -160,6 +168,67 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 	font-weight: 600;
 }
 
+/* ── Colour swatches ────────────────────────────────────────────────────────
+   Each dot reads the PACKAGE's own token (--ic-*, defined by
+   swarnil-icons.css, which this page loads) rather than a copy kept here. So
+   the swatch cannot show one colour while the export writes another, and if
+   the design system repoints --accent the picker moves with it. */
+
+.cluster--swatches { margin-top: .75rem; }
+
+.swatch {
+	display: inline-flex; align-items: center; gap: .375rem;
+	height: 1.875rem; padding-inline: .5rem .75rem;
+	border: 1px solid var(--line-default); border-radius: var(--radius-full);
+	font-size: .8125rem; color: var(--fg-muted);
+	transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.swatch:hover { color: var(--fg-default); border-color: var(--line-strong); }
+
+.swatch[aria-pressed='true'] {
+	border-color: var(--accent);
+	color: var(--fg-default);
+	font-weight: 600;
+}
+
+.swatch__dot {
+	inline-size: .75rem; block-size: .75rem; flex: none;
+	border-radius: var(--radius-full);
+	background: var(--swatch, var(--ic-ink));
+	/* A ring, because ink-on-dark and ink-on-light both vanish into the
+	   surface they sit on without one. */
+	box-shadow: inset 0 0 0 1px oklch(50% 0 0 / 0.25);
+}
+
+.swatch[data-pcolor='ink']     { --swatch: var(--ic-ink); }
+.swatch[data-pcolor='primary'] { --swatch: var(--ic-primary); }
+.swatch[data-pcolor='muted']   { --swatch: var(--ic-muted); }
+.swatch[data-pcolor='success'] { --swatch: var(--ic-success); }
+.swatch[data-pcolor='info']    { --swatch: var(--ic-info); }
+.swatch[data-pcolor='warning'] { --swatch: var(--ic-warning); }
+.swatch[data-pcolor='danger']  { --swatch: var(--ic-danger); }
+
+/* The custom picker is a native colour input dressed as one more dot, so the
+   row reads as one control rather than as seven buttons and a form field. */
+.swatch--custom { cursor: pointer; }
+
+.swatch__input {
+	inline-size: .75rem; block-size: .75rem; flex: none;
+	padding: 0; border: 0; background: none; cursor: pointer;
+	border-radius: var(--radius-full);
+}
+
+.swatch__input::-webkit-color-swatch-wrapper { padding: 0; }
+.swatch__input::-webkit-color-swatch {
+	border: 1px solid oklch(50% 0 0 / 0.25); border-radius: var(--radius-full);
+}
+.swatch__input::-moz-color-swatch {
+	border: 1px solid oklch(50% 0 0 / 0.25); border-radius: var(--radius-full);
+}
+
+.swatch--custom.is-on { border-color: var(--accent); color: var(--fg-default); font-weight: 600; }
+
 /* ── Hero + tools ─────────────────────────────────────────────────────────── */
 
 /* Full width — the icon grid is the content, and it should use whatever
@@ -168,11 +237,23 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    below, so prose doesn't stretch edge to edge on a wide monitor. */
 main { padding-inline: var(--gutter); }
 
-.hero { padding-block: 4rem 2.5rem; max-width: 46rem; }
+/* Copy on the left, the motion layer running on the right. The showcase is
+   the product demonstrating itself, which is worth more than a third
+   paragraph claiming the animations are good. */
+.hero {
+	display: grid; grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center; gap: 3rem;
+	padding-block: 4rem 2.5rem;
+}
+
+/* The prose keeps a reading-width cap of its own; the hero column is free to
+   be wider than that on a large monitor without the lead turning into a
+   single long line. */
+.hero__copy { max-width: 46rem; }
 
 /* ── Layout: a sticky category rail beside the grid ──────────────────────── */
 
-.layout { display: grid; grid-template-columns: 13rem 1fr; align-items: start; gap: 2.5rem; }
+.layout { display: grid; grid-template-columns: 13.5rem 1fr; align-items: start; gap: 2.5rem; }
 
 .sidebar {
 	position: sticky; top: calc(3.75rem + 1.5rem);
@@ -188,8 +269,22 @@ main { padding-inline: var(--gutter); }
 	padding: 1rem .75rem 1.5rem;
 }
 
-.nav__section { padding-block: .75rem; border-bottom: 1px solid var(--line-subtle); }
-.nav__section:last-child { border-bottom: 0; }
+/* Each rail is one question: which category, which weight, which size, which
+   colour, which motion. They are separated by a rule rather than by space
+   because five stacked groups with no divisions read as one long list. */
+.rail { padding-block: .875rem; border-bottom: 1px solid var(--line-subtle); }
+.rail:first-child { padding-top: 0; }
+.rail:last-child { border-bottom: 0; padding-bottom: 0; }
+
+.rail__head {
+	font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+	color: var(--fg-faint); padding: 0 .625rem .5rem;
+}
+
+.rail__note {
+	font-size: .75rem; color: var(--fg-faint); padding: .5rem .625rem 0;
+	border-left: 2px solid var(--line-default); margin: .5rem .625rem 0; padding-left: .5rem;
+}
 
 .nav__group {
 	font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
@@ -197,7 +292,7 @@ main { padding-inline: var(--gutter); }
 }
 
 .nav__item {
-	display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+	display: flex; align-items: center; gap: .5rem;
 	width: 100%; padding: .5rem .625rem; border-radius: var(--radius-md);
 	font-size: .875rem; color: var(--fg-muted); text-align: left;
 	transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease);
@@ -210,6 +305,9 @@ main { padding-inline: var(--gutter); }
 }
 
 .nav__item--child { padding-inline-start: 1.25rem; }
+.nav__label { flex: 1; }
+.nav__item .ic { color: var(--fg-faint); }
+.nav__item:hover .ic, .nav__item[aria-pressed='true'] .ic { color: inherit; }
 
 .nav__count {
 	font-family: var(--font-slate); font-size: .6875rem; color: var(--fg-faint);
@@ -224,9 +322,12 @@ main { padding-inline: var(--gutter); }
 		position: static; max-height: none; overflow: visible;
 		display: flex; flex-wrap: wrap; gap: .375rem; padding-bottom: 0;
 	}
-	.nav__section { display: contents; }
+	.rail { width: 100%; padding-block: .625rem; }
+	.rail:first-child { display: flex; flex-wrap: wrap; gap: .375rem; }
+	.rail__head { width: 100%; padding-inline: 0; }
 	.nav__group { width: 100%; padding-block: .5rem .125rem; }
 	.nav__item { width: auto; border: 1px solid var(--line-default); border-radius: var(--radius-full); }
+	.nav__count { display: none; }
 }
 
 /* ── Grouped sections in the grid ─────────────────────────────────────────── */
@@ -234,7 +335,7 @@ main { padding-inline: var(--gutter); }
 .section + .section { margin-top: 2rem; }
 
 .section__title {
-	display: flex; align-items: baseline; gap: .5rem;
+	display: flex; align-items: center; gap: .5rem;
 	font-family: var(--font-display); font-weight: 600; font-size: 1.0625rem;
 	letter-spacing: -.01em; margin-bottom: .875rem;
 }
@@ -253,13 +354,49 @@ main { padding-inline: var(--gutter); }
 }
 
 .hero__lead { font-size: 1.125rem; color: var(--fg-muted); margin-top: 1.25rem; text-wrap: pretty; }
+.hero__cta { display: flex; flex-wrap: wrap; gap: .625rem; margin-top: 1.75rem; }
+.kicker .ic { color: var(--accent); }
 
-.tools { display: flex; flex-direction: column; gap: 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line-subtle); }
+/* ── The showcase ─────────────────────────────────────────────────────────
+   Seven icons drawing themselves on a staggered loop. It sits in a soft panel
+   rather than on the page ground so the strokes have something to be drawn
+   ON — animation against bare canvas reads as a glitch. */
 
-.search { position: relative; display: flex; align-items: center; max-width: 28rem; }
+.showcase {
+	display: grid; grid-template-columns: repeat(4, 4.25rem); gap: .5rem;
+	padding: 1.25rem;
+	background: var(--bg-muted);
+	border: 1px solid var(--line-subtle);
+	border-radius: var(--radius-xl);
+}
+
+.showcase__cell {
+	display: grid; place-items: center;
+	aspect-ratio: 1;
+	border-radius: var(--radius-lg);
+	background: var(--bg-canvas);
+	color: var(--accent);
+}
+
+/* The last cell of an odd row would sit alone; the 7th spans the gap so the
+   block stays a rectangle. */
+.showcase__cell:last-child { grid-column: span 2; }
+
+.tools {
+	display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+	padding-bottom: .75rem; border-bottom: 1px solid var(--line-subtle);
+}
+
+.search { position: relative; display: flex; align-items: center; flex: 1; min-width: 8rem; max-width: 28rem; }
+
+/* In the bar the field is shorter and quieter — it is a utility sitting
+   between the wordmark and the two icon buttons, not the page's main event. */
+.search--bar { margin-inline: auto; }
+.search--bar .search__input { height: 2.25rem; font-size: .875rem; border-radius: var(--radius-md); }
+.search__icon { position: absolute; left: .75rem; color: var(--fg-faint); pointer-events: none; }
 
 .search__input {
-	width: 100%; height: 2.75rem; padding-inline: 1rem 3rem;
+	width: 100%; height: 2.75rem; padding-inline: 2.375rem 3rem;
 	font: inherit; font-size: .9375rem; color: inherit;
 	background: var(--bg-sunken); border: 1px solid var(--line-default);
 	border-radius: var(--radius-lg);
@@ -267,7 +404,7 @@ main { padding-inline: var(--gutter); }
 
 .search .kbd { position: absolute; right: .75rem; pointer-events: none; }
 
-.count { font-size: .8125rem; color: var(--fg-faint); padding-block: 1rem; font-variant-numeric: tabular-nums; }
+.count { font-size: .8125rem; color: var(--fg-faint); font-variant-numeric: tabular-nums; margin-left: auto; }
 
 /* ── The grid ─────────────────────────────────────────────────────────────── */
 
@@ -316,12 +453,31 @@ main { padding-inline: var(--gutter); }
    browsing-only accent, one hue per category, purely for telling sections
    apart at a glance; it never touches the SVG that gets exported. */
 
-.sections[data-colormode='color'] .cell[data-cat='frame']  svg { color: var(--accent); }
-.sections[data-colormode='color'] .cell[data-cat='editor'] svg { color: var(--hue-craft); }
-.sections[data-colormode='color'] .cell[data-cat='media']  svg { color: var(--hue-iris); }
-.sections[data-colormode='color'] .cell[data-cat='social'] svg { color: var(--hue-rose); }
-.sections[data-colormode='color'] .cell[data-cat='status'] svg { color: var(--hue-mint); }
-.sections[data-colormode='color'] .cell[data-cat='ui']     svg { color: var(--hue-azure); }
+/* One hue per category, declared once as --cat and then used for the icon,
+   its tile and its border together — so a section reads as a coloured block
+   rather than as grey boxes with coloured marks in them. The icons themselves
+   switch to their SOLID form in this mode (see cellsFor in site.js), which is
+   what makes it read as filled rather than merely tinted. */
+
+.cell[data-cat='frame']  { --cat: var(--accent); }
+.cell[data-cat='editor'] { --cat: var(--hue-craft); }
+.cell[data-cat='media']  { --cat: var(--hue-iris); }
+.cell[data-cat='social'] { --cat: var(--hue-rose); }
+.cell[data-cat='status'] { --cat: var(--hue-mint); }
+.cell[data-cat='ui']     { --cat: var(--hue-azure); }
+
+.sections[data-colormode='color'] .cell {
+	background: color-mix(in oklab, var(--cat) 9%, transparent);
+	border-color: color-mix(in oklab, var(--cat) 22%, transparent);
+}
+
+.sections[data-colormode='color'] .cell:hover {
+	background: color-mix(in oklab, var(--cat) 16%, transparent);
+	border-color: var(--cat);
+}
+
+.sections[data-colormode='color'] .cell svg { color: var(--cat); }
+.sections[data-colormode='color'] .cell__name { color: color-mix(in oklab, var(--cat) 70%, var(--fg-muted)); }
 
 .empty { padding: 3rem 0 5rem; color: var(--fg-muted); max-width: 34rem; }
 
@@ -387,7 +543,64 @@ main { padding-inline: var(--gutter); }
 .foot__fine { font-size: .875rem; color: var(--fg-faint); margin-top: 1rem; }
 .foot a { color: var(--accent-fg); }
 
+@media (max-width: 62rem) {
+	.hero { grid-template-columns: 1fr; gap: 2rem; }
+	.showcase { grid-template-columns: repeat(7, 1fr); }
+	.showcase__cell:last-child { grid-column: auto; }
+}
+
 @media (max-width: 40rem) {
 	.grid { grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)); }
 	.hero { padding-block: 2.5rem 1.5rem; }
+	.showcase { grid-template-columns: repeat(4, 1fr); }
+	.showcase__cell:last-child { grid-column: span 2; }
 }
+
+/* ── Option toggles ───────────────────────────────────────────────────────
+   A row of small toggles, each holding a real icon rendered in the state that
+   button selects — drawn at that weight, at that size, filled in that colour,
+   playing that animation. They carry no captions: the rail heading names the
+   current choice, so the word appears once instead of five times under five
+   samples that are already showing you the answer. */
+
+.opts { display: flex; flex-wrap: wrap; gap: .25rem; padding-inline: .25rem; }
+
+.opt {
+	display: inline-flex; align-items: center; justify-content: center; gap: .375rem;
+	inline-size: 2.125rem; block-size: 2.125rem; padding: 0;
+	border: 1px solid var(--line-default); border-radius: var(--radius-md);
+	color: var(--fg-muted);
+	transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.opt:hover { color: var(--fg-default); background: var(--bg-surface); border-color: var(--line-strong); }
+
+.opt[aria-pressed='true'] {
+	background: var(--accent-soft); border-color: var(--accent); color: var(--accent-fg);
+}
+
+/* A fixed box, so a button does not resize as the sample inside it changes
+   size or an animation scales it past its own bounds. */
+.opt__art {
+	display: grid; place-items: center;
+	inline-size: 1.625rem; block-size: 1.625rem; overflow: hidden;
+	color: var(--fg-default);
+}
+
+.opt[aria-pressed='true'] .opt__art { color: var(--accent); }
+.opt__art .is-tinted { color: var(--hue-azure); display: grid; place-items: center; }
+.opt__label { font-size: .75rem; }
+
+/* The groups that keep a written label — the play modes, and the panel's
+   copies — need room for it, so they stop being squares. */
+.opt:has(.opt__label) { inline-size: auto; padding-inline: .5rem .625rem; }
+
+.modes { display: flex; flex-wrap: wrap; gap: .25rem; padding-inline: .25rem; margin-top: .375rem; }
+
+.rail__now {
+	text-transform: none; letter-spacing: 0; font-weight: 500;
+	color: var(--accent-fg); margin-left: .125rem;
+}
+
+/* In the panel the same generated groups sit in a .cluster and flow as a row. */
+.cluster[data-optgroup] { display: flex; flex-wrap: wrap; gap: .375rem; }

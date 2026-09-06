@@ -42,17 +42,23 @@ def main():
     # the kicker line ("N icons · N categories").
     catcount = len({i['category'] for i in icons})
 
+    # The page's own chrome is built out of the set, so the sprite is inlined
+    # rather than fetched — one request fewer, and no moment on load where the
+    # buttons have no icons in them.
+    sprite = (DIST / 'sprite.svg').read_text().strip()
+
     page = (shell
             .replace('{name}', NAME)
             .replace('{site}', SITE)
             .replace('{count}', str(len(icons)))
             .replace('{catcount}', str(catcount))
+            .replace('{sprite}', sprite)
             .replace('{data}', json.dumps(icons, separators=(',', ':'))))
 
     (OUT / 'index.html').write_text(page)
 
     shutil.copytree(DOCS / 'assets', OUT / 'assets')
-    for f in ('sprite.svg', 'icons.json', 'swarnil-icons.css'):
+    for f in ('sprite.svg', 'icons.json', 'swarnil-icons.css', 'swarnil-icons-motion.css'):
         shutil.copy(DIST / f, OUT / f)
     shutil.copytree(DIST / 'svg', OUT / 'svg')
 
