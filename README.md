@@ -117,10 +117,11 @@ and CSS cannot reach into its shadow content. A sprite still gets the ink
 stroke, the primary marks and the wash, because those ride on inherited
 properties — it just misses the fourth touch.
 
-### Scanline
+### Scanline and TV
 
 ```html
 <svg class="ic ic-xl ic-solid ic-primary ic-scan"><use href="/sprite.svg#i-heart"/></svg>
+<svg class="ic ic-xl ic-solid ic-primary ic-scan ic-tv-loop"><use href="/sprite.svg#i-heart"/></svg>
 ```
 
 The one decorative device that belongs to a set sitting beside a viewfinder and
@@ -128,14 +129,33 @@ a record light: the line a screen already makes. It is a **mask**, not geometry
 — nothing is redrawn, so an icon in this style is still the same icon, which is
 the promise the five weights make too.
 
-The stops are percentages, and that is the whole trick. Percentages in a
-repeating gradient resolve against the element's own height, so it is always
-**eight lines** whether the icon renders at 16px or 160px; a fixed pixel pitch
-would give eight lines at one size and a grey smear at another.
+It is built as a **one-period gradient tiled by `mask-size`**, not a repeating
+gradient with percentage stops. That is what makes it move: a tile has a real
+height, so the pattern can be scrolled by animating `mask-position` exactly one
+pitch and it loops seamlessly. A percentage-stop gradient has nothing to move.
 
-Being a mask it cuts strokes as well as fills, which reads as deliberate at
-24px and up and as a broken icon below it. Pair it with a fill and `ic-lg` or
-larger — it is a display style, not a UI one.
+```css
+--ic-scan-pitch: calc(var(--ic-size, 1.5rem) / 14);   /* line spacing */
+--ic-scan-duty: 66%;                                  /* how much survives */
+--ic-scan-dur: 1.8s;                                  /* one full roll */
+```
+
+The pitch comes from the icon's own size, so the line count holds steady as it
+scales rather than smearing at 16px and fencing at 160px. The duty cycle keeps
+most of the image and takes a thin sliver out — which is what a CRT actually
+looks like; a 50/50 split reads as a barcode.
+
+`ic-tv-loop` scrolls that mask and adds a flicker on a `steps()` timeline, so
+the dips are abrupt like a real dropout and rare — the tube sits perfectly
+steady for nine tenths of its cycle. `ic-tv-in` and `ic-tv-out` are the power
+stroke: the picture blooming out of a scan line, or collapsing back into one.
+The roll is a no-op without `ic-scan`, so `ic-tv-loop` is safe anywhere and
+simply becomes the flicker alone.
+
+Being a mask it cuts strokes as well as fills, so pair it with a fill and
+`ic-lg` or larger. It is a display style, not a UI one. `ic-tv-*` uses the
+animation shorthand, so it replaces another motion class rather than stacking
+with it — pick one.
 
 ### The values track the design system
 
@@ -191,8 +211,9 @@ stylesheet, so a project that wants none of it pays nothing:
 | `spin` | rotation | | |
 | `pulse` | a slow breath, for something waiting | | |
 | `glitch` | a signal dropping out and recovering | | |
+| `tv` | a tube switching on, off, or humming | | |
 
-So `ic-draw-in`, `ic-pop-loop`, `ic-fade-out` — eighteen classes.
+So `ic-draw-in`, `ic-pop-loop`, `ic-fade-out` — twenty-one classes.
 
 `glitch` is the other half of the scanline's idea, and its restraint is the
 design: the loop sits perfectly still for nine tenths of its cycle and breaks

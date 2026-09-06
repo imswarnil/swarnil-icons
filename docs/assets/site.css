@@ -454,7 +454,7 @@ main { padding-inline: var(--gutter); }
 }
 
 .cell:hover .cell__name { color: var(--fg-muted); }
-.cell svg { width: 1.5rem; height: 1.5rem; }
+.cell svg { width: 1.5rem; height: 1.5rem; --ic-size: 1.5rem; }
 
 /* ── Preview size ─────────────────────────────────────────────────────────
    Sizes the icon drawn inside each cell without touching the SVG that gets
@@ -462,13 +462,13 @@ main { padding-inline: var(--gutter); }
    only changes what browsing looks like. */
 
 .sections[data-size='sm'] .grid { grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr)); }
-.sections[data-size='sm'] .cell svg { width: 1.25rem; height: 1.25rem; }
+.sections[data-size='sm'] .cell svg { width: 1.25rem; height: 1.25rem; --ic-size: 1.25rem; }
 
 .sections[data-size='lg'] .grid { grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr)); }
-.sections[data-size='lg'] .cell svg { width: 2rem; height: 2rem; }
+.sections[data-size='lg'] .cell svg { width: 2rem; height: 2rem; --ic-size: 2rem; }
 
 .sections[data-size='xl'] .grid { grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); }
-.sections[data-size='xl'] .cell svg { width: 3rem; height: 3rem; }
+.sections[data-size='xl'] .cell svg { width: 3rem; height: 3rem; --ic-size: 3rem; }
 
 /* ── Colour mode ──────────────────────────────────────────────────────────
    Off by default — the shipped icons are currentColor, full stop. This is a

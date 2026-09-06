@@ -242,14 +242,15 @@
 			art: function (v) { return svgMarkup(DEMO, 'line', { sm: 13, md: 16, lg: 20, xl: 26 }[v]); }
 		},
 		colormode: {
-			values: ['mono', 'multi', 'fill', 'scan'],
-			label: { mono: 'Mono', multi: 'Multi', fill: 'Fill', scan: 'Scanline' },
+			values: ['mono', 'multi', 'fill', 'scan', 'tv'],
+			label: { mono: 'Mono', multi: 'Multi', fill: 'Fill', scan: 'Scanline', tv: 'TV' },
 			// Each sample is the real class doing the real thing, so a toggle
 			// cannot promise one look and deliver another.
 			art: function (v) {
 				if (v === 'multi') return svgMarkup(DEMO, 'line', 20, 'ic-multi ic-multi-fill');
 				if (v === 'fill') return svgMarkup(DEMO, 'solid', 20, 'ic-primary');
 				if (v === 'scan') return svgMarkup(DEMO, 'solid', 20, 'ic-primary ic-scan');
+				if (v === 'tv') return svgMarkup(DEMO, 'solid', 20, 'ic-primary ic-scan ic-tv-loop');
 				return svgMarkup(DEMO, 'line', 20);
 			}
 		},
@@ -342,9 +343,11 @@
 	var sections = $('[data-sections]');
 
 	function cellsFor(rows) {
-		var mcls = motionClass(state.motion, state.mode);
+		// TV drives its own animation, so a motion selection would fight it.
+		var mcls = state.color === 'tv' ? '' : motionClass(state.motion, state.mode);
 		var multi = state.color === 'multi';
-		var scanned = state.color === 'scan';
+		var tv = state.color === 'tv';
+		var scanned = state.color === 'scan' || tv;
 		var filled = state.color === 'fill' || scanned;
 		return rows.map(function (i, n) {
 			var v = state.variant;
@@ -373,6 +376,10 @@
 			// bare stroke it just dashes the line. `filled` is already true for
 			// this mode, so the colour class is on; only the mask is left.
 			if (scanned) cls.push('ic-scan');
+			// TV brings its own animation — the scanline scroll and the
+			// flicker — using the animation shorthand, so a motion class here
+			// too would simply cancel one of them. The rail says so.
+			if (tv) cls.push('ic-tv-loop');
 			// A tiny per-cell delay so a grid of 61 icons arrives as a sweep
 			// rather than as one flash. Capped, or the last cell waits a
 			// second and a half to appear.
@@ -414,7 +421,11 @@
 		$('[data-count]').textContent = rows.length + (rows.length === 1 ? ' icon' : ' icons');
 		$('[data-empty]').hidden = rows.length > 0;
 		var note = $('[data-motion-note]');
-		if (state.color === 'scan') {
+		if (state.color === 'tv') {
+			note.textContent = 'TV rolls the scanline and flickers on its own, so it ' +
+				'overrides the motion below. Both want the large sizes.';
+			note.hidden = false;
+		} else if (state.color === 'scan') {
 			note.textContent = 'Scanline is a mask over the filled form — it wants ' +
 				'the large sizes. At sm it reads as a broken icon rather than a style.';
 			note.hidden = false;

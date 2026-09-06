@@ -385,21 +385,36 @@ CSS = """/* ====================================================================
    screen already makes: a raster line.
 
    It is a MASK, not geometry. Nothing is redrawn, so an icon in this style is
-   the same icon — which is the same promise the five weights make.
+   the same icon — the same promise the five weights make.
 
-   The stops are percentages, and that is the whole trick: percentages in a
-   repeating gradient resolve against the element's own height, so this is
-   always EIGHT lines whether the icon is rendered at 16px or 160px. A fixed
-   pixel pitch would give you eight lines at one size and a grey smear at
-   another.
+   ── PITCH ────────────────────────────────────────────────────────────────
+   Built as a ONE-PERIOD gradient tiled by mask-size, rather than a repeating
+   gradient with percentage stops. Two reasons, and the second is the one that
+   matters: a tile has a real height, so the pattern can be SCROLLED by
+   animating mask-position exactly one pitch, which loops seamlessly. A
+   percentage-stop gradient has nothing to move.
 
-   Being a mask, it cuts the strokes as well as the fills, which reads as
-   deliberate at 24px and up and as broken below it. It is a display style —
-   pair it with .ic-lg or larger, or with a fill. */
+   The pitch is derived from the icon's own size, so the line count holds
+   steady as the icon scales instead of turning into a smear at 16px and a
+   fence at 160px. Override --ic-scan-pitch for a coarser or finer screen.
+
+   The duty cycle keeps most of the image and takes a thin sliver out, which
+   is what a CRT actually looks like — the old 50/50 version read as a barcode
+   rather than as a screen.
+
+   Being a mask it cuts strokes as well as fills, so pair it with a fill and
+   ic-lg or larger. It is a display style, not a UI one. */
 
 .ic-scan {
-	-webkit-mask-image: repeating-linear-gradient(to bottom, #000 0 6.25%, transparent 6.25% 12.5%);
-	        mask-image: repeating-linear-gradient(to bottom, #000 0 6.25%, transparent 6.25% 12.5%);
+	--ic-scan-pitch: calc(var(--ic-size, 1.5rem) / 14);
+	--ic-scan-duty: 66%;
+
+	-webkit-mask-image: linear-gradient(to bottom, #000 0 var(--ic-scan-duty), transparent var(--ic-scan-duty) 100%);
+	        mask-image: linear-gradient(to bottom, #000 0 var(--ic-scan-duty), transparent var(--ic-scan-duty) 100%);
+	-webkit-mask-size: 100% var(--ic-scan-pitch);
+	        mask-size: 100% var(--ic-scan-pitch);
+	-webkit-mask-repeat: repeat;
+	        mask-repeat: repeat;
 }
 
 /* ── Two-tone ─────────────────────────────────────────────────────────────
@@ -445,6 +460,8 @@ MOTION = """/* =================================================================
      spin    rotation
      pulse   a slow breath, for something that is waiting
      glitch  a signal dropping out for two frames and recovering
+     tv      a tube switching on, switching off, or humming — the loop
+             scrolls the .ic-scan mask, so the two are built to pair
 
    times three:  -in    plays once and ends VISIBLE
                  -out   plays once and ends HIDDEN
@@ -613,12 +630,73 @@ MOTION = """/* =================================================================
 	100% { opacity: 0; transform: translateX(-0.12em); filter: drop-shadow(0.1em 0 var(--ic-primary)); }
 }
 
+/* The clip-path steps are the dropout: for one frame only a band of the icon
+   survives, which is what a torn signal actually looks like. Displacement
+   alone reads as a wobble; losing part of the picture reads as a glitch. */
 @keyframes ic-glitch-loop {
-	0%, 86%   { transform: none; filter: none; }
-	88%       { transform: translateX(-0.07em); filter: drop-shadow(0.07em 0 var(--ic-primary)); }
-	90%       { transform: translateX(0.06em); filter: drop-shadow(-0.06em 0 var(--ic-primary)); }
-	92%       { transform: translateX(-0.03em); filter: drop-shadow(0.03em 0 var(--ic-primary)); }
-	94%, 100% { transform: none; filter: none; }
+	0%, 86%   { transform: none; filter: none; clip-path: inset(0); }
+	87%       { transform: translateX(-0.08em); filter: drop-shadow(0.08em 0 var(--ic-primary)); clip-path: inset(26% 0 42% 0); }
+	89%       { transform: translateX(0.07em); filter: drop-shadow(-0.07em 0 var(--ic-primary)); clip-path: inset(0); }
+	91%       { transform: translateX(-0.04em); filter: drop-shadow(0.04em 0 var(--ic-primary)); clip-path: inset(62% 0 8% 0); }
+	93%       { transform: translateX(0.02em); filter: none; clip-path: inset(0); }
+	95%, 100% { transform: none; filter: none; clip-path: inset(0); }
+}
+
+/* ── TV ───────────────────────────────────────────────────────────────────
+   A cathode tube switching on, switching off, and sitting there humming. The
+   other half of the scanline's idea: if the mask makes an icon look like a
+   screen, this is the screen behaving like one.
+
+   `loop` runs TWO animations at once. One scrolls the scanline mask by exactly
+   one pitch — which is why .ic-scan is built as a tiled one-period gradient
+   rather than a repeating one, and why the loop is seamless rather than
+   snapping back. The other is the flicker, on a steps() timeline so the dips
+   are abrupt the way a real dropout is, and rare: the tube sits perfectly
+   steady for nine tenths of its cycle. Constant flicker is a fault, not a
+   style.
+
+   The roll is a no-op without .ic-scan — there is no mask to move — so
+   .ic-tv-loop is safe on any icon and simply becomes the flicker alone.
+
+   `in` and `out` are the power stroke: the picture collapsing to a scan line
+   and away, or blooming out of one.
+
+   NOTE these use the animation SHORTHAND, so combining .ic-tv-loop with
+   another motion class means the later rule wins rather than both playing.
+   Pick one. */
+
+.ic-tv-in  { animation: ic-tv-in var(--ic-dur, 520ms) cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.ic-tv-out { animation: ic-tv-out var(--ic-dur, 420ms) cubic-bezier(0.6, 0, 0.9, 0.4) both; }
+
+.ic-tv-loop {
+	animation: ic-tv-roll var(--ic-scan-dur, 1.8s) linear infinite,
+	           ic-tv-flicker var(--ic-dur, 5s) steps(1, end) infinite;
+}
+
+/* One pitch exactly — any other distance and the pattern jumps at the wrap. */
+@keyframes ic-tv-roll {
+	from { -webkit-mask-position: 0 0; mask-position: 0 0; }
+	to   { -webkit-mask-position: 0 var(--ic-scan-pitch, 0); mask-position: 0 var(--ic-scan-pitch, 0); }
+}
+
+@keyframes ic-tv-flicker {
+	0%, 90%, 100% { opacity: 1; }
+	91%  { opacity: 0.45; }
+	92%  { opacity: 1; }
+	94%  { opacity: 0.72; }
+	95%  { opacity: 1; }
+}
+
+@keyframes ic-tv-in {
+	0%   { opacity: 0; transform: scaleY(0.02) scaleX(1.35); filter: brightness(2.5); }
+	45%  { opacity: 1; transform: scaleY(0.06) scaleX(1.1); filter: brightness(1.6); }
+	100% { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes ic-tv-out {
+	0%   { opacity: 1; transform: none; filter: none; }
+	55%  { opacity: 1; transform: scaleY(0.05) scaleX(1.15); filter: brightness(1.8); }
+	100% { opacity: 0; transform: scaleY(0.01) scaleX(0.25); filter: brightness(3); }
 }
 
 /* ── Stagger ──────────────────────────────────────────────────────────────
@@ -650,6 +728,7 @@ MOTION = """/* =================================================================
 	.ic-spin-in, .ic-spin-out, .ic-spin-loop,
 	.ic-pulse-in, .ic-pulse-out, .ic-pulse-loop,
 	.ic-glitch-in, .ic-glitch-out, .ic-glitch-loop,
+	.ic-tv-in, .ic-tv-out, .ic-tv-loop,
 	.ic-stagger > * {
 		animation: none !important;
 		stroke-dasharray: none !important;
@@ -657,6 +736,7 @@ MOTION = """/* =================================================================
 		opacity: 1 !important;
 		transform: none !important;
 		filter: none !important;
+		clip-path: none !important;
 	}
 }
 """
