@@ -80,6 +80,7 @@ brand instead:
 | `ic-primary` | the brand accent | `ic-fill-primary` | fill with the accent |
 | `ic-muted` | quieter text | `ic-fill-soft` | fill with a wash of it |
 | `ic-subtle` | quieter still | `ic-fill-current` | fill with the stroke colour |
+| `ic-multi` | three-colour (below) | `ic-multi-fill` | its light-primary wash |
 | `ic-success` `ic-info` | | `ic-fill-none` | back to outline |
 | `ic-warning` `ic-danger` | | | |
 
@@ -89,6 +90,32 @@ are. `ic-solid ic-primary` is therefore a solid icon filled in the brand colour,
 and `ic-fill-soft` is the two-tone case: an ink outline holding a wash of the
 accent. The fill helpers only make sense on icons whose paths are closed — the
 same ones that have a solid variant.
+
+### Multicolour
+
+One more class turns the whole set three-colour — black strokes, the primary on
+the parts that carry meaning, and a light wash of the primary inside closed
+shapes:
+
+```html
+<svg class="ic ic-lg ic-multi ic-multi-fill"><use href="/sprite.svg#i-file"/></svg>
+```
+
+`build.py` emits **one element per subpath**, which is what makes this possible:
+most icons are authored as a single path whose data happens to contain several
+shapes — a page and the fold on its corner, a tray and its lid — and CSS saw one
+child where a reader sees two. Splitting on absolute `M` is lossless (the same
+commands, redistributed), and it leaves 47 of the 61 icons with two or more
+parts to colour.
+
+`ic-multi-fill` is separate because it is the one part that is not universally
+safe: filling an open path floods the area the path merely implies. Pair it with
+a closed icon — the same ones that have a solid variant.
+
+The per-part colour needs **inline** markup; a `<use>` reference has one child
+and CSS cannot reach into its shadow content. A sprite still gets the ink
+stroke, the primary marks and the wash, because those ride on inherited
+properties — it just misses the fourth touch.
 
 ### The values track the design system
 

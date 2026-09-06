@@ -88,6 +88,17 @@ try {
     <div class="showcase" data-showcase aria-hidden="true"></div>
   </section>
 
+  <!-- What the set actually is, in six numbers. Every one of them is a fact
+       the build can confirm, not a marketing adjective. -->
+  <section class="facts">
+    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-box" /></svg><b>{count}</b> icons</div>
+    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-type" /></svg><b>5</b> weights</div>
+    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-activity" /></svg><b>5</b> animations</div>
+    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-crop" /></svg><b>24</b> grid</div>
+    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-minus" /></svg><b>0</b> dependencies</div>
+    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-circle-check" /></svg><b>MIT</b></div>
+  </section>
+
   <div class="layout">
     <nav class="sidebar" aria-label="Filters and display">
       <div class="rail" data-catnav></div>
@@ -129,6 +140,43 @@ try {
       <p class="empty" data-empty hidden>Nothing matches that. Every icon is named for <b>what it is</b>, not what it does — try <code class="code">circle-check</code> rather than <code class="code">success</code>.</p>
     </div>
   </div>
+
+  <section class="use" id="use">
+    <h2 class="use__title">Take it three ways</h2>
+    <p class="use__lead">All three are the same geometry. Pick whichever suits the project — nothing here needs a build step.</p>
+
+    <div class="use__grid">
+      <article class="use__card">
+        <h3 class="use__head"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-box" /></svg> The sprite</h3>
+        <p class="use__note">One request for the whole set, then reference an icon by name. Both files are served from <code class="code">icons.imswarnil.com</code>.</p>
+        <pre class="use__code"><code>&lt;link rel="stylesheet"
+      href="…/swarnil-icons.css"&gt;
+
+&lt;svg class="ic ic-lg"&gt;
+  &lt;use href="…/sprite.svg#i-camera"/&gt;
+&lt;/svg&gt;</code></pre>
+      </article>
+
+      <article class="use__card">
+        <h3 class="use__head"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-download" /></svg> The package</h3>
+        <p class="use__note">The source SVGs, the sprite, the JSON index and both stylesheets.</p>
+        <pre class="use__code"><code>npm i @imswarnil/swarnil-icons
+
+import icons from
+  '@imswarnil/swarnil-icons'
+// …/css   …/motion   …/sprite</code></pre>
+      </article>
+
+      <article class="use__card">
+        <h3 class="use__head"><svg class="ic ic-sm ic-multi" aria-hidden="true"><use href="#i-aperture" /></svg> Colour and motion</h3>
+        <p class="use__note">Colour reads your design system's <code class="code">--accent</code> if you have one, and falls back to ours if you do not.</p>
+        <pre class="use__code"><code>ic-primary              brand colour
+ic-solid ic-primary     filled with it
+ic-multi ic-multi-fill  three colours
+ic-draw-in              draws itself on</code></pre>
+      </article>
+    </div>
+  </section>
 </main>
 
 <!-- The export panel. Opens on click; Escape closes it. -->

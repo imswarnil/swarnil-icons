@@ -50,7 +50,7 @@
 
 	var state = {
 		q: '', cat: '', variant: 'line', size: 'md',
-		color: 'mono', motion: 'off', mode: 'in'
+		color: 'multi', motion: 'off', mode: 'in'
 	};
 	var current = null, size = 24, panelVariant = 'line';
 	var panelMotion = 'off', panelMode = 'in';
@@ -183,14 +183,13 @@
 			art: function (v) { return svgMarkup(DEMO, 'line', { sm: 13, md: 16, lg: 20, xl: 26 }[v]); }
 		},
 		colormode: {
-			values: ['mono', 'color'],
-			label: { mono: 'Mono', color: 'Colour' },
-			// The colour sample is drawn SOLID and tinted, because that is
-			// exactly what the mode does to the grid — a stroked sample would
-			// promise an outline and deliver a fill.
+			values: ['mono', 'multi'],
+			label: { mono: 'Mono', multi: 'Multi' },
+			// The sample is the real .ic-multi class doing the real thing, so
+			// the toggle cannot promise one look and deliver another.
 			art: function (v) {
-				return v === 'color'
-					? '<span class="is-tinted">' + svgMarkup(DEMO, 'solid', 20) + '</span>'
+				return v === 'multi'
+					? svgMarkup(DEMO, 'line', 20, 'ic-multi ic-multi-fill')
 					: svgMarkup(DEMO, 'line', 20);
 			}
 		},
@@ -232,7 +231,9 @@
 	function optButton(group, v, pressed) {
 		var text = optText(group, v);
 		return '<button class="opt" type="button" data-' + group + '="' + v + '"'
-			+ ' aria-pressed="' + pressed + '" title="' + text + '" aria-label="' + text + '">'
+			// aria-label only — no title. A native tooltip would open on top of
+			// the styled one and say the same word twice.
+			+ ' aria-pressed="' + pressed + '" aria-label="' + text + '">'
 			+ '<span class="opt__art">' + OPTS[group].art(v) + '</span>'
 			+ (LABELLED[group] ? '<span class="opt__label">' + text + '</span>' : '')
 			+ '</button>';
@@ -265,27 +266,31 @@
 
 	function cellsFor(rows) {
 		var mcls = motionClass(state.motion, state.mode);
-		var colourful = state.color === 'color';
+		var multi = state.color === 'multi';
 		return rows.map(function (i, n) {
 			var v = state.variant;
 			var canFill = i.variants.indexOf('solid') !== -1;
-			// Colour mode means FILLED with colour, so it draws the solid form
-			// wherever the geometry allows one. The icons that cannot be
-			// filled — the open paths — keep their stroke and take the colour
-			// on that instead, which is the only honest answer: a filled open
-			// path is the blob this set refuses to ship.
-			if (colourful && canFill) v = 'solid';
 			// An icon with no solid falls back to line rather than vanishing —
 			// a hole in the grid would read as a missing icon, not a missing
 			// variant.
 			if (v === 'solid' && !canFill) v = 'line';
+			// Multicolour is added as CLASSES rather than by swapping the
+			// variant, so it composes with whatever weight is selected instead
+			// of overriding it. The wash only goes on icons that enclose an
+			// area; on an open path it would flood the region the path merely
+			// implies.
+			var cls = [mcls];
+			if (multi) {
+				cls.push('ic-multi');
+				if (canFill && v !== 'solid') cls.push('ic-multi-fill');
+			}
 			// A tiny per-cell delay so a grid of 61 icons arrives as a sweep
 			// rather than as one flash. Capped, or the last cell waits a
 			// second and a half to appear.
 			var delay = state.motion === 'off' ? '' :
 				' style="--ic-delay:' + Math.min(n * 18, 420) + 'ms"';
 			return '<button class="cell" type="button" data-name="' + i.name + '" data-cat="' + i.category + '" title="' + i.name + '"' + delay + '>'
-				+ svgMarkup(i, v, 24, mcls)
+				+ svgMarkup(i, v, 24, cls.filter(Boolean).join(' '))
 				+ '<span class="cell__name">' + i.name + '</span></button>';
 		}).join('');
 	}

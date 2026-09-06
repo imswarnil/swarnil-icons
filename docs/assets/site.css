@@ -144,9 +144,19 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 	transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
 
-.btn-primary { background: var(--accent); color: var(--on-accent); }
-.btn-outline { border-color: var(--line-default); }
-.btn-outline:hover { border-color: var(--line-strong); }
+/* An <a class="btn"> inherits the UA's link colour unless told otherwise, and
+   .btn-outline set only a border — which is why "Star on GitHub" was coming
+   out in browser blue against a grey outline. Every button variant now states
+   its own colour. */
+.btn { color: var(--fg-default); background: transparent; }
+
+.btn-primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent-fg); border-color: var(--accent-fg); }
+
+.btn-outline { border-color: var(--line-default); background: var(--bg-surface); color: var(--fg-default); }
+.btn-outline:hover { border-color: var(--line-strong); background: var(--bg-muted); }
+.btn-outline .ic { color: var(--accent); }
+
 .btn-quiet { color: var(--fg-muted); }
 .btn-quiet:hover { color: var(--fg-default); }
 
@@ -253,7 +263,11 @@ main { padding-inline: var(--gutter); }
 
 /* ── Layout: a sticky category rail beside the grid ──────────────────────── */
 
-.layout { display: grid; grid-template-columns: 13.5rem 1fr; align-items: start; gap: 2.5rem; }
+/* 15rem is not arbitrary: it is the width at which the widest control group —
+   the six motion toggles — fits on ONE line at the sizes below. A rail whose
+   groups wrap onto a second row reads as a pile rather than as a set of
+   choices. */
+.layout { display: grid; grid-template-columns: 15.5rem 1fr; align-items: start; gap: 2.5rem; }
 
 .sidebar {
 	position: sticky; top: calc(3.75rem + 1.5rem);
@@ -266,8 +280,16 @@ main { padding-inline: var(--gutter); }
 	background: var(--bg-muted);
 	border: 1px solid var(--line-subtle);
 	border-radius: var(--radius-lg);
-	padding: 1rem .75rem 1.5rem;
+	/* Deep bottom padding so the last rail's tooltip has somewhere to go — the
+	   rail scrolls internally, so a tooltip cannot escape past its edge. */
+	padding: 1rem .75rem 3rem;
+	scrollbar-width: none;          /* Firefox */
+	-ms-overflow-style: none;       /* old Edge */
 }
+
+/* WebKit and Blink need the pseudo-element; the rail still scrolls, it just
+   does so without a bar cutting into a 13rem-wide panel. */
+.sidebar::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
 /* Each rail is one question: which category, which weight, which size, which
    colour, which motion. They are separated by a rule rather than by space
@@ -453,31 +475,17 @@ main { padding-inline: var(--gutter); }
    browsing-only accent, one hue per category, purely for telling sections
    apart at a glance; it never touches the SVG that gets exported. */
 
-/* One hue per category, declared once as --cat and then used for the icon,
-   its tile and its border together — so a section reads as a coloured block
-   rather than as grey boxes with coloured marks in them. The icons themselves
-   switch to their SOLID form in this mode (see cellsFor in site.js), which is
-   what makes it read as filled rather than merely tinted. */
+/* ── Multicolour mode ─────────────────────────────────────────────────────
+   The colouring is done entirely by .ic-multi / .ic-multi-fill from the
+   package — the same classes a consumer would write — so this browser shows
+   the real style rather than a site-only imitation.
 
-.cell[data-cat='frame']  { --cat: var(--accent); }
-.cell[data-cat='editor'] { --cat: var(--hue-craft); }
-.cell[data-cat='media']  { --cat: var(--hue-iris); }
-.cell[data-cat='social'] { --cat: var(--hue-rose); }
-.cell[data-cat='status'] { --cat: var(--hue-mint); }
-.cell[data-cat='ui']     { --cat: var(--hue-azure); }
+   The tiles deliberately stay NEUTRAL here. An earlier pass tinted them with a
+   wash of the accent and it swallowed the icons' own light-primary fill: two
+   pale washes on top of each other read as one flat block, and the third
+   colour vanished. The grid is the frame; the colour belongs to the icons. */
 
-.sections[data-colormode='color'] .cell {
-	background: color-mix(in oklab, var(--cat) 9%, transparent);
-	border-color: color-mix(in oklab, var(--cat) 22%, transparent);
-}
-
-.sections[data-colormode='color'] .cell:hover {
-	background: color-mix(in oklab, var(--cat) 16%, transparent);
-	border-color: var(--cat);
-}
-
-.sections[data-colormode='color'] .cell svg { color: var(--cat); }
-.sections[data-colormode='color'] .cell__name { color: color-mix(in oklab, var(--cat) 70%, var(--fg-muted)); }
+.sections[data-colormode='multi'] .cell:hover { border-color: var(--accent); }
 
 .empty { padding: 3rem 0 5rem; color: var(--fg-muted); max-width: 34rem; }
 
@@ -563,11 +571,12 @@ main { padding-inline: var(--gutter); }
    current choice, so the word appears once instead of five times under five
    samples that are already showing you the answer. */
 
-.opts { display: flex; flex-wrap: wrap; gap: .25rem; padding-inline: .25rem; }
+.opts { display: flex; flex-wrap: wrap; gap: .1875rem; padding-inline: .25rem; }
 
 .opt {
+	position: relative;
 	display: inline-flex; align-items: center; justify-content: center; gap: .375rem;
-	inline-size: 2.125rem; block-size: 2.125rem; padding: 0;
+	inline-size: 2rem; block-size: 2rem; padding: 0;
 	border: 1px solid var(--line-default); border-radius: var(--radius-md);
 	color: var(--fg-muted);
 	transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
@@ -583,13 +592,41 @@ main { padding-inline: var(--gutter); }
    size or an animation scales it past its own bounds. */
 .opt__art {
 	display: grid; place-items: center;
-	inline-size: 1.625rem; block-size: 1.625rem; overflow: hidden;
+	inline-size: 1.5rem; block-size: 1.5rem; overflow: hidden;
 	color: var(--fg-default);
 }
 
 .opt[aria-pressed='true'] .opt__art { color: var(--accent); }
 .opt__art .is-tinted { color: var(--hue-azure); display: grid; place-items: center; }
 .opt__label { font-size: .75rem; }
+
+/* ── Tooltips ─────────────────────────────────────────────────────────────
+   The icon-only toggles say what they are on hover and on keyboard focus.
+   The label comes from aria-label, so there is one string doing both jobs and
+   the tooltip cannot drift from what a screen reader announces.
+
+   It opens DOWNWARD. The rail scrolls internally, so a tooltip above the top
+   row would be clipped by the rail's own overflow — down is the direction
+   that always has somewhere to go, and the rail carries extra bottom padding
+   for the last row. */
+
+.opt[aria-label]::after {
+	content: attr(aria-label);
+	position: absolute; top: calc(100% + .375rem); left: 50%; translate: -50% 0;
+	z-index: 5;
+	padding: .1875rem .4375rem;
+	border-radius: var(--radius-sm);
+	background: var(--fg-default); color: var(--bg-canvas);
+	font-size: .6875rem; line-height: 1.4; font-weight: 500; white-space: nowrap;
+	opacity: 0; pointer-events: none;
+	transition: opacity var(--dur) var(--ease);
+}
+
+.opt[aria-label]:hover::after,
+.opt[aria-label]:focus-visible::after { opacity: 1; }
+
+/* A labelled button already says its name; a tooltip repeating it is noise. */
+.opt:has(.opt__label)::after { content: none; }
 
 /* The groups that keep a written label — the play modes, and the panel's
    copies — need room for it, so they stop being squares. */
@@ -604,3 +641,66 @@ main { padding-inline: var(--gutter); }
 
 /* In the panel the same generated groups sit in a .cluster and flow as a row. */
 .cluster[data-optgroup] { display: flex; flex-wrap: wrap; gap: .375rem; }
+
+/* ── Facts strip ──────────────────────────────────────────────────────────
+   Six numbers closing the hero. Each is something the build can confirm, so
+   the line stays true on its own rather than needing anybody to remember to
+   update it when the set grows. */
+
+.facts {
+	display: flex; flex-wrap: wrap; gap: .5rem 1.75rem;
+	padding-block: 1.25rem;
+	border-block: 1px solid var(--line-subtle);
+	font-size: .875rem; color: var(--fg-muted);
+}
+
+.fact { display: inline-flex; align-items: center; gap: .5rem; }
+.fact .ic { color: var(--accent); }
+.fact b { color: var(--fg-default); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ── Take it three ways ───────────────────────────────────────────────────
+   The page is a browser first, but somebody who has found the icon they want
+   still has to be told how to put it in a project — so the answer sits at the
+   bottom of the page they were already scrolling. */
+
+.use { padding-block: 4rem 5rem; border-top: 1px solid var(--line-subtle); margin-top: 3rem; }
+
+.use__title {
+	font-family: var(--font-display); font-size: 1.75rem; font-weight: 600;
+	letter-spacing: -.02em;
+}
+
+.use__lead { color: var(--fg-muted); margin-top: .5rem; max-width: 42rem; }
+
+.use__grid {
+	display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+	gap: 1rem; margin-top: 2rem;
+}
+
+.use__card {
+	display: flex; flex-direction: column;
+	padding: 1.25rem;
+	background: var(--bg-muted);
+	border: 1px solid var(--line-subtle);
+	border-radius: var(--radius-lg);
+}
+
+.use__head {
+	display: flex; align-items: center; gap: .5rem;
+	font-family: var(--font-display); font-size: 1rem; font-weight: 600;
+}
+
+.use__head .ic { color: var(--accent); }
+.use__note { font-size: .875rem; color: var(--fg-muted); margin-top: .375rem; }
+
+/* The blocks are different lengths; margin-top:auto keeps their tops ragged
+   and their bottoms aligned, which is the tidier of the two. */
+.use__code {
+	margin-top: auto; padding: .875rem;
+	background: var(--bg-canvas);
+	border: 1px solid var(--line-subtle); border-radius: var(--radius-md);
+	font-family: var(--font-slate); font-size: .75rem; line-height: 1.65;
+	color: var(--fg-muted); overflow-x: auto;
+}
+
+.use__code code { white-space: pre; }

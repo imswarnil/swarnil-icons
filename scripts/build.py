@@ -47,7 +47,41 @@ def is_fillable(body):
     return bool(paths) and all(CLOSED.search(p) for p in paths)
 
 
+SUBPATH = re.compile(r'M[^M]*')
+PATH_EL = re.compile(r'<path((?:(?!/>)[^>])*?)\sd="([^"]+)"\s*/>')
 MEASURABLE = re.compile(r'<(path|circle)\b(?![^>]*pathLength)')
+
+
+def split_paths(body):
+    """One <path> per subpath, so the parts of an icon can be styled apart.
+
+    Most icons in this set are authored as a SINGLE path whose `d` happens to
+    contain several subpaths — `M6 4h8l5 5v11H6zM14 4v5h5` is a page and the
+    fold on its corner, in one element. Rendered, that is exactly right. But it
+    means CSS sees one child where a reader sees two shapes, and a multicolour
+    or staggered style has nothing to take hold of: two thirds of the set would
+    only ever be one colour.
+
+    Splitting on absolute M is lossless — the same commands, redistributed —
+    so every stroke lands on the same pixel it did before. Only the number of
+    elements changes, which is the point.
+
+    Deliberately conservative: it splits only when the data starts with an
+    absolute M and the parts rejoin to exactly the original string. A relative
+    `m` continues from the previous point, so it is left inside its subpath
+    rather than promoted to one; the worst case is a split that does not
+    happen, never a shape that moves.
+    """
+    def one(m):
+        attrs, d = m.group(1), m.group(2)
+        if not d.startswith('M'):
+            return m.group(0)
+        parts = SUBPATH.findall(d)
+        if len(parts) < 2 or ''.join(parts) != d:
+            return m.group(0)
+        return ''.join(f'<path{attrs} d="{p.strip()}"/>' for p in parts)
+
+    return PATH_EL.sub(one, body)
 
 
 def measured(body):
@@ -95,7 +129,7 @@ def main():
         # icon looks fillable, and the whole set silently loses its solid
         # variant. The source file itself is never touched either way.
         raw = body_of(f.read_text())
-        body = measured(raw)
+        body = measured(split_paths(raw))
 
         symbols.append(f'<symbol id="i-{name}" viewBox="0 0 24 24">{body}</symbol>')
 
@@ -120,7 +154,7 @@ def main():
             out.mkdir(parents=True, exist_ok=True)
             solid = raw.replace('<path d=', '<path fill="currentColor" stroke="none" d=')
             solid = re.sub(r'<circle (?![^>]*fill=)', '<circle fill="currentColor" stroke="none" ', solid)
-            (out / f'{name}.svg').write_text(wrap(measured(solid), '1.5'))
+            (out / f'{name}.svg').write_text(wrap(measured(split_paths(solid)), '1.5'))
 
     (DIST / 'sprite.svg').write_text(
         '<svg xmlns="http://www.w3.org/2000/svg" style="display:none">'
@@ -295,6 +329,55 @@ CSS = """/* ====================================================================
 
 /* Back to inheriting, for overriding a colour set further up. */
 .ic-current { color: inherit; }
+
+/* ── Multicolour ──────────────────────────────────────────────────────────
+   Three colours out of one geometry: BLACK strokes, the PRIMARY on the marks
+   that already carry meaning, and a LIGHT PRIMARY wash inside closed shapes.
+
+   The trick is that it works through <use>. A sprite reference has one child,
+   so no child selector can reach the parts inside it — but `stroke`, `fill`
+   and `color` are all INHERITED, and the set already distinguishes its two
+   kinds of geometry by hand: strokes are plain, while the deliberate marks
+   (the record dot, the aperture centre, the alert full stop) are authored as
+   fill="currentColor". So:
+
+       stroke        -> ink        every drawn line
+       color         -> primary    every filled mark, via its currentColor
+       --ic-fill     -> soft       the wash, on shapes that enclose an area
+
+   An element's own presentation attribute beats an inherited value, which is
+   what keeps the marks on `color` while everything else takes the wash.
+
+   The wash is a SEPARATE class because it is the one part that is not
+   universally safe: filling an open path floods the region the path merely
+   implies, and half this set is open paths. Pair it with a closed icon — the
+   same ones that have a solid variant. */
+
+.ic-multi {
+	stroke: var(--ic-ink);
+	color: var(--ic-primary);
+}
+
+/* The second colour, on the parts of the icon after the first. build.py emits
+   one element per subpath precisely so this rule has something to hold: the
+   page and its folded corner, the tray and its lid, the arrow's shaft and its
+   head. 47 of the 61 icons have two or more parts.
+
+   Child selectors cannot cross into the shadow content of a <use>, so this
+   line applies to INLINE markup — what the site serves and what "Copy SVG"
+   gives you. A sprite reference still gets the ink stroke, the primary marks
+   and the wash from the inherited properties above; it just does not get this
+   fourth touch. */
+.ic-multi > :not(:first-child) { stroke: var(--ic-primary); }
+
+/* Both, deliberately. --ic-fill is the composable hook that .ic reads, and
+   the plain `fill` is what makes this work on a bare <svg> that never took the
+   .ic class — a presentation attribute like fill="none" on the root loses to
+   any CSS property, so the wash lands either way. */
+.ic-multi-fill {
+	--ic-fill: var(--ic-primary-soft);
+	fill: var(--ic-primary-soft);
+}
 
 /* ── Two-tone ─────────────────────────────────────────────────────────────
    Stroke and fill pulled apart: the outline stays ink while the shape carries
