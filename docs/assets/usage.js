@@ -1,39 +1,18 @@
 /* =============================================================================
    icons.imswarnil.com/usage
 
-   Two jobs only: the theme toggle, and revealing the step row when it scrolls
-   into view. Everything else on the page is CSS classes the package already
-   ships — if this file were doing the animating, the demo would be proving
-   something about this file rather than about the icon set.
+   One job: revealing the step row when it scrolls into view. The theme toggle
+   and the bar's search live in site.js, which every page loads.
+
+   Everything else on this page is CSS classes the package already ships — if
+   this file were doing the animating, the demo would be proving something
+   about this file rather than about the icon set.
    ========================================================================== */
 (function () {
 	'use strict';
 
 	var $ = function (s, r) { return (r || document).querySelector(s); };
 	var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
-
-	/* ── Theme ───────────────────────────────────────────────────────────────
-	   Same key as the browser page, so the choice carries across the two. */
-
-	function themeIcon() {
-		var dark = document.documentElement.dataset.theme === 'dark';
-		var use = $('[data-theme-icon]');
-		// The theme you would GET by clicking, not the one you are in.
-		if (use) use.setAttribute('href', dark ? '#i-aperture' : '#i-moon');
-		var btn = $('[data-theme-toggle]');
-		if (btn) btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-	}
-	themeIcon();
-
-	var toggle = $('[data-theme-toggle]');
-	if (toggle) {
-		toggle.addEventListener('click', function () {
-			var next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-			document.documentElement.dataset.theme = next;
-			try { localStorage.setItem('si-theme', next); } catch (e) {}
-			themeIcon();
-		});
-	}
 
 	/* ── Reveal on scroll ────────────────────────────────────────────────────
 	   The draw class is added when the row arrives and REMOVED when it leaves,

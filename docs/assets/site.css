@@ -123,7 +123,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .brand__mark { width: .5rem; height: .5rem; border-radius: var(--radius-full); background: var(--accent); align-self: center; flex: none; }
 .brand__name { font-family: var(--font-display); font-weight: 600; font-size: 1.125rem; letter-spacing: -.02em; }
 .brand__sub { font-size: .6875rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-faint); }
-.bar__end { margin-left: auto; display: flex; gap: .5rem; }
+.bar__end { display: flex; gap: .5rem; }
 
 /* ── Page tabs ────────────────────────────────────────────────────────────
    Two pages, two jobs: Browse says what is in the set, Usage says what it
@@ -269,6 +269,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    below, so prose doesn't stretch edge to edge on a wide monitor. */
 main { padding-inline: var(--gutter); }
 
+/* ── The three pages ──────────────────────────────────────────────────────
+   /        the pitch — capped to a reading width, because it is prose.
+   /icons/  the browser — edge to edge, because the grid IS the content and a
+            centred column would leave a wide monitor mostly empty.
+   /usage/  the showcase — capped, like the pitch. */
+
+.home { max-width: 84rem; margin-inline: auto; }
+.browser { padding-block: 1.75rem 4rem; }
+
 /* Copy on the left, the motion layer running on the right. The showcase is
    the product demonstrating itself, which is worth more than a third
    paragraph claiming the animations are good. */
@@ -292,8 +301,8 @@ main { padding-inline: var(--gutter); }
 .layout { display: grid; grid-template-columns: 16.5rem 1fr; align-items: start; gap: 2.5rem; }
 
 .sidebar {
-	position: sticky; top: calc(3.75rem + 1.5rem);
-	max-height: calc(100dvh - 3.75rem - 3rem);
+	position: sticky; top: calc(3.75rem + 1rem);
+	max-height: calc(100dvh - 3.75rem - 2rem);
 	overflow-y: auto;
 	/* A persistent light grey/cream panel — --bg-muted, the one neutral that
 	   stays visibly a panel in both themes — so the rail reads as a fixed
@@ -433,9 +442,11 @@ main { padding-inline: var(--gutter); }
 
 .search { position: relative; display: flex; align-items: center; flex: 1; min-width: 8rem; max-width: 28rem; }
 
-/* In the bar the field is shorter and quieter — it is a utility sitting
-   between the wordmark and the two icon buttons, not the page's main event. */
-.search--bar { margin-inline: auto; }
+/* Right-hand side, next to the two icon buttons: the wordmark and the tabs
+   are where the eye starts, and search is what you reach for once you know
+   where you are. margin-left:auto on this element pushes it and everything
+   after it to the end of the bar in one declaration. */
+.search--bar { margin-left: auto; }
 .search--bar .search__input { height: 2.25rem; font-size: .875rem; border-radius: var(--radius-md); }
 .search__icon { position: absolute; left: .75rem; color: var(--fg-faint); pointer-events: none; }
 

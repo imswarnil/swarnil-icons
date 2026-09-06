@@ -1,0 +1,37 @@
+<!-- The navbar, one file for all three pages. build.py marks the active tab,
+     which is the only thing that differs between them — three hand-kept copies
+     would have drifted by the second edit. -->
+<header class="bar">
+  <a class="brand" href="/">
+    <span class="brand__mark" aria-hidden="true"></span>
+    <span class="brand__name">Swarnil</span>
+    <span class="brand__sub">Icons</span>
+  </a>
+
+  <nav class="tabs" aria-label="Sections">
+    <a class="tab {on:home}" href="/" {cur:home}>Home</a>
+    <a class="tab {on:icons}" href="/icons/" {cur:icons}>Icons</a>
+    <a class="tab {on:usage}" href="/usage/" {cur:usage}>Usage</a>
+  </nav>
+
+  <!-- Search sits on every page, not just the browser. On the icons page it
+       filters the grid as well as listing matches; anywhere else, picking a
+       result takes you to that icon on the icons page. -->
+  <div class="search search--bar" role="combobox" aria-haspopup="listbox" aria-expanded="false" data-searchbox>
+    <label class="u-sr-only" for="q">Search icons</label>
+    <svg class="ic ic-sm search__icon" aria-hidden="true"><use href="#i-search" /></svg>
+    <input class="search__input" id="q" type="search" placeholder="Search {count} icons"
+           autocomplete="off" aria-autocomplete="list" aria-controls="results" data-search />
+    <kbd class="kbd">/</kbd>
+    <ul class="ac" id="results" role="listbox" aria-label="Matching icons" data-ac hidden></ul>
+  </div>
+
+  <div class="bar__end">
+    <button class="iconbtn" type="button" data-theme-toggle aria-label="Switch theme">
+      <svg class="ic ic-md" aria-hidden="true"><use href="#i-moon" data-theme-icon /></svg>
+    </button>
+    <a class="iconbtn" href="https://github.com/imswarnil/swarnil-icons" rel="noopener" aria-label="This set on GitHub">
+      <svg class="ic ic-md" aria-hidden="true"><use href="#i-code" /></svg>
+    </a>
+  </div>
+</header>

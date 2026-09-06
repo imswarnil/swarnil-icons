@@ -26,6 +26,7 @@ try {
 <link rel="stylesheet" href="/swarnil-icons-motion.css" />
 <link rel="stylesheet" href="/assets/site.css" />
 <link rel="stylesheet" href="/assets/usage.css" />
+<script src="/assets/site.js" defer></script>
 <script src="/assets/usage.js" defer></script>
 </head>
 
@@ -34,27 +35,7 @@ try {
 
 {sprite}
 
-<header class="bar">
-  <a class="brand" href="/">
-    <span class="brand__mark" aria-hidden="true"></span>
-    <span class="brand__name">Swarnil</span>
-    <span class="brand__sub">Icons</span>
-  </a>
-
-  <nav class="tabs" aria-label="Sections">
-    <a class="tab" href="/">Browse</a>
-    <a class="tab tab--on" href="/usage/" aria-current="page">Usage</a>
-  </nav>
-
-  <div class="bar__end">
-    <button class="iconbtn" type="button" data-theme-toggle aria-label="Switch theme">
-      <svg class="ic ic-md" aria-hidden="true"><use href="#i-moon" data-theme-icon /></svg>
-    </button>
-    <a class="iconbtn" href="https://github.com/imswarnil/swarnil-icons" rel="noopener" aria-label="This set on GitHub">
-      <svg class="ic ic-md" aria-hidden="true"><use href="#i-code" /></svg>
-    </a>
-  </div>
-</header>
+{bar}
 
 <main class="usage">
   <section class="uhero">
@@ -288,5 +269,6 @@ try {
     <p class="foot__fine">MIT · &copy; 2026 Swarnil Singhai · Built to sit beside <a href="https://design.imswarnil.com">Swarnil Design System</a></p>
   </div>
 </footer>
+<script id="icon-data" type="application/json">{data}</script>
 </body>
 </html>

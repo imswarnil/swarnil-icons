@@ -20,6 +20,11 @@
 	var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
 	var ICONS = JSON.parse($('#icon-data').textContent);
+	// Present only on /icons/. Declared here rather than beside the grid code
+	// because the guard further down reads it, and a `var` assigned later
+	// would still be undefined at that point — every page would take the
+	// early return, including the one that needs the grid.
+	var sections = $('[data-sections]');
 	var STROKE = { thin: 1, line: 1.5, bold: 2, solid: 1.5, duo: 1.5 };
 
 	function byName(n) {
@@ -175,6 +180,166 @@
 	function motionClass(name, mode) {
 		return (!name || name === 'off') ? '' : 'ic-' + name + '-' + mode;
 	}
+
+	/* ── Filters ─────────────────────────────────────────────────────────── */
+
+	/* ── Search ──────────────────────────────────────────────────────────────
+	   Two answers to one query, because they are different questions. The grid
+	   below filters, which answers "what is there" — you browse the result. The
+	   dropdown lists the closest few, which answers "the one I already had in
+	   mind" — you take it and go. A set this size needs both. */
+
+	var input = $('[data-search]');
+	var ac = $('[data-ac]');
+	var box = $('[data-searchbox]');
+	var hits = [], cursor = -1;
+
+	function score(icon, q) {
+		var n = icon.name;
+		if (n === q) return 0;
+		if (n.indexOf(q) === 0) return 1;          // prefix beats
+		if (n.indexOf(q) !== -1) return 2;         // anywhere in the name
+		if (icon.category.indexOf(q) !== -1) return 3;
+		return -1;
+	}
+
+	function closeAc() {
+		ac.hidden = true;
+		box.setAttribute('aria-expanded', 'false');
+		cursor = -1;
+	}
+
+	function markCursor() {
+		$$('.ac__row', ac).forEach(function (el, i) {
+			el.setAttribute('aria-selected', String(i === cursor));
+		});
+	}
+
+	function openAc(q) {
+		hits = ICONS.map(function (i) { return { i: i, s: score(i, q) }; })
+			.filter(function (r) { return r.s !== -1; })
+			.sort(function (a, b) { return a.s - b.s || a.i.name.localeCompare(b.i.name); })
+			.slice(0, 8)
+			.map(function (r) { return r.i; });
+
+		if (!hits.length) return closeAc();
+
+		ac.innerHTML = hits.map(function (i, n) {
+			return '<li class="ac__row" role="option" aria-selected="false" data-pick="' + i.name + '" id="ac-' + n + '">'
+				+ svgMarkup(i, 'line', 20)
+				+ '<span class="ac__name">' + i.name + '</span>'
+				+ '<span class="ac__cat">' + label(i.category) + '</span></li>';
+		}).join('');
+		ac.hidden = false;
+		box.setAttribute('aria-expanded', 'true');
+		cursor = -1;
+		markCursor();
+	}
+
+	// Off the browser page there is no grid to filter, only the dropdown.
+	function pick(name) {
+		if (sections) { open(name); return; }
+		location.href = '/icons/#' + name;
+	}
+
+	input.addEventListener('input', function (e) {
+		state.q = e.target.value.trim();
+		if (sections) render();
+		if (state.q) openAc(state.q.toLowerCase()); else closeAc();
+	});
+
+	input.addEventListener('keydown', function (e) {
+		if (ac.hidden) return;
+		if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+			e.preventDefault();
+			cursor = (cursor + (e.key === 'ArrowDown' ? 1 : -1) + hits.length + 1) % (hits.length + 1);
+			// The extra slot is "nothing selected", so arrowing past the end
+			// returns you to the raw query rather than wrapping silently.
+			if (cursor === hits.length) cursor = -1;
+			markCursor();
+			input.setAttribute('aria-activedescendant', cursor < 0 ? '' : 'ac-' + cursor);
+		} else if (e.key === 'Enter' && cursor > -1) {
+			e.preventDefault();
+			pick(hits[cursor].name);
+			closeAc();
+		} else if (e.key === 'Escape') {
+			closeAc();
+		}
+	});
+
+	ac.addEventListener('mousedown', function (e) {
+		// mousedown, not click: the input's blur would hide the row before a
+		// click ever landed on it.
+		var row = e.target.closest('[data-pick]');
+		if (!row) return;
+		e.preventDefault();
+		pick(row.dataset.pick);
+		closeAc();
+	});
+
+	document.addEventListener('click', function (e) {
+		if (!box.contains(e.target)) closeAc();
+	});
+
+	document.addEventListener('keydown', function (e) {
+		if (e.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) {
+			e.preventDefault();
+			input.focus();
+		}
+	});
+
+	// One delegated listener for every generated control, rather than rebinding
+	// after each repaint.
+	document.addEventListener('click', function (e) {
+		var GROUPS_ = ['variant', 'psize', 'colormode', 'motion', 'mode',
+		               'primary', 'secondary', 'pmotion', 'pmode'];
+		var b = e.target.closest(GROUPS_.map(function (g) { return '[data-' + g + ']'; }).join(','));
+		if (!b || !b.classList.contains('opt')) return;
+
+		var group = GROUPS_.filter(function (g) { return b.hasAttribute('data-' + g); })[0];
+		var v = b.getAttribute('data-' + group);
+
+		if (group === 'variant') state.variant = v;
+		if (group === 'psize') state.size = v;
+		if (group === 'colormode') state.color = v;
+		if (group === 'motion') state.motion = v;
+		if (group === 'mode') state.mode = v;
+		if (group === 'primary') primary = v;
+		if (group === 'secondary') secondary = v;
+		if (group === 'pmotion') panelMotion = v;
+		if (group === 'pmode') panelMode = v;
+
+		paintOpts(group, v);
+		if (group === 'primary' || group === 'secondary') {
+			applyPalette();
+			// The sidebar samples are drawn markup, not live classes, so they
+			// have to be redrawn for the new hue to reach them.
+			paintOpts('colormode', state.color);
+			paintOpts('primary', primary);
+			paintOpts('secondary', secondary);
+		}
+		if (group === 'pmotion' || group === 'pmode') paint(); else render();
+	});
+
+	/* ── The hero showcase ───────────────────────────────────────────────── */
+
+	// Seven icons drawing themselves on a loop, staggered. It is the motion
+	// layer running, not a screenshot of it.
+	var SHOW = ['capture', 'activity', 'aperture', 'heart', 'camera', 'star', 'live'];
+	var showcase = $('[data-showcase]');
+	if (showcase) {
+		showcase.innerHTML = SHOW.map(function (n, i) {
+			return '<span class="showcase__cell" style="--ic-delay:' + (i * 160) + 'ms">'
+				+ svgMarkup(byName(n), 'line', 40, 'ic-draw-loop') + '</span>';
+		}).join('');
+	}
+
+	/* ── Everything above runs on all three pages. ───────────────────────
+	   The bar, its search and the hero showcase are shared; the rail, the
+	   grid and the export panel exist only on /icons/, so the rest of this
+	   file is skipped everywhere else rather than guarded line by line. */
+
+	if (!sections) return;
 
 	/* ── The sidebar ─────────────────────────────────────────────────────── */
 
@@ -340,8 +505,6 @@
 
 	/* ── The grid ────────────────────────────────────────────────────────── */
 
-	var sections = $('[data-sections]');
-
 	function cellsFor(rows) {
 		// Scanline and RGB drive their own animation, so a motion selection
 		// would fight them for the same property.
@@ -442,153 +605,6 @@
 		} else {
 			note.hidden = true;
 		}
-	}
-
-	/* ── Filters ─────────────────────────────────────────────────────────── */
-
-	/* ── Search ──────────────────────────────────────────────────────────────
-	   Two answers to one query, because they are different questions. The grid
-	   below filters, which answers "what is there" — you browse the result. The
-	   dropdown lists the closest few, which answers "the one I already had in
-	   mind" — you take it and go. A set this size needs both. */
-
-	var input = $('[data-search]');
-	var ac = $('[data-ac]');
-	var box = $('[data-searchbox]');
-	var hits = [], cursor = -1;
-
-	function score(icon, q) {
-		var n = icon.name;
-		if (n === q) return 0;
-		if (n.indexOf(q) === 0) return 1;          // prefix beats
-		if (n.indexOf(q) !== -1) return 2;         // anywhere in the name
-		if (icon.category.indexOf(q) !== -1) return 3;
-		return -1;
-	}
-
-	function closeAc() {
-		ac.hidden = true;
-		box.setAttribute('aria-expanded', 'false');
-		cursor = -1;
-	}
-
-	function markCursor() {
-		$$('.ac__row', ac).forEach(function (el, i) {
-			el.setAttribute('aria-selected', String(i === cursor));
-		});
-	}
-
-	function openAc(q) {
-		hits = ICONS.map(function (i) { return { i: i, s: score(i, q) }; })
-			.filter(function (r) { return r.s !== -1; })
-			.sort(function (a, b) { return a.s - b.s || a.i.name.localeCompare(b.i.name); })
-			.slice(0, 8)
-			.map(function (r) { return r.i; });
-
-		if (!hits.length) return closeAc();
-
-		ac.innerHTML = hits.map(function (i, n) {
-			return '<li class="ac__row" role="option" aria-selected="false" data-pick="' + i.name + '" id="ac-' + n + '">'
-				+ svgMarkup(i, 'line', 20)
-				+ '<span class="ac__name">' + i.name + '</span>'
-				+ '<span class="ac__cat">' + label(i.category) + '</span></li>';
-		}).join('');
-		ac.hidden = false;
-		box.setAttribute('aria-expanded', 'true');
-		cursor = -1;
-		markCursor();
-	}
-
-	input.addEventListener('input', function (e) {
-		state.q = e.target.value.trim();
-		render();
-		if (state.q) openAc(state.q.toLowerCase()); else closeAc();
-	});
-
-	input.addEventListener('keydown', function (e) {
-		if (ac.hidden) return;
-		if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-			e.preventDefault();
-			cursor = (cursor + (e.key === 'ArrowDown' ? 1 : -1) + hits.length + 1) % (hits.length + 1);
-			// The extra slot is "nothing selected", so arrowing past the end
-			// returns you to the raw query rather than wrapping silently.
-			if (cursor === hits.length) cursor = -1;
-			markCursor();
-			input.setAttribute('aria-activedescendant', cursor < 0 ? '' : 'ac-' + cursor);
-		} else if (e.key === 'Enter' && cursor > -1) {
-			e.preventDefault();
-			open(hits[cursor].name);
-			closeAc();
-		} else if (e.key === 'Escape') {
-			closeAc();
-		}
-	});
-
-	ac.addEventListener('mousedown', function (e) {
-		// mousedown, not click: the input's blur would hide the row before a
-		// click ever landed on it.
-		var row = e.target.closest('[data-pick]');
-		if (!row) return;
-		e.preventDefault();
-		open(row.dataset.pick);
-		closeAc();
-	});
-
-	document.addEventListener('click', function (e) {
-		if (!box.contains(e.target)) closeAc();
-	});
-
-	document.addEventListener('keydown', function (e) {
-		if (e.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) {
-			e.preventDefault();
-			input.focus();
-		}
-	});
-
-	// One delegated listener for every generated control, rather than rebinding
-	// after each repaint.
-	document.addEventListener('click', function (e) {
-		var GROUPS_ = ['variant', 'psize', 'colormode', 'motion', 'mode',
-		               'primary', 'secondary', 'pmotion', 'pmode'];
-		var b = e.target.closest(GROUPS_.map(function (g) { return '[data-' + g + ']'; }).join(','));
-		if (!b || !b.classList.contains('opt')) return;
-
-		var group = GROUPS_.filter(function (g) { return b.hasAttribute('data-' + g); })[0];
-		var v = b.getAttribute('data-' + group);
-
-		if (group === 'variant') state.variant = v;
-		if (group === 'psize') state.size = v;
-		if (group === 'colormode') state.color = v;
-		if (group === 'motion') state.motion = v;
-		if (group === 'mode') state.mode = v;
-		if (group === 'primary') primary = v;
-		if (group === 'secondary') secondary = v;
-		if (group === 'pmotion') panelMotion = v;
-		if (group === 'pmode') panelMode = v;
-
-		paintOpts(group, v);
-		if (group === 'primary' || group === 'secondary') {
-			applyPalette();
-			// The sidebar samples are drawn markup, not live classes, so they
-			// have to be redrawn for the new hue to reach them.
-			paintOpts('colormode', state.color);
-			paintOpts('primary', primary);
-			paintOpts('secondary', secondary);
-		}
-		if (group === 'pmotion' || group === 'pmode') paint(); else render();
-	});
-
-	/* ── The hero showcase ───────────────────────────────────────────────── */
-
-	// Seven icons drawing themselves on a loop, staggered. It is the motion
-	// layer running, not a screenshot of it.
-	var SHOW = ['capture', 'activity', 'aperture', 'heart', 'camera', 'star', 'live'];
-	var showcase = $('[data-showcase]');
-	if (showcase) {
-		showcase.innerHTML = SHOW.map(function (n, i) {
-			return '<span class="showcase__cell" style="--ic-delay:' + (i * 160) + 'ms">'
-				+ svgMarkup(byName(n), 'line', 40, 'ic-draw-loop') + '</span>';
-		}).join('');
 	}
 
 	/* ── The panel ───────────────────────────────────────────────────────── */
@@ -832,4 +848,12 @@
 	});
 
 	render();
+
+	// Arriving from the bar's search on another page. The hash is the icon's
+	// name, so the panel opens on the one that was actually chosen rather than
+	// dropping the reader into 61 tiles to find it again.
+	if (location.hash.length > 1) {
+		var wanted = decodeURIComponent(location.hash.slice(1));
+		if (ICONS.some(function (i) { return i.name === wanted; })) open(wanted);
+	}
 }());

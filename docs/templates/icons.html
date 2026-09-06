@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<title>Icons — browse all {count} · {name}</title>
+<meta name="description" content="Search and filter {count} icons. Pick a weight, a size, a colour style and an animation, then copy the markup or download SVG, PNG or JPG." />
+<link rel="canonical" href="{site}/icons/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="{name} — browse the set" />
+<meta property="og:description" content="{count} icons on a 24 grid, with every weight, colour and animation to hand." />
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>{name} — {count} open-source icons, drawn from scratch</title>
-<meta name="description" content="A 24-grid stroked icon set. Five variants and five animations from one geometry, any size, SVG, PNG or JPG. MIT, no dependencies." />
-<link rel="canonical" href="{site}/" />
-<meta property="og:type" content="website" />
-<meta property="og:title" content="{name}" />
-<meta property="og:description" content="{count} icons on a 24 grid. Five variants and five animations from one geometry. MIT." />
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
 
 <script>
@@ -31,83 +31,13 @@ try {
 <body>
 <a class="skip" href="#icons">Skip to the icons</a>
 
-<!-- The sprite, inlined. Every icon in the CHROME of this page — the theme
-     toggle, the category markers, the control icons — is an icon from the set
-     it is documenting, so the page is its own first consumer. Inlining it
-     costs one round trip less than fetching /sprite.svg and removes the flash
-     of un-iconed buttons on load. -->
 {sprite}
 
-<header class="bar">
-  <a class="brand" href="/">
-    <span class="brand__mark" aria-hidden="true"></span>
-    <span class="brand__name">Swarnil</span>
-    <span class="brand__sub">Icons</span>
-  </a>
-  <div class="search search--bar" role="combobox" aria-haspopup="listbox" aria-expanded="false" data-searchbox>
-    <label class="u-sr-only" for="q">Search icons</label>
-    <svg class="ic ic-sm search__icon" aria-hidden="true"><use href="#i-search" /></svg>
-    <input class="search__input" id="q" type="search" placeholder="Search {count} icons — try 'camera' or 'arrow'"
-           autocomplete="off" aria-autocomplete="list" aria-controls="results" data-search />
-    <kbd class="kbd">/</kbd>
-    <!-- Matches as you type, on top of the grid filtering below. The grid
-         answers "what is there"; this answers "the one I already had in mind". -->
-    <ul class="ac" id="results" role="listbox" aria-label="Matching icons" data-ac hidden></ul>
-  </div>
+{bar}
 
-  <nav class="tabs" aria-label="Sections">
-    <a class="tab tab--on" href="/" aria-current="page">Browse</a>
-    <a class="tab" href="/usage/">Usage</a>
-  </nav>
-
-  <div class="bar__end">
-    <button class="iconbtn" type="button" data-theme-toggle aria-label="Switch theme">
-      <svg class="ic ic-md" aria-hidden="true"><use href="#i-moon" data-theme-icon /></svg>
-    </button>
-    <a class="iconbtn" href="https://github.com/imswarnil/swarnil-icons" rel="noopener" aria-label="This set on GitHub">
-      <svg class="ic ic-md" aria-hidden="true"><use href="#i-code" /></svg>
-    </a>
-  </div>
-</header>
-
-<main>
-  <section class="hero">
-    <div class="hero__copy">
-      <p class="kicker">
-        <svg class="ic ic-sm ic-inline ic-primary" aria-hidden="true"><use href="#i-record" /></svg>
-        MIT · {count} icons · {catcount} categories · 24 grid
-      </p>
-      <h1 class="hero__title">Icons that know<br />what they are for.</h1>
-      <p class="hero__lead">Drawn from scratch on a 24&nbsp;grid — nothing traced, nothing re-licensed. Five weights and five animations generated from one geometry, so <code class="code">bold</code> can never drift away from <code class="code">line</code>. Take any icon at any size, in any colour, as SVG, PNG or JPG.</p>
-      <div class="hero__cta">
-        <a class="btn btn-primary" href="#icons">
-          <svg class="ic ic-sm" aria-hidden="true"><use href="#i-search" /></svg>
-          Browse the set
-        </a>
-        <a class="btn btn-outline" href="https://github.com/imswarnil/swarnil-icons" rel="noopener">
-          <svg class="ic ic-sm" aria-hidden="true"><use href="#i-star" /></svg>
-          Star on GitHub
-        </a>
-      </div>
-    </div>
-
-    <!-- The showcase draws itself on a loop: the motion layer running live
-         rather than a paragraph describing it. aria-hidden because it says
-         nothing the heading has not already said. -->
-    <div class="showcase" data-showcase aria-hidden="true"></div>
-  </section>
-
-  <!-- What the set actually is, in six numbers. Every one of them is a fact
-       the build can confirm, not a marketing adjective. -->
-  <section class="facts">
-    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-box" /></svg><b>{count}</b> icons</div>
-    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-type" /></svg><b>5</b> weights</div>
-    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-activity" /></svg><b>5</b> animations</div>
-    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-crop" /></svg><b>24</b> grid</div>
-    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-minus" /></svg><b>0</b> dependencies</div>
-    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-circle-check" /></svg><b>MIT</b></div>
-  </section>
-
+<!-- Nothing above the grid. The pitch lives on the home page; this one is the
+     rail and the icons, edge to edge. -->
+<main class="browser">
   <div class="layout">
     <nav class="sidebar" aria-label="Filters and display">
       <div class="rail" data-catnav></div>
@@ -161,43 +91,6 @@ try {
       <p class="empty" data-empty hidden>Nothing matches that. Every icon is named for <b>what it is</b>, not what it does — try <code class="code">circle-check</code> rather than <code class="code">success</code>.</p>
     </div>
   </div>
-
-  <section class="use" id="use">
-    <h2 class="use__title">Take it three ways</h2>
-    <p class="use__lead">All three are the same geometry. Pick whichever suits the project — nothing here needs a build step.</p>
-
-    <div class="use__grid">
-      <article class="use__card">
-        <h3 class="use__head"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-box" /></svg> The sprite</h3>
-        <p class="use__note">One request for the whole set, then reference an icon by name. Both files are served from <code class="code">icons.imswarnil.com</code>.</p>
-        <pre class="use__code"><code>&lt;link rel="stylesheet"
-      href="…/swarnil-icons.css"&gt;
-
-&lt;svg class="ic ic-lg"&gt;
-  &lt;use href="…/sprite.svg#i-camera"/&gt;
-&lt;/svg&gt;</code></pre>
-      </article>
-
-      <article class="use__card">
-        <h3 class="use__head"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-download" /></svg> The package</h3>
-        <p class="use__note">The source SVGs, the sprite, the JSON index and both stylesheets.</p>
-        <pre class="use__code"><code>npm i @imswarnil/swarnil-icons
-
-import icons from
-  '@imswarnil/swarnil-icons'
-// …/css   …/motion   …/sprite</code></pre>
-      </article>
-
-      <article class="use__card">
-        <h3 class="use__head"><svg class="ic ic-sm ic-multi" aria-hidden="true"><use href="#i-aperture" /></svg> Colour and motion</h3>
-        <p class="use__note">Colour reads your design system's <code class="code">--accent</code> if you have one, and falls back to ours if you do not.</p>
-        <pre class="use__code"><code>ic-primary              brand colour
-ic-solid ic-primary     filled with it
-ic-multi ic-multi-fill  three colours
-ic-draw-in              draws itself on</code></pre>
-      </article>
-    </div>
-  </section>
 </main>
 
 <!-- The export panel. Opens on click; Escape closes it.

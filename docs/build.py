@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
 """build.py — the icons.imswarnil.com site.
 
-Two pages, and they answer different questions.
+Three pages, each answering one question.
 
-    /        the BROWSER — what is in the set. Search, filter, pick a weight
-             and a size, copy the markup, download the file. The whole set is
-             inlined as JSON so it works from a static host with no API.
+    /        the PITCH — what this is and why it exists. Hero, the numbers,
+             the motion running, and the three ways to install it.
+
+    /icons/  the BROWSER — what is in the set. A fixed rail of controls and a
+             full-width grid, nothing above it. Search, filter, pick a weight
+             and a size, copy the markup, download the file.
 
     /usage/  the SHOWCASE — what the set looks like in place. A browser can
              tell you an icon exists; it cannot tell you whether the thing is
-             any good on a marketing card or a video thumbnail. So this page
-             is the icons doing real jobs, built out of the same classes the
-             README documents rather than out of screenshots.
+             any good on a marketing card or a video thumbnail.
+
+The navbar is one partial (templates/_bar.html) shared by all three, because
+three hand-kept copies drift by the second edit. Every page inlines the icon
+data, so the search in that bar works everywhere — off the browser page,
+picking a result takes you to /icons/#name and opens it.
 
     docs/    source
     site/    output — generated, gitignored
@@ -65,6 +71,17 @@ def fingerprint(page):
     return page
 
 
+def page(shell, bar, active, subs):
+    """Fill one template: the shared bar with its active tab, then the rest."""
+    for key in ('home', 'icons', 'usage'):
+        bar = (bar.replace('{on:%s}' % key, 'tab--on' if key == active else '')
+                  .replace('{cur:%s}' % key, 'aria-current="page"' if key == active else ''))
+    out = shell.replace('{bar}', bar)
+    for k, v in subs.items():
+        out = out.replace('{%s}' % k, v)
+    return out
+
+
 def main():
     data_file = DIST / 'icons.json'
     if not data_file.exists():
@@ -78,7 +95,6 @@ def main():
         shutil.rmtree(OUT)
     OUT.mkdir()
 
-    shell = (DOCS / 'templates' / 'index.html').read_text()
     # The sidebar and the grouped grid are both built client-side from
     # #icon-data (see site.js) — categories only need counting here, for
     # the kicker line ("N icons · N categories").
@@ -94,25 +110,27 @@ def main():
         shutil.copy(DIST / f, OUT / f)
     shutil.copytree(DIST / 'svg', OUT / 'svg')
 
-    page = (shell
-            .replace('{name}', NAME)
-            .replace('{site}', SITE)
-            .replace('{count}', str(len(icons)))
-            .replace('{catcount}', str(catcount))
-            .replace('{sprite}', sprite)
-            .replace('{data}', json.dumps(icons, separators=(',', ':'))))
+    bar = (DOCS / 'templates' / '_bar.html').read_text()
+    common = {
+        'name': NAME,
+        'site': SITE,
+        'count': str(len(icons)),
+        'catcount': str(catcount),
+        'sprite': sprite,
+        # Every page carries the set, so the bar's search works on all of them.
+        # It is the one payload worth repeating: a search that only exists on
+        # one page is a search people learn not to reach for.
+        'data': json.dumps(icons, separators=(',', ':')),
+    }
 
-    (OUT / 'index.html').write_text(fingerprint(page))
-
-    # The showcase. Same sprite, same stylesheets, no icon data — it is a page
-    # of worked examples, not a second browser, so it needs no index.
-    usage = ((DOCS / 'templates' / 'usage.html').read_text()
-             .replace('{name}', NAME)
-             .replace('{site}', SITE)
-             .replace('{count}', str(len(icons)))
-             .replace('{sprite}', sprite))
-    (OUT / 'usage').mkdir()
-    (OUT / 'usage' / 'index.html').write_text(fingerprint(usage))
+    for slug, template, active in (('', 'home.html', 'home'),
+                                   ('icons', 'icons.html', 'icons'),
+                                   ('usage', 'usage.html', 'usage')):
+        shell = (DOCS / 'templates' / template).read_text()
+        html = fingerprint(page(shell, bar, active, common))
+        folder = OUT / slug if slug else OUT
+        folder.mkdir(exist_ok=True)
+        (folder / 'index.html').write_text(html)
 
     (OUT / '.nojekyll').write_text('')
     (OUT / 'CNAME').write_text(SITE.split('//')[1] + '\n')
@@ -121,10 +139,11 @@ def main():
         '<?xml version="1.0" encoding="UTF-8"?>'
         f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
         f'<url><loc>{SITE}/</loc></url>'
+        f'<url><loc>{SITE}/icons/</loc></url>'
         f'<url><loc>{SITE}/usage/</loc></url></urlset>')
 
     print(f'built the icons site: {len(icons)} icons, {catcount} categories '
-          f'-> site/ (browser + showcase)')
+          f'-> site/ (home + browser + showcase)')
     return 0
 
 
