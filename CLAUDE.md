@@ -65,7 +65,7 @@ otherwise regenerate for you, and never hand-edit `dist/` or `site/` at all — 
 fully generated and gitignored.
 
 A closed path gets a solid variant for free (build.py fills it); an open path (arrow,
-chevron, check, …) does not — see README.md's "49 icons without a solid variant" for
+chevron, check, …) does not — see README.md's "76 icons without a solid variant" for
 why that's a deliberate gap, not a bug.
 
 ## Two things build.py will let you break quietly
@@ -77,8 +77,8 @@ match on the literal string `<path d="`, and pathLength lands between the tag na
 and that attribute. They are therefore handed `raw`, the unmeasured body; everything
 emitted is handed `body`. Feed them `body` by mistake and no icon looks fillable any
 more — the set silently loses its solid variant and the build still reports success.
-The "49 icons have no solid variant" line in the build output is the canary: if it
-jumps to 61, this is what happened.
+The "76 icons have no solid variant" line in the build output is the canary: if it
+jumps to 100, this is what happened.
 
 **Colour is a layer, never geometry.** The source SVGs carry no colour and
 `validate.py` fails on a hard-coded one. `--ic-primary` and friends live in the

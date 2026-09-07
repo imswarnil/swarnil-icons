@@ -94,7 +94,7 @@ def measured(body):
     runtime. pathLength="1" redefines the path's own length as 1, so
     `stroke-dasharray: 1; stroke-dashoffset: 1` means "completely hidden" for
     every icon in the set regardless of its actual geometry, and one CSS rule
-    animates all 61.
+    animates all 100.
 
     It changes nothing else. pathLength is inert unless something asks for a
     dash pattern or a marker interval.
@@ -361,7 +361,7 @@ CSS = """/* ====================================================================
 /* The second colour, on the parts of the icon after the first. build.py emits
    one element per subpath precisely so this rule has something to hold: the
    page and its folded corner, the tray and its lid, the arrow's shaft and its
-   head. 47 of the 61 icons have two or more parts.
+   head. 85 of the 100 icons have two or more parts.
 
    Child selectors cannot cross into the shadow content of a <use>, so this
    line applies to INLINE markup — what the site serves and what "Copy SVG"

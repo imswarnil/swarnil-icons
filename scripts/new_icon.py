@@ -10,7 +10,7 @@
 WHY THIS EXISTS. The geometry table at the top of author.py is the source of
 truth for the whole set, and it has to stay that way — one table is what makes
 the wrapper, the viewBox, the stroke and the cap/join identical on every icon
-rather than 61 files slowly drifting apart. But "edit a Python dict literal in
+rather than 100 files slowly drifting apart. But "edit a Python dict literal in
 the right category block, with the right column alignment" is a poor first step
 for adding a drawing. So this writes that line for you, in the right place, and
 then runs the same author -> validate pass you would have run by hand.
