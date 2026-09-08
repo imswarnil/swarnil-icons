@@ -51,37 +51,37 @@ try {
   <section class="demo" id="cards">
     <div class="demo__head">
       <h2 class="demo__title">Marketing cards</h2>
-      <p class="demo__note">The commonest job an icon set ever does. <code class="code">ic-lg ic-primary</code> in a soft tile, one hue for the lot — a feature grid is not the place for six colours.</p>
+      <p class="demo__note">The commonest job an icon set ever does. <code class="code">ic-lg ic-primary</code> in a soft tile, one hue for the lot — a feature grid is not the place for six colours. Every mark here also carries <code class="code">ic-flicker</code>, on its own <code class="code">--ic-dur</code>, so the six drop out at different moments and the grid reads as a wall of screens rather than as one blinking light. That is the whole discipline of the effect: each icon is steady for nine tenths of its cycle, and they never agree on which tenth.</p>
     </div>
 
     <div class="cards">
       <article class="card">
-        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-capture" /></svg></span>
+        <span class="card__mark"><svg class="ic ic-lg ic-flicker" style="--ic-dur: 4.6s" aria-hidden="true"><use href="#i-capture" /></svg></span>
         <h3 class="card__title">Drawn from scratch</h3>
         <p class="card__text">Nothing traced, nothing re-licensed. The geometry is original, which is what lets the set ship MIT without inheriting anyone's attribution clause.</p>
       </article>
       <article class="card">
-        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-type" /></svg></span>
-        <h3 class="card__title">Five weights, one path</h3>
+        <span class="card__mark"><svg class="ic ic-lg ic-flicker" style="--ic-dur: 5.9s" aria-hidden="true"><use href="#i-type" /></svg></span>
+        <h3 class="card__title">Three weights, one path</h3>
         <p class="card__text">Every weight is generated from the same geometry, so <code class="code">bold</code> cannot drift away from <code class="code">line</code> the way two hand-drawn files always eventually do.</p>
       </article>
       <article class="card">
-        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-activity" /></svg></span>
+        <span class="card__mark"><svg class="ic ic-lg ic-flicker" style="--ic-dur: 7.3s" aria-hidden="true"><use href="#i-activity" /></svg></span>
         <h3 class="card__title">Motion included</h3>
         <p class="card__text">Six animations, each with an in, an out and a loop. The draw needs no JavaScript — the build stamps a normalised path length so one CSS rule animates all of them.</p>
       </article>
       <article class="card">
-        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-aperture" /></svg></span>
+        <span class="card__mark"><svg class="ic ic-lg ic-flicker" style="--ic-dur: 6.1s" aria-hidden="true"><use href="#i-aperture" /></svg></span>
         <h3 class="card__title">Colour that follows yours</h3>
         <p class="card__text">Every token reads your design system's <code class="code">--accent</code> first and falls back to ours. Repoint one line and the icons rebrand with everything else.</p>
       </article>
       <article class="card">
-        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-box" /></svg></span>
+        <span class="card__mark"><svg class="ic ic-lg ic-flicker" style="--ic-dur: 8.7s" aria-hidden="true"><use href="#i-box" /></svg></span>
         <h3 class="card__title">No dependencies</h3>
         <p class="card__text">A sprite, a stylesheet and a JSON index. Nothing to install, nothing to build, nothing that can go stale in a lockfile.</p>
       </article>
       <article class="card">
-        <span class="card__mark"><svg class="ic ic-lg" aria-hidden="true"><use href="#i-circle-check" /></svg></span>
+        <span class="card__mark"><svg class="ic ic-lg ic-flicker" style="--ic-dur: 5.2s" aria-hidden="true"><use href="#i-circle-check" /></svg></span>
         <h3 class="card__title">Enforced, not described</h3>
         <p class="card__text">Every rule in STYLE.md is a number, and the build fails when an icon breaks one. A style guide that is not executable is a wish.</p>
       </article>
@@ -92,13 +92,13 @@ try {
   <section class="demo">
     <div class="demo__head">
       <h2 class="demo__title">Thumbnails and the scanline</h2>
-      <p class="demo__note">The scanline's real job. <code class="code">ic-scan ic-tv-loop</code> over a filled icon reads as a screen, which is exactly what a video tile is — and the record dot marks the one that is live.</p>
+      <p class="demo__note">The scanline's real job. It is ONE raster — thirty-four lines to the icon, too fine to count — and a mask rather than geometry, so a bold stroke at <code class="code">ic-2xl</code> is what it wants: enough line for the raster to cut across without dashing it. Static it reads as a surface; <code class="code">ic-scan-roll</code> passes the raster over it as a shimmer, <code class="code">ic-flicker</code> drops the tube for two frames, and <code class="code">ic-tv-loop</code> is both. The record dot marks the one that is live.</p>
     </div>
 
     <div class="thumbs">
       <a class="thumb" href="#cards">
         <span class="thumb__art">
-          <svg class="ic ic-2xl ic-solid ic-primary ic-scan ic-tv-loop" aria-hidden="true"><use href="#i-video" /></svg>
+          <svg class="ic ic-2xl ic-bold ic-primary ic-scan ic-tv-loop" aria-hidden="true"><use href="#i-video" /></svg>
         </span>
         <span class="thumb__meta">
           <span class="thumb__title">Drawing the set</span>
@@ -109,7 +109,7 @@ try {
 
       <a class="thumb" href="#cards">
         <span class="thumb__art">
-          <svg class="ic ic-2xl ic-solid ic-primary ic-scan" aria-hidden="true"><use href="#i-camera" /></svg>
+          <svg class="ic ic-2xl ic-bold ic-primary ic-scan" aria-hidden="true"><use href="#i-camera" /></svg>
         </span>
         <span class="thumb__meta">
           <span class="thumb__title">Frame &amp; Signal</span>
@@ -119,7 +119,7 @@ try {
 
       <a class="thumb" href="#cards">
         <span class="thumb__art">
-          <svg class="ic ic-2xl ic-solid ic-primary ic-scan" aria-hidden="true"><use href="#i-headphones" /></svg>
+          <svg class="ic ic-2xl ic-bold ic-primary ic-scan ic-flicker" aria-hidden="true"><use href="#i-headphones" /></svg>
         </span>
         <span class="thumb__meta">
           <span class="thumb__title">On the grid</span>
@@ -129,13 +129,13 @@ try {
 
       <a class="thumb" href="#cards">
         <span class="thumb__art">
-          <svg class="ic ic-2xl ic-rgb ic-rgb-loop" aria-hidden="true"><use href="#i-browser" /></svg>
+          <svg class="ic ic-2xl ic-bold ic-primary ic-scan ic-scan-roll" aria-hidden="true"><use href="#i-browser" /></svg>
         </span>
         <span class="thumb__meta">
-          <span class="thumb__title">Losing lock</span>
+          <span class="thumb__title">Still warming up</span>
           <span class="thumb__sub"><svg class="ic ic-xs ic-inline" aria-hidden="true"><use href="#i-clock" /></svg> 4:11</span>
         </span>
-        <span class="badge"><code class="code">ic-rgb</code></span>
+        <span class="badge"><code class="code">ic-scan-roll</code></span>
       </a>
     </div>
   </section>
@@ -219,7 +219,7 @@ try {
         <p class="ui__label">Status</p>
         <div class="notes">
           <p class="note note--ok"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-circle-check" /></svg> Every icon passed the style audit.</p>
-          <p class="note note--info"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-circle-info" /></svg> 49 icons have no solid variant, on purpose.</p>
+          <p class="note note--info"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-circle-info" /></svg> 24 of 103 icons enclose an area and take the wash.</p>
           <p class="note note--warn"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-circle-alert" /></svg> The scanline wants lg or larger.</p>
           <p class="note note--bad"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-x" /></svg> A hard-coded colour will fail the build.</p>
         </div>
@@ -252,12 +252,23 @@ try {
     </div>
   </section>
 
+  <!-- ── 6 · the ask ───────────────────────────────────────────────────
+       A star is the only currency a free MIT set has, and a link that says
+       "Star on GitHub" in a row of four buttons is not an ask, it is a
+       footnote. So this one is its own section, it says what the star is
+       actually for, and the star itself is drawn from the set — pulsing,
+       because the one moment a decorative animation earns its place is on
+       the single thing you want somebody to click. -->
   <section class="uclose">
-    <h2 class="uclose__title">Take the set</h2>
-    <p class="uclose__text">Every example above is markup you can copy off the browser page — same classes, same sprite, no extra stylesheet.</p>
+    <span class="uclose__mark">
+      <svg class="ic ic-2xl ic-primary ic-pulse-loop" aria-hidden="true"><use href="#i-star" /></svg>
+    </span>
+    <h2 class="uclose__title">If the set is useful, star it.</h2>
+    <p class="uclose__text">Everything above is markup you can copy off the browser page — same classes, same sprite, no extra stylesheet, and MIT with no attribution clause to honour. There is nothing to buy and nothing to sign up for, so a star is the only signal that any of this was worth drawing. It also decides what gets drawn next: the categories people star and open are the ones that grow.</p>
     <div class="hero__cta">
-      <a class="btn btn-primary" href="/"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-search" /></svg> Browse the set</a>
-      <a class="btn btn-outline" href="https://github.com/imswarnil/swarnil-icons" rel="noopener"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-star" /></svg> Star on GitHub</a>
+      <a class="btn btn-primary" href="https://github.com/imswarnil/swarnil-icons" rel="noopener"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-star" /></svg> Star on GitHub</a>
+      <a class="btn btn-outline" href="/icons/"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-search" /></svg> Browse the set</a>
+      <a class="btn btn-quiet" href="https://github.com/imswarnil/swarnil-icons/issues" rel="noopener"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-plus" /></svg> Request an icon</a>
     </div>
   </section>
 </main>

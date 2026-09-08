@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 96" width="288" height="96" fill="none" role="img" aria-label="The three weights: thin, regular and bold"><title>The three weights: thin, regular and bold</title><style>
+svg { stroke: #1c1c22; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+[fill="currentColor"] { fill: #1c1c22; stroke: none; }
+.cap { font: 500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #6b6b78; stroke: none; letter-spacing: .02em; }
+.cap--on { fill: #e2593a; }
+.accent { stroke: #e2593a; }
+.accent [fill="currentColor"] { fill: #e2593a; }
+@media (prefers-color-scheme: dark) {
+  svg { stroke: #e9e9ee; }
+  [fill="currentColor"] { fill: #e9e9ee; }
+  .cap { fill: #9a9aa8; }
+  .cap--on { fill: #e2593a; }
+  .accent { stroke: #e2593a; }
+  .accent [fill="currentColor"] { fill: #e2593a; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; stroke-dasharray: none !important;
+       stroke-dashoffset: 0 !important; opacity: 1 !important; }
+}
+</style><g transform="translate(24 12) scale(2.0)" stroke-width="1"><g><path pathLength="1" d="M4 9V6a2 2 0 0 1 2-2h3"/><path pathLength="1" d="M15 4h3a2 2 0 0 1 2 2v3"/><path pathLength="1" d="M20 15v3a2 2 0 0 1-2 2h-3"/><path pathLength="1" d="M9 20H6a2 2 0 0 1-2-2v-3"/><circle pathLength="1" cx="12" cy="12" r="3"/></g></g><text x="48" y="78" class="cap" text-anchor="middle">thin · ic-thin</text><g transform="translate(120 12) scale(2.0)" stroke-width="1.5"><g><path pathLength="1" d="M4 9V6a2 2 0 0 1 2-2h3"/><path pathLength="1" d="M15 4h3a2 2 0 0 1 2 2v3"/><path pathLength="1" d="M20 15v3a2 2 0 0 1-2 2h-3"/><path pathLength="1" d="M9 20H6a2 2 0 0 1-2-2v-3"/><circle pathLength="1" cx="12" cy="12" r="3"/></g></g><text x="144" y="78" class="cap" text-anchor="middle">regular · ic-line</text><g transform="translate(216 12) scale(2.0)" stroke-width="2"><g><path pathLength="1" d="M4 9V6a2 2 0 0 1 2-2h3"/><path pathLength="1" d="M15 4h3a2 2 0 0 1 2 2v3"/><path pathLength="1" d="M20 15v3a2 2 0 0 1-2 2h-3"/><path pathLength="1" d="M9 20H6a2 2 0 0 1-2-2v-3"/><circle pathLength="1" cx="12" cy="12" r="3"/></g></g><text x="240" y="78" class="cap" text-anchor="middle">bold · ic-bold</text></svg>

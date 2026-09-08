@@ -99,6 +99,10 @@ def main():
     # #icon-data (see site.js) — categories only need counting here, for
     # the kicker line ("N icons · N categories").
     catcount = len({i['category'] for i in icons})
+    # The facts strip says how many weights there are, and a hand-typed number
+    # there is a number that will be wrong one release after somebody changes
+    # the variant table. Every icon carries the same list, so ask one.
+    weights = len(icons[0]['variants'])
 
     # The page's own chrome is built out of the set, so the sprite is inlined
     # rather than fetched — one request fewer, and no moment on load where the
@@ -116,6 +120,7 @@ def main():
         'site': SITE,
         'count': str(len(icons)),
         'catcount': str(catcount),
+        'weights': str(weights),
         'sprite': sprite,
         # Every page carries the set, so the bar's search works on all of them.
         # It is the one payload worth repeating: a search that only exists on

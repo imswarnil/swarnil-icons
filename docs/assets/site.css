@@ -90,6 +90,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-sm); }
 
+/* nowrap, because a class name broken across two lines reads as two class
+   names — `ic-` on one line and `flicker` on the next is not a thing anyone
+   can copy. A chip that overflows a narrow column is the lesser problem. */
 .code {
 	font-family: var(--font-slate);
 	font-size: 0.875em;
@@ -97,7 +100,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 	border: 1px solid var(--line-subtle);
 	border-radius: var(--radius-sm);
 	padding: 0.1em 0.35em;
+	white-space: nowrap;
 }
+
+/* …except in a code BLOCK, which is already preformatted and whose own
+   whitespace rule must win. */
+.code__pre .code, pre .code { white-space: inherit; }
 
 .kbd {
 	font-family: var(--font-slate);
@@ -474,7 +482,13 @@ main { padding-inline: var(--gutter); }
 	display: flex; flex-direction: column; align-items: center; justify-content: center;
 	gap: .625rem; aspect-ratio: 1;
 	border: 1px solid var(--line-subtle); border-radius: var(--radius-lg);
-	color: var(--fg-default);
+	/* --ic-ink, not --fg-default, so the Secondary rail reaches the icons in
+	   every style rather than only in Multi. It resolves to the page's own
+	   foreground until something sets it, so this is the same colour it always
+	   was — it is just now the one the rail can move. The colour sits on the
+	   CELL rather than on the svg so that .ic-multi, which sets `color` on the
+	   element itself, still wins for the marks it is meant to carry. */
+	color: var(--ic-ink);
 	transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
 	position: relative;
 }
@@ -818,9 +832,10 @@ main { padding-inline: var(--gutter); }
 
 /* ── Palette swatches ─────────────────────────────────────────────────────
    Smaller than the other toggles, because a colour needs no room to be read
-   and seven of them still have to sit on one line. */
+   and seven of them still have to sit on one line — which is now literal:
+   nowrap, so a colour row is a row. The eyedropper rides at the end of it. */
 
-.opts--swatch { gap: .25rem; }
+.opts--swatch { gap: .25rem; flex-wrap: nowrap; }
 .opts--swatch .opt { inline-size: 1.5rem; block-size: 1.5rem; }
 .opts--swatch .opt__art { inline-size: 100%; block-size: 100%; }
 
@@ -868,3 +883,111 @@ main { padding-inline: var(--gutter); }
 .ac__row:hover,
 .ac__row[aria-selected='true'] { background: var(--accent-soft); }
 .ac__row[aria-selected='true'] .ac__name { color: var(--accent-fg); font-weight: 600; }
+
+
+/* ── Segmented groups ─────────────────────────────────────────────────────
+   Weight and size are the two controls whose choices have an ORDER — thin is
+   less than bold, S is less than XL — and a row of detached squares reads as a
+   set of unrelated alternatives. Joining them into one bar says "steps on a
+   scale" with geometry instead of with a label.
+
+   Each button still draws the real icon in the state it selects, which is why
+   this is a button group and not a slider: a slider's handle can only ever
+   point AT a value, where a button can show you it. The buttons share edges,
+   so the group needs one border rather than four, and the selected one lifts
+   out of the bar rather than merely tinting.
+
+   `flex: 1` on the buttons, so four sizes and three weights both fill the rail
+   exactly and the two rows line up down the left edge. */
+
+.opts--group {
+	display: flex; flex-wrap: nowrap; gap: 0;
+	border: 1px solid var(--line-default); border-radius: var(--radius-md);
+	overflow: hidden;
+	padding-inline: 0; margin-inline: .25rem;
+	background: var(--bg-surface);
+}
+
+.opts--group .opt {
+	flex: 1; inline-size: auto; block-size: 2rem;
+	border: 0; border-radius: 0;
+	border-left: 1px solid var(--line-subtle);
+	background: transparent;
+}
+
+.opts--group .opt:first-child { border-left: 0; }
+
+.opts--group .opt[aria-pressed='true'] {
+	background: var(--accent-soft);
+	/* The divider beside a selected button would cut through its own tint. */
+	border-left-color: transparent;
+}
+.opts--group .opt[aria-pressed='true'] + .opt { border-left-color: transparent; }
+
+.opts--group .opt:hover { background: var(--bg-muted); }
+
+/* ── Dropdowns ────────────────────────────────────────────────────────────
+   Motion is the one axis whose sample cannot show its answer at rail size: a
+   20px icon playing a three-second loop is a smudge, and ten buttons were
+   spending the rail's whole width to say two words. Two selects say it in two
+   lines and leave the space to the icons. */
+
+.selects { display: grid; grid-template-columns: 1fr 1fr; gap: .375rem; padding-inline: .25rem; }
+
+.sel { display: flex; flex-direction: column; gap: .1875rem; min-width: 0; }
+
+.sel__label {
+	font-size: .625rem; font-weight: 600; letter-spacing: .06em;
+	text-transform: uppercase; color: var(--fg-faint);
+}
+
+.sel__input {
+	width: 100%; min-width: 0;
+	height: 1.875rem; padding: 0 .375rem;
+	border: 1px solid var(--line-default); border-radius: var(--radius-md);
+	background: var(--bg-surface); color: var(--fg-default);
+	font: inherit; font-size: .8125rem;
+}
+
+.sel__input:hover { border-color: var(--line-strong); }
+
+/* ── A style's own options ────────────────────────────────────────────────
+   Scanline is the only style with anything to tune, so its controls appear
+   when it is chosen and are gone otherwise — a pitch selector sitting greyed
+   out beside Multi is furniture. The rule down the left says the two groups
+   belong to the toggle above them rather than being two more top-level
+   rails. */
+
+.sub {
+	margin: .625rem 0 0 .25rem; padding-left: .625rem;
+	border-left: 2px solid var(--accent-soft);
+}
+
+.sub .rail__head { padding-inline: 0; }
+.sub .rail__head--sub:first-child { padding-top: 0; }
+
+/* ── The eyedropper ───────────────────────────────────────────────────────
+   The last thing in each colour row: the named hues, then anything else. A
+   <label> around <input type="color"> rather than a button, because that is
+   the only control the platform will open a real picker for. The input fills
+   the label and shows the current colour, so the swatch IS the value. */
+
+.opt--pick { padding: 0; overflow: hidden; cursor: pointer; }
+.opt--pick.is-on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+.opt__pick {
+	inline-size: 100%; block-size: 100%;
+	padding: 0; border: 0; background: none;
+	appearance: none; -webkit-appearance: none;
+	cursor: pointer;
+}
+
+.opt__pick::-webkit-color-swatch-wrapper { padding: 2px; }
+.opt__pick::-webkit-color-swatch { border: 0; border-radius: var(--radius-sm); }
+.opt__pick::-moz-color-swatch { border: 0; border-radius: var(--radius-sm); }
+
+/* ── Style toggles ────────────────────────────────────────────────────────
+   Four of them, and they must not wrap to a second line — the row is short
+   enough to be read as one choice at a glance. */
+
+.opts--row { flex-wrap: nowrap; }

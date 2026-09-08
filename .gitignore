@@ -4,9 +4,14 @@ node_modules/
 __pycache__/
 *.pyc
 
-# Nothing generated is committed. `npm run build` rebuilds both.
+# Generated and NOT committed — `npm run build` rebuilds both.
 dist/
 site/
+
+# demo/ is generated too and IS committed, deliberately: README.md embeds those
+# strips by raw.githubusercontent URL on the default branch, and a gitignored
+# file renders there as a broken image. Regenerate with `npm run demos`; never
+# hand-edit them.
 
 # Reference images used while drawing a representational icon (see STYLE.md
 # 9) — local-only, unknown licence, never traced exactly and never shipped.

@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <title>{name} — {count} open-source icons, drawn from scratch</title>
-<meta name="description" content="A 24-grid stroked icon set. Five weights, six animations and a scanline, all from one geometry. MIT, no dependencies." />
+<meta name="description" content="A 24-grid stroked icon set. Three weights, six animations and a scanline, all from one geometry. MIT, no dependencies." />
 <link rel="canonical" href="{site}/" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="{name}" />
-<meta property="og:description" content="{count} icons on a 24 grid. Five weights and six animations from one geometry. MIT." />
+<meta property="og:description" content="{count} icons on a 24 grid. Three weights and six animations from one geometry. MIT." />
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
@@ -43,7 +43,7 @@ try {
         MIT · {count} icons · {catcount} categories · 24 grid
       </p>
       <h1 class="hero__title">Icons that know<br />what they are for.</h1>
-      <p class="hero__lead">Drawn from scratch on a 24&nbsp;grid — nothing traced, nothing re-licensed. Five weights and six animations generated from one geometry, so <code class="code">bold</code> can never drift away from <code class="code">line</code>. Take any icon at any size, in any colour, as SVG, PNG or JPG.</p>
+      <p class="hero__lead">Drawn from scratch on a 24&nbsp;grid — nothing traced, nothing re-licensed. Three weights and six animations generated from one geometry, so <code class="code">bold</code> can never drift away from <code class="code">line</code>. Take any icon at any size, in any colour, as SVG, PNG or JPG.</p>
       <div class="hero__cta">
         <a class="btn btn-primary" href="/icons/">
           <svg class="ic ic-sm" aria-hidden="true"><use href="#i-search" /></svg>
@@ -70,7 +70,7 @@ try {
        the build can confirm, not a marketing adjective. -->
   <section class="facts">
     <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-box" /></svg><b>{count}</b> icons</div>
-    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-type" /></svg><b>5</b> weights</div>
+    <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-type" /></svg><b>{weights}</b> weights</div>
     <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-activity" /></svg><b>6</b> animations</div>
     <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-crop" /></svg><b>24</b> grid</div>
     <div class="fact"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-minus" /></svg><b>0</b> dependencies</div>
@@ -107,9 +107,9 @@ import icons from
         <h3 class="use__head"><svg class="ic ic-sm ic-multi" aria-hidden="true"><use href="#i-aperture" /></svg> Colour and motion</h3>
         <p class="use__note">Colour reads your design system's <code class="code">--accent</code> if you have one, and falls back to ours if you do not.</p>
         <pre class="use__code"><code>ic-primary              brand colour
-ic-solid ic-primary     filled with it
+ic-thin  ic-bold        lighter, heavier
 ic-multi ic-multi-fill  three colours
-ic-scan ic-tv-loop      a screen</code></pre>
+ic-scan  ic-scan-roll   a screen</code></pre>
       </article>
     </div>
   </section>

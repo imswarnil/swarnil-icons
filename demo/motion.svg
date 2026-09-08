@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 96" width="480" height="96" fill="none" role="img" aria-label="Five animations on a loop: draw, fade, pop, spin and pulse"><title>Five animations on a loop: draw, fade, pop, spin and pulse</title><style>
+svg { stroke: #1c1c22; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+[fill="currentColor"] { fill: #1c1c22; stroke: none; }
+.cap { font: 500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #6b6b78; stroke: none; letter-spacing: .02em; }
+.cap--on { fill: #e2593a; }
+.accent { stroke: #e2593a; }
+.accent [fill="currentColor"] { fill: #e2593a; }
+@media (prefers-color-scheme: dark) {
+  svg { stroke: #e9e9ee; }
+  [fill="currentColor"] { fill: #e9e9ee; }
+  .cap { fill: #9a9aa8; }
+  .cap--on { fill: #e2593a; }
+  .accent { stroke: #e2593a; }
+  .accent [fill="currentColor"] { fill: #e2593a; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; stroke-dasharray: none !important;
+       stroke-dashoffset: 0 !important; opacity: 1 !important; }
+}
+
+.draw { stroke-dasharray: 1; animation: draw 2.4s cubic-bezier(.65,0,.35,1) infinite; }
+@keyframes draw { 0%,4% { stroke-dashoffset: 1; } 46%,64% { stroke-dashoffset: 0; }
+                  100% { stroke-dashoffset: -1; } }
+.fade { animation: fade 1.8s cubic-bezier(.65,0,.35,1) infinite; }
+@keyframes fade { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+.pop { transform-origin: 12px 12px; animation: pop 2.6s ease-in-out infinite; }
+@keyframes pop { 0%,70%,100% { transform: scale(1); } 78% { transform: scale(1.15); }
+                 86% { transform: scale(.97); } 93% { transform: scale(1.04); } }
+.spin { transform-origin: 12px 12px; animation: spin 1.4s linear infinite; }
+@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+.pulse { transform-origin: 12px 12px; animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); }
+                   50% { opacity: .65; transform: scale(1.08); } }
+</style><g transform="translate(24 12) scale(2.0)" stroke-width="1.5"><g class="draw"><path pathLength="1" d="M4 12h4l2-5 3 10 2-5h5"/></g></g><text x="48" y="78" class="cap" text-anchor="middle">ic-draw-loop</text><g transform="translate(120 12) scale(2.0)" stroke-width="1.5"><g class="fade"><path pathLength="1" d="M3 12c3-4.5 6-6.5 9-6.5s6 2 9 6.5c-3 4.5-6 6.5-9 6.5s-6-2-9-6.5z"/><circle pathLength="1" cx="12" cy="12" r="3"/></g></g><text x="144" y="78" class="cap" text-anchor="middle">ic-fade-loop</text><g transform="translate(216 12) scale(2.0)" stroke-width="1.5"><g class="pop"><path pathLength="1" d="M8 12l3 3 5-6"/><circle pathLength="1" cx="12" cy="12" r="8"/></g></g><text x="240" y="78" class="cap" text-anchor="middle">ic-pop-loop</text><g transform="translate(312 12) scale(2.0)" stroke-width="1.5"><g class="spin"><path pathLength="1" d="M20 5v5h-5"/><path pathLength="1" d="M4 19v-5h5"/><path pathLength="1" d="M19 10a7.5 7.5 0 0 0-13-3l-2 3"/><path pathLength="1" d="M5 14a7.5 7.5 0 0 0 13 3l2-3"/></g></g><text x="336" y="78" class="cap" text-anchor="middle">ic-spin-loop</text><g transform="translate(408 12) scale(2.0)" stroke-width="1.5"><g class="pulse"><circle pathLength="1" cx="12" cy="12" r="8"/><circle pathLength="1" cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></g></g><text x="432" y="78" class="cap" text-anchor="middle">ic-pulse-loop</text></svg>

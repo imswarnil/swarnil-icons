@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 804 66" width="804" height="66" fill="none" role="img" aria-label="A strip of the set drawing itself on"><title>A strip of the set drawing itself on</title><style>
+svg { stroke: #1c1c22; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+[fill="currentColor"] { fill: #1c1c22; stroke: none; }
+.cap { font: 500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #6b6b78; stroke: none; letter-spacing: .02em; }
+.cap--on { fill: #e2593a; }
+.accent { stroke: #e2593a; }
+.accent [fill="currentColor"] { fill: #e2593a; }
+@media (prefers-color-scheme: dark) {
+  svg { stroke: #e9e9ee; }
+  [fill="currentColor"] { fill: #e9e9ee; }
+  .cap { fill: #9a9aa8; }
+  .cap--on { fill: #e2593a; }
+  .accent { stroke: #e2593a; }
+  .accent [fill="currentColor"] { fill: #e2593a; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; stroke-dasharray: none !important;
+       stroke-dashoffset: 0 !important; opacity: 1 !important; }
+}
+
+.d { stroke-dasharray: 1; animation: d 3.6s cubic-bezier(.65,0,.35,1) infinite; }
+@keyframes d { 0%,6% { stroke-dashoffset: 1; } 40%,72% { stroke-dashoffset: 0; }
+               100% { stroke-dashoffset: -1; } }
+</style><g transform="translate(12 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 0ms"><path pathLength="1" d="M4 9V6a2 2 0 0 1 2-2h3"/><path pathLength="1" d="M15 4h3a2 2 0 0 1 2 2v3"/><path pathLength="1" d="M20 15v3a2 2 0 0 1-2 2h-3"/><path pathLength="1" d="M9 20H6a2 2 0 0 1-2-2v-3"/><circle pathLength="1" cx="12" cy="12" r="3"/></g></g><g transform="translate(78 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 140ms"><path pathLength="1" d="M4 9a2 2 0 0 1 2-2h2l2-3h4l2 3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle pathLength="1" cx="12" cy="13" r="3"/></g></g><g transform="translate(144 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 280ms"><circle pathLength="1" cx="12" cy="12" r="8"/><circle pathLength="1" cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></g></g><g transform="translate(210 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 420ms"><path pathLength="1" d="M8 8a5 5 0 0 0 0 8"/><path pathLength="1" d="M16 16a5 5 0 0 0 0-8"/><path pathLength="1" d="M5 5a9 9 0 0 0 0 14"/><path pathLength="1" d="M19 19a9 9 0 0 0 0-14"/><circle pathLength="1" cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></g></g><g transform="translate(276 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 560ms"><path pathLength="1" d="M4 10v4"/><path pathLength="1" d="M8 7v10"/><path pathLength="1" d="M12 4v16"/><path pathLength="1" d="M16 7v10"/><path pathLength="1" d="M20 10v4"/></g></g><g transform="translate(342 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 700ms"><path pathLength="1" d="M15 9l-2 4-4 2 2-4 4-2"/><circle pathLength="1" cx="12" cy="12" r="8"/></g></g><g transform="translate(408 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 840ms"><path pathLength="1" d="M12 3c3 2.5 4.5 6 4.5 9.5L14 16h-4L7.5 12.5C7.5 9 9 5.5 12 3z"/><path pathLength="1" d="M10 16l-2 4 3-1"/><path pathLength="1" d="M14 16l2 4-3-1"/><circle pathLength="1" cx="12" cy="10" r="2"/></g></g><g transform="translate(474 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 980ms"><path pathLength="1" d="M3 20h18"/><path pathLength="1" d="M4 20V10a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v2h2v8"/><path pathLength="1" d="M4 14h15"/><path pathLength="1" d="M6 20v-3a1.5 1.5 0 0 1 3 0v3"/><path pathLength="1" d="M10 20v-3a1.5 1.5 0 0 1 3 0v3"/><path pathLength="1" d="M14 20v-3a1.5 1.5 0 0 1 3 0v3"/></g></g><g transform="translate(540 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 1120ms"><path pathLength="1" d="M4.5 12a7.5 7.5 0 0 1 15 0z"/><path pathLength="1" d="M12 12v7"/><path pathLength="1" d="M3 19c2-2 4 2 6 0s4 2 6 0 4 2 6 0"/></g></g><g transform="translate(606 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 1260ms"><path pathLength="1" d="M3 11l4-4 4 4v6H3z"/><path pathLength="1" d="M13 12h8"/><path pathLength="1" d="M18 9l3 3-3 3"/></g></g><g transform="translate(672 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 1400ms"><path pathLength="1" d="M10 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path pathLength="1" d="M18 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/></g></g><g transform="translate(738 12) scale(1.75)" stroke-width="1.5"><g class="d" style="animation-delay: 1540ms"><path pathLength="1" d="M12 20s-8-4.7-8-9.5A4.5 4.5 0 0 1 12 8a4.5 4.5 0 0 1 8 2.5C20 15.3 12 20 12 20z"/></g></g></svg>

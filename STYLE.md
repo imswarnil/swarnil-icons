@@ -120,22 +120,31 @@ frame layer.
 
 Used on: capture, crop, focus, select, scan.
 
-## 5 · Variants
+## 5 · Weights
 
-Every icon ships in five weights from one source path. They are generated, not
+Every icon ships in three weights from one source path. They are generated, not
 redrawn, so they can never drift apart.
 
-| Variant | How | Use |
+| Weight | How | Use |
 | --- | --- | --- |
 | `line` | stroke `1.5` | the default |
 | `thin` | stroke `1` | dense UI, tables, 16px |
 | `bold` | stroke `2` | emphasis, 32px and up |
-| `solid` | fill `currentColor`, no stroke | selected / active states |
-| `duo` | primary stroke + secondary at `0.35` opacity | large decorative use |
 
-`solid` is the one that cannot be purely mechanical — a stroked outline filled in
-becomes a blob. Icons that need a genuinely different solid path declare one; the
-rest are generated. `validate.py` reports which is which so it stays honest.
+**A weight is the only variant this set has, and that is a rule rather than a
+gap.** The set is stroked; the only property a stroke has is its width, so a
+weight can be *derived* and is therefore guaranteed to agree with every other
+weight about what the icon is.
+
+A filled variant cannot be. Filling a path only makes an icon when the path is
+closed, and most of these are open — an arrow, a chevron, a check. Fill those
+and you get a blob. So `solid` would be either a second drawing per icon, free
+to drift from the first, or a variant most of the set does not have and every
+consumer has to guard against. Both are worse than not having it. Emphasis is
+`bold`; colour is `ic-primary`; a wash inside a closed icon is `ic-multi-fill`.
+
+`build.py` reports how many icons enclose an area, because that is what decides
+where a fill is safe.
 
 ## 6 · Naming
 
@@ -177,7 +186,7 @@ idea is wrong.
 
 1. viewBox is exactly `0 0 24 24`
 2. all geometry inside the `2 … 22` live area (circles may overshoot to `1.5`)
-3. stroke weight is one of the five declared values
+3. stroke weight is one of the three declared values
 4. `fill="none"` on stroked icons; no hard-coded colour anywhere
 5. horizontal and vertical lines sit on whole coordinates
 6. no `<style>`, no `class`, no `id` — an icon is geometry, not a stylesheet

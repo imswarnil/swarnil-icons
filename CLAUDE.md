@@ -13,7 +13,9 @@ icons.imswarnil.com/          (repo root — this is the whole project)
 ├── scripts/new_icon.py       writes a table entry for you (`npm run new`)
 ├── scripts/validate.py       enforces STYLE.md, --strict for CI
 ├── scripts/build.py          icons/ -> dist/ (sprite, css, motion css, json, svg)
-├── docs/build.py             dist/ -> site/ (two pages: browser + showcase)
+├── scripts/demos.py          dist/ -> demo/ (the animated strips README embeds)
+├── docs/build.py             dist/ -> site/ (three pages: pitch, browser, showcase)
+├── demo/                     generated but COMMITTED — README points at it on main
 ├── dist/                     generated, gitignored
 └── site/                     generated, gitignored — the whole Pages deploy artifact
 ```
@@ -21,12 +23,17 @@ icons.imswarnil.com/          (repo root — this is the whole project)
 Read `README.md` for the public-facing pitch and `STYLE.md` for the geometry rules
 `validate.py` enforces — both are already thorough; don't duplicate them here.
 
-## The site is two pages
+## The site is three pages
 
-`/` is the **browser** — what is in the set: search, filter, weight, size, colour,
-motion, copy, download. `/usage/` is the **showcase** — what the set looks like once
-it has a job: marketing cards, video thumbnails, interface chrome, scroll-triggered
-sections, the scanline and the RGB split.
+`/` is the **pitch** — what this is and why it exists. `/icons/` is the **browser**:
+search, filter, and one rail of controls over the grid — weight and size as segmented
+button groups (joined, because those two axes have an order), style as toggles, colour
+as two single-line swatch rows each ending in an eyedropper, animation as two dropdowns.
+Every toggle draws a real icon in the state it selects. The default style is Scanline.
+Picking either scanline reveals a flicker toggle; nothing else has sub-options.
+`/usage/` is the **showcase** — what the set looks like once it has a job: marketing
+cards (their marks flickering, each on its own `--ic-dur`), video thumbnails, interface
+chrome, scroll-triggered sections, and the scanline still, rolling and flickering.
 
 The rule for the showcase is that **every icon on it wears a class the package
 ships**. `usage.css` styles the surrounding cards, tiles and panels; it never
@@ -64,21 +71,33 @@ Never hand-edit files under `icons/` for anything build.py or docs/build.py woul
 otherwise regenerate for you, and never hand-edit `dist/` or `site/` at all — both are
 fully generated and gitignored.
 
-A closed path gets a solid variant for free (build.py fills it); an open path (arrow,
-chevron, check, …) does not — see README.md's "76 icons without a solid variant" for
-why that's a deliberate gap, not a bug.
+**Three weights and nothing else.** `thin`, `line`, `bold` — all generated from one
+path by changing the pen. There is no `solid` or `duo`; they were removed because a
+fill cannot be derived (79 of 103 icons are open paths, and filling those gives you a
+blob), so it would have been a second drawing per icon, free to drift. See README.md's
+"Why there is no filled variant". Emphasis is `ic-bold`, colour is `ic-primary`, and a
+wash inside a closed icon is `ic-multi-fill` — `icons.json` carries `closed` per icon
+so a consumer knows where that is safe.
 
 ## Two things build.py will let you break quietly
 
 **`raw` vs `body`.** build.py stamps `pathLength="1"` onto every path and circle in
 the *generated* output, which is what lets the motion layer draw an icon on with no
-JavaScript (README explains why). But `is_fillable()` and the solid generator both
-match on the literal string `<path d="`, and pathLength lands between the tag name
-and that attribute. They are therefore handed `raw`, the unmeasured body; everything
-emitted is handed `body`. Feed them `body` by mistake and no icon looks fillable any
-more — the set silently loses its solid variant and the build still reports success.
-The "76 icons have no solid variant" line in the build output is the canary: if it
-jumps to 100, this is what happened.
+JavaScript (README explains why). But `is_closed()` matches on the literal string
+`<path d="`, and pathLength lands between the tag name and that attribute. It is
+therefore handed `raw`, the unmeasured body; everything emitted is handed `body`.
+Feed it `body` by mistake and no icon reports itself closed any more — every icon
+silently loses the `ic-multi-fill` wash and the build still reports success. The
+"24 of 103 icons enclose an area" line in the build output is the canary: if the
+first number drops to 0, this is what happened.
+
+**The scanline is one raster, and its pitch has a floor.** `max(1.2px, size/60)` at 65%
+duty, in `scripts/build.py`'s `CSS` constant. Both halves matter: without the floor the
+gap between lines goes sub-pixel on a small icon and the effect silently disappears
+while still being "on"; without the fine ratio a big icon gets bars rather than a
+raster. There is deliberately no coarse/fine class — that was tried and removed, since
+a scanline with three thicknesses is three effects sharing a name. Consumers who want
+another pitch set the custom property inline.
 
 **Colour is a layer, never geometry.** The source SVGs carry no colour and
 `validate.py` fails on a hard-coded one. `--ic-primary` and friends live in the

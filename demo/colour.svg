@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 96" width="384" height="96" fill="none" role="img" aria-label="Mono, the brand colour, and the three-colour mode"><title>Mono, the brand colour, and the three-colour mode</title><style>
+svg { stroke: #1c1c22; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+[fill="currentColor"] { fill: #1c1c22; stroke: none; }
+.cap { font: 500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #6b6b78; stroke: none; letter-spacing: .02em; }
+.cap--on { fill: #e2593a; }
+.accent { stroke: #e2593a; }
+.accent [fill="currentColor"] { fill: #e2593a; }
+@media (prefers-color-scheme: dark) {
+  svg { stroke: #e9e9ee; }
+  [fill="currentColor"] { fill: #e9e9ee; }
+  .cap { fill: #9a9aa8; }
+  .cap--on { fill: #e2593a; }
+  .accent { stroke: #e2593a; }
+  .accent [fill="currentColor"] { fill: #e2593a; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; stroke-dasharray: none !important;
+       stroke-dashoffset: 0 !important; opacity: 1 !important; }
+}
+
+.multi { stroke: #1c1c22; }
+.multi [fill="currentColor"] { fill: #e2593a; }
+.multi > *:not(:first-child) { stroke: #e2593a; }
+.wash { fill: #f7ded7; }
+@media (prefers-color-scheme: dark) {
+  .multi { stroke: #e9e9ee; }
+  .wash { fill: #3a221c; }
+}
+</style><g transform="translate(24 12) scale(2.0)" stroke-width="1.5"><g><path pathLength="1" d="M4 9a2 2 0 0 1 2-2h2l2-3h4l2 3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle pathLength="1" cx="12" cy="13" r="3"/></g></g><text x="48" y="78" class="cap" text-anchor="middle">mono</text><g transform="translate(120 12) scale(2.0)" stroke-width="1.5"><g class="accent"><path pathLength="1" d="M4 9a2 2 0 0 1 2-2h2l2-3h4l2 3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle pathLength="1" cx="12" cy="13" r="3"/></g></g><text x="144" y="78" class="cap" text-anchor="middle">ic-primary</text><g transform="translate(216 12) scale(2.0)" stroke-width="1.5"><g class="multi"><path pathLength="1" d="M4 9a2 2 0 0 1 2-2h2l2-3h4l2 3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle pathLength="1" cx="12" cy="13" r="3"/></g></g><text x="240" y="78" class="cap" text-anchor="middle">ic-multi</text><g transform="translate(312 12) scale(2.0)" stroke-width="1.5"><g class="multi wash"><path pathLength="1" d="M4 9a2 2 0 0 1 2-2h2l2-3h4l2 3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle pathLength="1" cx="12" cy="13" r="3"/></g></g><text x="336" y="78" class="cap" text-anchor="middle">ic-multi-fill</text></svg>

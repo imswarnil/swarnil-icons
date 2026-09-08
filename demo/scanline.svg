@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 118" width="384" height="118" fill="none" role="img" aria-label="One scanline raster: still, rolling, and flickering"><title>One scanline raster: still, rolling, and flickering</title><style>
+svg { stroke: #1c1c22; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+[fill="currentColor"] { fill: #1c1c22; stroke: none; }
+.cap { font: 500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #6b6b78; stroke: none; letter-spacing: .02em; }
+.cap--on { fill: #e2593a; }
+.accent { stroke: #e2593a; }
+.accent [fill="currentColor"] { fill: #e2593a; }
+@media (prefers-color-scheme: dark) {
+  svg { stroke: #e9e9ee; }
+  [fill="currentColor"] { fill: #e9e9ee; }
+  .cap { fill: #9a9aa8; }
+  .cap--on { fill: #e2593a; }
+  .accent { stroke: #e2593a; }
+  .accent [fill="currentColor"] { fill: #e2593a; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; stroke-dasharray: none !important;
+       stroke-dashoffset: 0 !important; opacity: 1 !important; }
+}
+
+.scan {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 65%, transparent 65% 100%);
+          mask-image: linear-gradient(to bottom, #000 0 65%, transparent 65% 100%);
+  -webkit-mask-size: 100% 1.200px; mask-size: 100% 1.200px;
+  -webkit-mask-repeat: repeat; mask-repeat: repeat;
+}
+.roll { animation: roll 2.6s linear infinite; }
+@keyframes roll {
+  from { -webkit-mask-position: 0 0; mask-position: 0 0; }
+  to { -webkit-mask-position: 0 1.200px; mask-position: 0 1.200px; }
+}
+.flick { animation: roll 2.6s linear infinite, flick 5s steps(1, end) infinite; }
+@keyframes flick {
+  0%, 90%, 100% { opacity: 1; } 91% { opacity: .45; } 92% { opacity: 1; }
+  94% { opacity: .72; } 95% { opacity: 1; }
+}</style><g transform="translate(28 10) scale(3.0)" stroke-width="2" class="scan accent"><g><path pathLength="1" d="M4 9a2 2 0 0 1 2-2h2l2-3h4l2 3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle pathLength="1" cx="12" cy="13" r="3"/></g></g><text x="64" y="100" class="cap" text-anchor="middle">ic-scan</text><g transform="translate(156 10) scale(3.0)" stroke-width="2" class="scan roll accent"><g><path pathLength="1" d="M4 9a2 2 0 0 1 2-2h2l2-3h4l2 3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle pathLength="1" cx="12" cy="13" r="3"/></g></g><text x="192" y="100" class="cap" text-anchor="middle">+ ic-scan-roll</text><g transform="translate(284 10) scale(3.0)" stroke-width="2" class="scan flick accent"><g><path pathLength="1" d="M4 9a2 2 0 0 1 2-2h2l2-3h4l2 3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle pathLength="1" cx="12" cy="13" r="3"/></g></g><text x="320" y="100" class="cap" text-anchor="middle">+ ic-flicker</text></svg>

@@ -139,6 +139,31 @@ ICONS = {
     'compass':        ('travel', 'M15 9l-2 4-4 2 2-4 4-2', 'circle:12,12,8'),
     'luggage':        ('travel', 'M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M9 11v6M15 11v6'),
     'mountain':       ('travel', 'M9 13l3 3 3-3M2 20L12 10l10 10z'),
+    # A house and the direction it is going. Two halves rather than one glyph,
+    # because "relocation" is a move — a house alone is `home`.
+    'relocation':     ('travel', 'M3 11l4-4 4 4v6H3zM13 12h8M18 9l3 3-3 3'),
+    # Parasol, pole, water. The dome is an arc rather than a half-circle
+    # element so it closes back along its own diameter in one path.
+    'beach':          ('travel', 'M4.5 12a7.5 7.5 0 0 1 15 0zM12 12v7M3 19c2-2 4 2 6 0s4 2 6 0 4 2 6 0'),
+
+    # ── country ───────────────────────────────────────────────────────
+    # Named for the country, drawn as its landmark. That is the rule for this
+    # category, and it is the only one that scales: a flag is colour, and a
+    # colourless stroked set draws every tricolour identically — three bands in
+    # a box, which is `france` and `ireland` and `italy` all at once. A
+    # building is geometry, so it can be told apart.
+    #
+    # The Colosseum, and the STEP on the right is the whole icon. A wide box
+    # with a regular grid in it — which is where this drawing started — is
+    # `grid` and `browser` and a window, because a rectangle ruled into equal
+    # cells has no subject. The broken outer ring does: nothing else in a UI is
+    # a building missing its top storey on one side.
+    #
+    # ONE tier of arches, not the real four. At 16px an arch three units wide
+    # is 2px; a second row of them is a grey bar, not an arcade. So the attic
+    # above is left as plain wall, which is what the real attic storey is
+    # anyway — STYLE.md's 16px floor deciding the drawing rather than taste.
+    'italy':          ('country', 'M3 20h18M4 20V10a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v2h2v8M4 14h15M6 20v-3a1.5 1.5 0 0 1 3 0v3M10 20v-3a1.5 1.5 0 0 1 3 0v3M14 20v-3a1.5 1.5 0 0 1 3 0v3'),
 
     # ── writing ───────────────────────────────────────────────────────────
     'book':           ('writing', 'M4 5a1 1 0 0 1 1-1h6v16H5a1 1 0 0 0-1 1zM20 5a1 1 0 0 0-1-1h-6v16h6a1 1 0 0 1 1 1z'),

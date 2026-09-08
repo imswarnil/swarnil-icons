@@ -5,10 +5,11 @@
       sprite.svg              one <symbol> per icon; one request for the set
       swarnil-icons.css       sizing, variants, alignment
       icons.json              the index the docs site and any tool reads
-      svg/<variant>/<n>.svg   standalone files, one per variant
+      svg/<weight>/<n>.svg    standalone files, one per weight
 
-Variants are GENERATED from one source path, never redrawn, so `bold` cannot
-drift away from `line`. That is the whole reason the geometry lives in one file.
+The three weights are GENERATED from one source path, never redrawn, so `bold`
+cannot drift away from `line`. That is the whole reason the geometry lives in
+one file.
 
     python3 scripts/build.py
 """
@@ -21,8 +22,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 ICONS = ROOT / 'icons'
 DIST = ROOT / 'dist'
 
-# name -> the stroke weight it renders at. `duo` is a weight plus a second,
-# faded pass; `solid` is not a weight at all and is handled separately.
+# name -> the stroke weight it renders at. This is the whole variant axis: the
+# set is stroked, and a weight is the only thing a stroke has. `solid` and `duo`
+# used to sit alongside these and no longer do — a filled variant is a second
+# drawing wearing the first one's name, and half the set could never have one.
 STROKE_VARIANTS = {'thin': '1', 'line': '1.5', 'bold': '2'}
 
 BODY = re.compile(r'<svg[^>]*>(.*)</svg>', re.S)
@@ -34,12 +37,15 @@ def body_of(src):
     return m.group(1) if m else ''
 
 
-def is_fillable(body):
-    """Can this icon have a MECHANICALLY generated solid variant?
+def is_closed(body):
+    """Does every path in this icon close?
 
-    Only if every path is closed. Filling an open path — an arrow, a chevron —
-    produces a blob, not an icon. STYLE.md says solid cannot be purely
-    mechanical; this is where that is decided rather than assumed.
+    It decides one thing: whether the icon encloses an area, and so whether a
+    FILL can be put inside it. `.ic-multi-fill` washes that area with the soft
+    primary; on an open path — an arrow, a chevron — the wash floods the region
+    the path merely implies, which is why it is a separate class rather than
+    part of `.ic-multi`. The answer travels to consumers as `closed` in
+    icons.json so nobody has to re-derive it from the path data.
     """
     paths = re.findall(r'<path d="([^"]+)"', body)
     if not paths and '<circle' in body:
@@ -118,43 +124,32 @@ def main():
         shutil.rmtree(DIST)
     DIST.mkdir()
 
-    index, symbols, no_solid = [], [], []
+    index, symbols, open_paths = [], [], []
 
     for f in files:
         name, cat = f.stem, f.parent.name
-        # RAW first, MEASURED second, and the order matters. is_fillable and
-        # the solid generation below both match on `<path d="`, so they have
-        # to see the geometry before pathLength is inserted between the tag
-        # name and the d attribute — otherwise every path stops matching, no
-        # icon looks fillable, and the whole set silently loses its solid
-        # variant. The source file itself is never touched either way.
+        # RAW first, MEASURED second, and the order matters. is_closed matches
+        # on `<path d="`, so it has to see the geometry before pathLength is
+        # inserted between the tag name and the d attribute — otherwise no path
+        # matches, every icon reports itself open, and the multicolour wash
+        # silently disappears from the whole set. The source file itself is
+        # never touched either way.
         raw = body_of(f.read_text())
         body = measured(split_paths(raw))
 
         symbols.append(f'<symbol id="i-{name}" viewBox="0 0 24 24">{body}</symbol>')
 
-        fillable = is_fillable(raw)
-        if not fillable:
-            no_solid.append(name)
+        closed = is_closed(raw)
+        if not closed:
+            open_paths.append(name)
 
-        variants = list(STROKE_VARIANTS)
-        if fillable:
-            variants.append('solid')
-        variants.append('duo')
-
-        index.append({'name': name, 'category': cat, 'body': body, 'variants': variants})
+        index.append({'name': name, 'category': cat, 'body': body,
+                      'variants': list(STROKE_VARIANTS), 'closed': closed})
 
         for v, w in STROKE_VARIANTS.items():
             out = DIST / 'svg' / v
             out.mkdir(parents=True, exist_ok=True)
             (out / f'{name}.svg').write_text(wrap(body, w))
-
-        if fillable:
-            out = DIST / 'svg' / 'solid'
-            out.mkdir(parents=True, exist_ok=True)
-            solid = raw.replace('<path d=', '<path fill="currentColor" stroke="none" d=')
-            solid = re.sub(r'<circle (?![^>]*fill=)', '<circle fill="currentColor" stroke="none" ', solid)
-            (out / f'{name}.svg').write_text(wrap(measured(split_paths(solid)), '1.5'))
 
     (DIST / 'sprite.svg').write_text(
         '<svg xmlns="http://www.w3.org/2000/svg" style="display:none">'
@@ -169,13 +164,13 @@ def main():
 
     cats = sorted({i['category'] for i in index})
     print(f'built {len(index)} icons · {len(cats)} categories · '
-          f'{len(STROKE_VARIANTS) + 1} variants -> dist/')
-    if no_solid:
-        # Reported, not hidden. An open path cannot be filled mechanically, and
-        # pretending otherwise would ship 20 blobs.
-        print(f'  {len(no_solid)} icons have no solid variant (open paths — '
-              f'a solid needs its own declared geometry):')
-        print('    ' + ', '.join(no_solid))
+          f'{len(STROKE_VARIANTS)} weights -> dist/')
+    # Reported, not hidden: these are the icons `.ic-multi-fill` must be kept
+    # off, and the count is the canary for the raw/body ordering above. If it
+    # ever jumps to the size of the set, `closed` is being computed against the
+    # measured body instead of the raw one.
+    print(f'  {len(index) - len(open_paths)} of {len(index)} icons enclose an '
+          f'area and take the multicolour wash; {len(open_paths)} are open paths')
     return 0
 
 
@@ -220,7 +215,11 @@ CSS = """/* ====================================================================
 .ic-2xl { --ic-size: 3rem; }      /* 48px */
 
 /* ── Weight ───────────────────────────────────────────────────────────────
-   One geometry, three weights. Nothing is redrawn, so they cannot drift.
+   One geometry, three weights, and that is the entire variant axis. Nothing is
+   redrawn, so they cannot drift: `bold` IS `line` with a wider pen.
+
+   `ic-line` is the default and needs no class. It has one because a weight you
+   can only get by omitting a class is a weight you cannot switch BACK to.
 
    The stroke does NOT scale with the icon, which is deliberate: a 48px icon
    with a proportionally scaled stroke reads as a fat 24px icon rather than as
@@ -229,20 +228,6 @@ CSS = """/* ====================================================================
 .ic-thin { --ic-stroke: 1; }
 .ic-line { --ic-stroke: 1.5; }
 .ic-bold { --ic-stroke: 2; }
-
-/* ── Solid ────────────────────────────────────────────────────────────────
-   Only for icons whose paths are closed. An open path — an arrow, a chevron —
-   filled is a blob, so those icons have no solid variant rather than a bad
-   one. build.py lists which. */
-
-.ic-solid { --ic-fill: currentColor; stroke: none; }
-
-/* ── Duo ──────────────────────────────────────────────────────────────────
-   The whole icon at reduced opacity with the first path at full strength.
-   For large decorative use, where a flat single weight looks thin. */
-
-.ic-duo { opacity: 0.4; }
-.ic-duo > :first-child { opacity: 2.5; }
 
 /* ── Alignment ────────────────────────────────────────────────────────────
    An icon beside text sits a hair high, because the cap height of the text is
@@ -258,11 +243,10 @@ CSS = """/* ====================================================================
    Two questions, and the second one is why this section exists.
 
    "Match the text it sits beside."  Do nothing — currentColor already does.
-   "Make it the brand colour."       .ic-primary. And the solid variant fills
-                                     with that colour too, because every helper
-                                     below sets `color` rather than `stroke`,
-                                     so stroke and fill move together and a
-                                     line icon and its solid never disagree.
+   "Make it the brand colour."       .ic-primary. Every helper below sets
+                                     `color` rather than `stroke`, so the
+                                     stroke and any fill move together and the
+                                     two can never disagree.
 
    ── WHERE THE VALUES COME FROM ────────────────────────────────────────────
    Every token reads the Swarnil Design System's token FIRST and falls back to
@@ -350,8 +334,8 @@ CSS = """/* ====================================================================
 
    The wash is a SEPARATE class because it is the one part that is not
    universally safe: filling an open path floods the region the path merely
-   implies, and half this set is open paths. Pair it with a closed icon — the
-   same ones that have a solid variant. */
+   implies, and half this set is open paths. Pair it with a closed icon —
+   icons.json says which, in `closed`. */
 
 .ic-multi {
 	stroke: var(--ic-ink);
@@ -392,22 +376,49 @@ CSS = """/* ====================================================================
    gradient with percentage stops. Two reasons, and the second is the one that
    matters: a tile has a real height, so the pattern can be SCROLLED by
    animating mask-position exactly one pitch, which loops seamlessly. A
-   percentage-stop gradient has nothing to move.
+   percentage-stop gradient has nothing to move. That is .ic-scan-roll, in the
+   motion layer.
 
-   The pitch is derived from the icon's own size, so the line count holds
-   steady as the icon scales instead of turning into a smear at 16px and a
-   fence at 160px. Override --ic-scan-pitch for a coarser or finer screen.
+   ── ONE RASTER, AND IT IS VERY FINE ──────────────────────────────────────
+   Sixty lines across the icon — but never finer than 1.2px, and that `max()`
+   is the whole design.
 
-   The duty cycle keeps most of the image and takes a thin sliver out, which
-   is what a CRT actually looks like — the old 50/50 version read as a barcode
-   rather than as a screen.
+   Deriving the pitch from the icon's size alone is the obvious move and it is
+   wrong at both ends. Pitch and duty together decide the width of the GAP, and
+   the gap IS the effect: a gap is only visible from about half a CSS pixel —
+   one device pixel on a 2x screen — so a 60th-of-the-size pitch on a 24px icon
+   leaves 0.18px, which is arithmetically a scanline and visually a plain icon.
+   That is this style's one failure mode and it looks exactly like nothing
+   being wrong. Coarsening the pitch to fix the small end then ruins the large
+   end, where the whole point is a raster too fine to count.
 
-   Being a mask it cuts strokes as well as fills, so pair it with a fill and
-   ic-lg or larger. It is a display style, not a UI one. */
+   The floor fixes both at once, and it is also the truer model. A real tube's
+   raster belongs to the SCREEN, not to the picture on it — shrink the picture
+   and the scan lines do not shrink with it. So: 1.2px, always, until the icon
+   is big enough that sixty lines are coarser than that, at which point the
+   line count takes over and holds steady as it scales.
+
+       ic-md   20px   pitch 1.20px   gap 0.42px
+       ic-2xl  48px   pitch 1.20px   gap 0.42px
+       96px           pitch 1.60px   gap 0.56px
+       240px          pitch 4.00px   gap 1.40px
+
+   ── DUTY ─────────────────────────────────────────────────────────────────
+   65%, and the number was chosen by looking rather than by arithmetic. Nearer
+   half maximises the CONTRAST of the pattern, which is the textbook answer and
+   the wrong one here: at 24px it takes so much out of a 1.5-unit stroke that
+   the icons stop looking scanned and start looking eroded — thin, patchy,
+   like a bad render. Much higher and the raster is gone by 48px. 65% is where
+   an icon keeps its weight at 24px and still shows a clear raster at 48px,
+   which is the range these are actually browsed at.
+
+   There is no coarse variant and no fine variant, because a scanline with
+   three thicknesses is three effects sharing a name — and the coarse one was
+   never a scanline at all: it was a set of bars lying across a picture. */
 
 .ic-scan {
-	--ic-scan-pitch: calc(var(--ic-size, 1.5rem) / 22);
-	--ic-scan-duty: 62%;
+	--ic-scan-pitch: max(1.2px, calc(var(--ic-size, 1.5rem) / 60));
+	--ic-scan-duty: 65%;
 
 	-webkit-mask-image: linear-gradient(to bottom, #000 0 var(--ic-scan-duty), transparent var(--ic-scan-duty) 100%);
 	        mask-image: linear-gradient(to bottom, #000 0 var(--ic-scan-duty), transparent var(--ic-scan-duty) 100%);
@@ -417,46 +428,20 @@ CSS = """/* ====================================================================
 	        mask-repeat: repeat;
 }
 
-/* ── RGB split ────────────────────────────────────────────────────────────
-   Chromatic aberration: the red channel pulled one way, the cyan the other,
-   the way a mistracked tube or a badly aligned lens shears colour off an edge.
+/* Both are still custom properties, so a project that genuinely wants a
+   coarser screen sets them — per instance, inline, without a class:
 
-   It is two drop-shadows rather than three copies of the icon. drop-shadow
-   takes the ALPHA of what it is drawn on and floods it with a colour, so a
-   single element gives you the fringe on both sides for free — and because it
-   follows the alpha rather than a box, it traces the actual shape of the icon,
-   strokes and all. Three stacked copies would need three elements and would
-   not survive a <use>.
+       <svg class="ic ic-2xl ic-scan" style="--ic-scan-pitch: 4px">
 
-   Red and cyan because they are the complementary pair: where the two fringes
-   overlap they cancel back to neutral, so the icon's own colour is untouched
-   and only the edges shear. Any other pairing tints the middle.
-
-   The shift is derived from --ic-size, NOT from em. On an SVG element `em`
-   resolves against the inherited FONT-SIZE — the surrounding text, usually
-   16px — and not against the icon's own dimensions, so an em offset stays the
-   same fraction of a pixel whether the icon renders at 16px or 160px. It looks
-   correct at one size by accident and wrong at every other. Every offset in
-   the motion layer is derived the same way, for the same reason. */
-
-.ic-rgb {
-	--ic-rgb-shift: calc(var(--ic-size, 1.5rem) * 0.035);
-	--ic-rgb-a: oklch(63% 0.24 25);
-	--ic-rgb-b: oklch(78% 0.14 195);
-
-	filter: drop-shadow(var(--ic-rgb-shift) 0 var(--ic-rgb-a))
-	        drop-shadow(calc(var(--ic-rgb-shift) * -1) 0 var(--ic-rgb-b));
-}
+   That is the escape hatch, and it is deliberately not a shipped class. */
 
 /* ── Two-tone ─────────────────────────────────────────────────────────────
    Stroke and fill pulled apart: the outline stays ink while the shape carries
    a wash of the accent. It is the one way to use colour on a stroked icon
-   without shouting, and it only works on icons whose paths are CLOSED — the
-   same ones that have a solid variant. On an open path the wash leaks out of
-   the shape, so pair it with a closed icon or leave it off.
-
-   These come after .ic-solid so `.ic-solid.ic-fill-primary` is a solid in the
-   brand colour rather than a fight over one custom property. */
+   without shouting, and it only works on icons whose paths are CLOSED. On an
+   open path the wash leaks out of the shape it merely implies, so pair it with
+   a closed icon or leave it off — icons.json carries a `closed` flag per icon
+   precisely so a consumer can decide that without parsing path data. */
 
 .ic-fill-primary { --ic-fill: var(--ic-primary); }
 .ic-fill-soft    { --ic-fill: var(--ic-primary-soft); }
@@ -477,7 +462,7 @@ CSS = """/* ====================================================================
 
 MOTION = """/* =============================================================================
    SWARNIL ICONS · MOTION
-   Five ways an icon can move, each with an in, an out and a loop.
+   Six ways an icon can move, five of them with an in, an out and a loop.
 
        <link rel="stylesheet" href="swarnil-icons.css">
        <link rel="stylesheet" href="swarnil-icons-motion.css">
@@ -490,16 +475,18 @@ MOTION = """/* =================================================================
      pop     scale with an overshoot — the one for a confirmation
      spin    rotation
      pulse   a slow breath, for something that is waiting
-     glitch  a signal dropping out for two frames and recovering
-     tv      a tube switching on, switching off, or humming — the loop
-             scrolls the .ic-scan mask, so the two are built to pair
-     rgb     .ic-rgb losing lock: the colour channels mistracking (loop only)
+     tv      a tube switching on, switching off, or humming
 
    times three:  -in    plays once and ends VISIBLE
                  -out   plays once and ends HIDDEN
                  -loop  repeats forever
 
-   So: .ic-draw-in, .ic-draw-out, .ic-draw-loop, .ic-fade-in … fifteen classes.
+   So: .ic-draw-in, .ic-draw-out, .ic-draw-loop, .ic-fade-in … eighteen classes.
+
+   Plus one that is not a motion so much as a surface: .ic-scan-roll scrolls
+   the .ic-scan mask, which is what turns a scanline from a texture into a
+   screen. It is listed with the TV section below, because they are the same
+   idea at two volumes.
 
    ── TIMING ────────────────────────────────────────────────────────────────
    Four custom properties, set anywhere — a theme, a component, one element:
@@ -525,8 +512,6 @@ MOTION = """/* =================================================================
    <use>: the rule sits on the <svg> and the value reaches the shadow content
    of a sprite reference, where a child selector could never go.
 
-   Draw needs a stroke to draw, so it does nothing on .ic-solid.
-
    ── REPLAYING ─────────────────────────────────────────────────────────────
    A CSS animation runs when the class arrives. It plays on load; to play it
    again, take the class off and put it back:
@@ -542,8 +527,7 @@ MOTION = """/* =================================================================
 .ic-fade-in, .ic-fade-out, .ic-fade-loop,
 .ic-pop-in, .ic-pop-out, .ic-pop-loop,
 .ic-spin-in, .ic-spin-out, .ic-spin-loop,
-.ic-pulse-in, .ic-pulse-out, .ic-pulse-loop,
-.ic-glitch-in, .ic-glitch-out, .ic-glitch-loop {
+.ic-pulse-in, .ic-pulse-out, .ic-pulse-loop {
 	animation-duration: var(--ic-dur, 600ms);
 	animation-delay: var(--ic-delay, 0ms);
 	animation-timing-function: var(--ic-ease, cubic-bezier(0.65, 0, 0.35, 1));
@@ -631,49 +615,6 @@ MOTION = """/* =================================================================
 @keyframes ic-pulse-out  { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(0.88); } }
 @keyframes ic-pulse-loop { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.65; transform: scale(1.08); } }
 
-/* ── Glitch ───────────────────────────────────────────────────────────────
-   A signal dropping out for two frames and recovering. It is the other half of
-   the same idea as the scanline: the design system is a record light, and this
-   is what a record light does when the feed stutters.
-
-   The restraint is the design. The loop sits PERFECTLY STILL for nine tenths
-   of its cycle and breaks for the last tenth — a permanent shudder is a broken
-   page, not a style. The displacement is in em so it tracks the icon's size,
-   and the coloured fringe is drop-shadow in the accent, so a glitch inherits
-   whatever the primary happens to be rather than hard-coding a cyan/magenta
-   that would fight every palette.
-
-   Off entirely under prefers-reduced-motion, with the rest. */
-
-.ic-glitch-in   { animation-name: ic-glitch-in; }
-.ic-glitch-out  { animation-name: ic-glitch-out; }
-.ic-glitch-loop { animation-name: ic-glitch-loop; animation-iteration-count: infinite; animation-duration: var(--ic-dur, 3.2s); }
-
-@keyframes ic-glitch-in {
-	0%   { opacity: 0; transform: translateX(calc(var(--ic-size, 1.5rem) * -0.12)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.1) 0 var(--ic-primary)); }
-	35%  { opacity: 1; transform: translateX(calc(var(--ic-size, 1.5rem) * 0.08)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * -0.08) 0 var(--ic-primary)); }
-	65%  { transform: translateX(calc(var(--ic-size, 1.5rem) * -0.03)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.03) 0 var(--ic-primary)); }
-	100% { opacity: 1; transform: none; filter: none; }
-}
-
-@keyframes ic-glitch-out {
-	0%   { opacity: 1; transform: none; filter: none; }
-	40%  { opacity: 1; transform: translateX(calc(var(--ic-size, 1.5rem) * 0.08)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * -0.08) 0 var(--ic-primary)); }
-	100% { opacity: 0; transform: translateX(calc(var(--ic-size, 1.5rem) * -0.12)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.1) 0 var(--ic-primary)); }
-}
-
-/* The clip-path steps are the dropout: for one frame only a band of the icon
-   survives, which is what a torn signal actually looks like. Displacement
-   alone reads as a wobble; losing part of the picture reads as a glitch. */
-@keyframes ic-glitch-loop {
-	0%, 86%   { transform: none; filter: none; clip-path: inset(0); }
-	87%       { transform: translateX(calc(var(--ic-size, 1.5rem) * -0.08)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.08) 0 var(--ic-primary)); clip-path: inset(26% 0 42% 0); }
-	89%       { transform: translateX(calc(var(--ic-size, 1.5rem) * 0.07)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * -0.07) 0 var(--ic-primary)); clip-path: inset(0); }
-	91%       { transform: translateX(calc(var(--ic-size, 1.5rem) * -0.04)); filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.04) 0 var(--ic-primary)); clip-path: inset(62% 0 8% 0); }
-	93%       { transform: translateX(calc(var(--ic-size, 1.5rem) * 0.02)); filter: none; clip-path: inset(0); }
-	95%, 100% { transform: none; filter: none; clip-path: inset(0); }
-}
-
 /* ── TV ───────────────────────────────────────────────────────────────────
    A cathode tube switching on, switching off, and sitting there humming. The
    other half of the scanline's idea: if the mask makes an icon look like a
@@ -690,6 +631,13 @@ MOTION = """/* =================================================================
    The roll is a no-op without .ic-scan — there is no mask to move — so
    .ic-tv-loop is safe on any icon and simply becomes the flicker alone.
 
+   .ic-scan-roll is the roll WITHOUT the flicker, .ic-flicker is the flicker
+   without the roll, and .ic-scan-roll.ic-flicker is both. The roll is the one
+   to reach for by default, and it is the reason the pitch is as fine as it is:
+   at 34 lines to the icon the moving mask is a SHIMMER passing over a surface,
+   where a coarse one would be a set of bars visibly crawling up the picture.
+   Slow it or speed it with --ic-scan-dur.
+
    `in` and `out` are the power stroke: the picture collapsing to a scan line
    and away, or blooming out of one.
 
@@ -702,6 +650,27 @@ MOTION = """/* =================================================================
 
 .ic-tv-loop {
 	animation: ic-tv-roll var(--ic-scan-dur, 1.8s) linear infinite,
+	           ic-tv-flicker var(--ic-dur, 5s) steps(1, end) infinite;
+}
+
+/* The TV's two halves, separately, because you will want one without the
+   other: a roll with no flicker is a working screen, a flicker with no roll is
+   a failing bulb, and .ic-tv-loop is both at once.
+
+   They cannot simply be listed together on an element — each is an animation
+   SHORTHAND, so the second would replace the first rather than join it. Hence
+   the combined rule, last, which is what actually plays when both classes are
+   present. Three rules for two flags is the price of the shorthand; the
+   alternative is longhand lists that no longer read as one effect. */
+
+.ic-flicker   { animation: ic-tv-flicker var(--ic-dur, 5s) steps(1, end) infinite; }
+
+/* Slower by default than the TV's, because without the flicker to punctuate it
+   the movement is the only thing there is. */
+.ic-scan-roll { animation: ic-tv-roll var(--ic-scan-dur, 2.6s) linear infinite; }
+
+.ic-scan-roll.ic-flicker {
+	animation: ic-tv-roll var(--ic-scan-dur, 2.6s) linear infinite,
 	           ic-tv-flicker var(--ic-dur, 5s) steps(1, end) infinite;
 }
 
@@ -729,45 +698,6 @@ MOTION = """/* =================================================================
 	0%   { opacity: 1; transform: none; filter: none; }
 	55%  { opacity: 1; transform: scaleY(0.05) scaleX(1.15); filter: brightness(1.8); }
 	100% { opacity: 0; transform: scaleY(0.01) scaleX(0.25); filter: brightness(3); }
-}
-
-/* ── RGB glitch ───────────────────────────────────────────────────────────
-   The split from .ic-rgb, but mistracking. The filter is animated with literal
-   values rather than by animating --ic-rgb-shift, because an unregistered
-   custom property is substituted at computed-value time and cannot be
-   interpolated — and it cannot be registered either, since @property forbids a
-   relative initial value and the whole point of the shift being in em is that
-   it tracks the icon's size.
-
-   steps(1) so the channels SNAP between alignments. Eased, it reads as a
-   wobble; stepped, it reads as a signal losing lock. Still for most of the
-   cycle, like the rest of the motion here. */
-
-.ic-rgb-loop {
-	animation: ic-rgb-loop var(--ic-dur, 3.4s) steps(1, end) infinite;
-}
-
-@keyframes ic-rgb-loop {
-	0%, 84%, 100% {
-		filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.045) 0 var(--ic-rgb-a)) drop-shadow(calc(var(--ic-size, 1.5rem) * -0.045) 0 var(--ic-rgb-b));
-		transform: none;
-	}
-	86% {
-		filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.14) 0 var(--ic-rgb-a)) drop-shadow(calc(var(--ic-size, 1.5rem) * -0.09) 0 var(--ic-rgb-b));
-		transform: translateX(calc(var(--ic-size, 1.5rem) * -0.035));
-	}
-	89% {
-		filter: drop-shadow(calc(var(--ic-size, 1.5rem) * -0.11) 0 var(--ic-rgb-a)) drop-shadow(calc(var(--ic-size, 1.5rem) * 0.12) 0 var(--ic-rgb-b));
-		transform: translateX(calc(var(--ic-size, 1.5rem) * 0.03));
-	}
-	92% {
-		filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.02) 0 var(--ic-rgb-a)) drop-shadow(calc(var(--ic-size, 1.5rem) * -0.02) 0 var(--ic-rgb-b));
-		transform: none;
-	}
-	95% {
-		filter: drop-shadow(calc(var(--ic-size, 1.5rem) * 0.09) 0 var(--ic-rgb-a)) drop-shadow(calc(var(--ic-size, 1.5rem) * -0.13) 0 var(--ic-rgb-b));
-		transform: translateX(calc(var(--ic-size, 1.5rem) * 0.02));
-	}
 }
 
 /* ── Stagger ──────────────────────────────────────────────────────────────
@@ -798,9 +728,8 @@ MOTION = """/* =================================================================
 	.ic-pop-in, .ic-pop-out, .ic-pop-loop,
 	.ic-spin-in, .ic-spin-out, .ic-spin-loop,
 	.ic-pulse-in, .ic-pulse-out, .ic-pulse-loop,
-	.ic-glitch-in, .ic-glitch-out, .ic-glitch-loop,
 	.ic-tv-in, .ic-tv-out, .ic-tv-loop,
-	.ic-rgb-loop,
+	.ic-scan-roll, .ic-flicker,
 	.ic-stagger > * {
 		animation: none !important;
 		stroke-dasharray: none !important;

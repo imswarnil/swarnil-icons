@@ -25,7 +25,7 @@
 	// would still be undefined at that point — every page would take the
 	// early return, including the one that needs the grid.
 	var sections = $('[data-sections]');
-	var STROKE = { thin: 1, line: 1.5, bold: 2, solid: 1.5, duo: 1.5 };
+	var STROKE = { thin: 1, line: 1.5, bold: 2 };
 
 	function byName(n) {
 		for (var i = 0; i < ICONS.length; i++) if (ICONS[i].name === n) return ICONS[i];
@@ -44,7 +44,9 @@
 	// the nav.
 	var CATICON = {
 		ui: 'menu', media: 'play', frame: 'capture',
-		editor: 'edit', status: 'record', social: 'heart'
+		editor: 'edit', status: 'record', social: 'heart',
+		travel: 'plane', country: 'italy', ai: 'sparkle',
+		dev: 'terminal', writing: 'book'
 	};
 	var grouped = {};
 	GROUPS.forEach(function (g) { g.categories.forEach(function (c) { grouped[c] = g; }); });
@@ -53,9 +55,16 @@
 		return LABELS[cat] || (cat.charAt(0).toUpperCase() + cat.slice(1));
 	}
 
+	/* The browser opens ON the scanline, because it is the thing about this set
+	   that a grid of glyphs cannot tell you — every other style here is one an
+	   icon set is assumed to have.
+
+	   The raster holds at every size — its pitch has a pixel floor — so the
+	   size default is free to be whatever browses best, which is md. */
 	var state = {
 		q: '', cat: '', variant: 'line', size: 'md',
-		color: 'multi', motion: 'off', mode: 'in'
+		color: 'scan', flicker: 'off',
+		motion: 'off', mode: 'in'
 	};
 	var current = null, size = 24, panelVariant = 'line';
 	var panelMotion = 'off', panelMode = 'in';
@@ -80,6 +89,10 @@
 	}
 	var primary = stored('si-primary', 'signal');
 	var secondary = stored('si-secondary', 'ink');
+	// The two eyedroppers. They keep their own hex so switching to a named hue
+	// and back returns the colour you mixed rather than a default.
+	var primaryCustom = stored('si-primary-custom', '#e2593a');
+	var secondaryCustom = stored('si-secondary-custom', '#3a6ee2');
 
 	/* The design system's tier-1 hues at their ~63% "full voice" step — one
 	   shared lightness ladder, so swapping between them changes the hue and
@@ -104,9 +117,14 @@
 	var INKS = { ink: '', signal: PALETTE.signal, azure: PALETTE.azure,
 	             iris: PALETTE.iris, mint: PALETTE.mint, craft: PALETTE.craft };
 
-	var MOTIONS = ['off', 'draw', 'fade', 'pop', 'spin', 'pulse', 'glitch'];
+	// What the two rails are actually SET to, named hue or mixed hex. Every
+	// reader goes through these rather than indexing the tables directly, so
+	// `custom` needs no special case anywhere else.
+	function primaryHue() { return primary === 'custom' ? primaryCustom : (PALETTE[primary] || PALETTE.signal); }
+	function secondaryHue() { return secondary === 'custom' ? secondaryCustom : INKS[secondary]; }
+
+	var MOTIONS = ['off', 'draw', 'fade', 'pop', 'spin', 'pulse', 'tv'];
 	var MODES = ['in', 'out', 'loop'];
-	var MODEICON = { in: 'arrow-down', out: 'arrow-up', loop: 'refresh' };
 
 	/* ── Theme ───────────────────────────────────────────────────────────── */
 
@@ -132,7 +150,7 @@
 
 	function applyPalette() {
 		var root = document.documentElement.style;
-		var c = PALETTE[primary] || PALETTE.signal;
+		var c = primaryHue();
 
 		root.setProperty('--accent', c);
 		// The two derived accent tones are mixed from the chosen hue rather
@@ -147,31 +165,39 @@
 		// fill rather than as a smudge.
 		root.setProperty('--ic-primary-soft', 'color-mix(in oklab, ' + c + ' 20%, transparent)');
 
-		var ink = INKS[secondary];
+		var ink = secondaryHue();
 		if (ink) root.setProperty('--ic-ink', ink);
 		else root.removeProperty('--ic-ink');
 
 		try {
 			localStorage.setItem('si-primary', primary);
 			localStorage.setItem('si-secondary', secondary);
+			localStorage.setItem('si-primary-custom', primaryCustom);
+			localStorage.setItem('si-secondary-custom', secondaryCustom);
 		} catch (e) {}
 	}
 	applyPalette();
 
 	/* ── Building one icon's SVG ─────────────────────────────────────────── */
 
-	function svgMarkup(icon, variant, px, cls) {
-		var solid = variant === 'solid';
-		var body = icon.body;
-		if (solid) {
-			body = body.replace(/<path /g, '<path fill="currentColor" stroke="none" ')
-			           .replace(/<circle (?![^>]*fill=)/g, '<circle fill="currentColor" stroke="none" ');
-		}
-		var op = variant === 'duo' ? ' opacity="0.45"' : '';
+	function svgMarkup(icon, variant, px, cls, style) {
 		return '<svg xmlns="http://www.w3.org/2000/svg" width="' + px + '" height="' + px + '"'
 			+ (cls ? ' class="' + cls + '"' : '')
+			+ (style ? ' style="' + style + '"' : '')
 			+ ' viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + STROKE[variant] + '"'
-			+ ' stroke-linecap="round" stroke-linejoin="round"' + op + '>' + body + '</svg>';
+			+ ' stroke-linecap="round" stroke-linejoin="round">' + icon.body + '</svg>';
+	}
+
+	/* A scanline sample.
+
+	   It states no pitch of its own: .ic-scan floors at 1.2px and a rail button
+	   draws at 20px, so the class already gives the sample the same raster the
+	   grid behind it is showing. That is what the floor bought — before it,
+	   this function had to state an exaggerated pitch in pixels to have
+	   anything to display at all, and a control showing an exaggeration of its
+	   answer is a control that can lie. */
+	function scanSample(extra) {
+		return svgMarkup(DEMO, 'bold', 20, ('ic-scan ' + extra).trim());
 	}
 
 	// The class the motion layer wants, or '' for off. One place, because the
@@ -288,20 +314,21 @@
 		}
 	});
 
-	// One delegated listener for every generated control, rather than rebinding
-	// after each repaint.
-	document.addEventListener('click', function (e) {
-		var GROUPS_ = ['variant', 'psize', 'colormode', 'motion', 'mode',
-		               'primary', 'secondary', 'pmotion', 'pmode'];
-		var b = e.target.closest(GROUPS_.map(function (g) { return '[data-' + g + ']'; }).join(','));
-		if (!b || !b.classList.contains('opt')) return;
+	/* One route in, whatever the control was.
 
-		var group = GROUPS_.filter(function (g) { return b.hasAttribute('data-' + g); })[0];
-		var v = b.getAttribute('data-' + group);
+	   The rail is two kinds of widget — toggles and dropdowns — and a colour
+	   can also be driven from the eyedropper beside its row rather than from a
+	   toggle at all. Every one of them lands here, so the rule for what a
+	   selection DOES is written once and cannot be half-implemented on the
+	   control that was added last. */
+	var GROUPS_ = ['variant', 'psize', 'colormode', 'flicker',
+	               'motion', 'mode', 'primary', 'secondary', 'pmotion', 'pmode'];
 
+	function choose(group, v) {
 		if (group === 'variant') state.variant = v;
 		if (group === 'psize') state.size = v;
 		if (group === 'colormode') state.color = v;
+		if (group === 'flicker') state.flicker = v;
 		if (group === 'motion') state.motion = v;
 		if (group === 'mode') state.mode = v;
 		if (group === 'primary') primary = v;
@@ -309,7 +336,7 @@
 		if (group === 'pmotion') panelMotion = v;
 		if (group === 'pmode') panelMode = v;
 
-		paintOpts(group, v);
+		repaintControl(group, v);
 		if (group === 'primary' || group === 'secondary') {
 			applyPalette();
 			// The sidebar samples are drawn markup, not live classes, so they
@@ -319,6 +346,36 @@
 			paintOpts('secondary', secondary);
 		}
 		if (group === 'pmotion' || group === 'pmode') paint(); else render();
+	}
+
+	function repaintControl(group, v) {
+		if (SELECTS[group]) paintSelect(group, v);
+		else paintOpts(group, v);
+	}
+
+	// One delegated listener for every generated control, rather than rebinding
+	// after each repaint.
+	document.addEventListener('click', function (e) {
+		var b = e.target.closest(GROUPS_.map(function (g) { return '[data-' + g + ']'; }).join(','));
+		if (!b || !b.classList.contains('opt')) return;
+
+		var group = GROUPS_.filter(function (g) { return b.hasAttribute('data-' + g); })[0];
+		choose(group, b.getAttribute('data-' + group));
+	});
+
+	document.addEventListener('input', function (e) {
+		var el = e.target;
+		// The eyedroppers. Setting the hex and selecting `custom` are one
+		// action — a colour you mixed and then had to click again to apply
+		// would be a bug report.
+		var c = el.getAttribute('data-custom');
+		if (c === 'primary') { primaryCustom = el.value; choose('primary', 'custom'); }
+		if (c === 'secondary') { secondaryCustom = el.value; choose('secondary', 'custom'); }
+	});
+
+	document.addEventListener('change', function (e) {
+		var g = e.target.getAttribute('data-select-input');
+		if (g) choose(g, e.target.value);
 	});
 
 	/* ── The hero showcase ───────────────────────────────────────────────── */
@@ -393,62 +450,70 @@
 	/* ── The display controls ────────────────────────────────────────────────
 	   Every one of these is generated, and every one previews itself. */
 
-	var DEMO = byName('aperture');      // closed paths, so `solid` is real
+	var DEMO = byName('aperture');      // a ring and a dot: reads at 20px
 	var MOVER = byName('activity');     // one open path, so `draw` reads clearly
 
 	var OPTS = {
 		variant: {
-			values: ['thin', 'line', 'bold', 'solid', 'duo'],
+			values: ['thin', 'line', 'bold'],
+			// `line` is the class name the package ships and `Regular` is what
+			// a weight in the middle is called. Both are true; the label is
+			// for the reader and the value is for the stylesheet.
+			label: { thin: 'Thin', line: 'Regular', bold: 'Bold' },
 			art: function (v) { return svgMarkup(DEMO, v, 20); }
 		},
 		psize: {
 			values: ['sm', 'md', 'lg', 'xl'],
+			label: { sm: 'S', md: 'M', lg: 'L', xl: 'XL' },
 			// Drawn at the size it selects, capped so the rail stays a rail.
 			art: function (v) { return svgMarkup(DEMO, 'line', { sm: 13, md: 16, lg: 20, xl: 26 }[v]); }
 		},
 		colormode: {
-			values: ['mono', 'multi', 'fill', 'scan', 'rgb'],
-			label: { mono: 'Mono', multi: 'Multi', fill: 'Fill', scan: 'Scanline', rgb: 'RGB' },
+			values: ['mono', 'multi', 'scan', 'scan-roll'],
+			label: { mono: 'Mono', multi: 'Multi', scan: 'Scanline', 'scan-roll': 'Scanline rolling' },
 			// Each sample is the real class doing the real thing, so a toggle
 			// cannot promise one look and deliver another.
 			art: function (v) {
 				if (v === 'multi') return svgMarkup(DEMO, 'line', 20, 'ic-multi ic-multi-fill');
-				if (v === 'fill') return svgMarkup(DEMO, 'solid', 20, 'ic-primary');
-				if (v === 'scan') return svgMarkup(DEMO, 'solid', 20, 'ic-primary ic-scan ic-tv-loop');
-				if (v === 'rgb') return svgMarkup(DEMO, 'line', 20, 'ic-rgb ic-rgb-loop');
+				if (v === 'scan') return scanSample('');
+				if (v === 'scan-roll') return scanSample('ic-scan-roll');
 				return svgMarkup(DEMO, 'line', 20);
+			}
+		},
+		flicker: {
+			values: ['off', 'on'],
+			label: { off: 'Steady', on: 'Flicker' },
+			art: function (v) {
+				return v === 'on' ? scanSample('ic-flicker') : svgMarkup(DEMO, 'bold', 20);
 			}
 		},
 		primary: {
 			values: Object.keys(PALETTE),
+			// `custom` is never one of `values` — it is what the eyedropper
+			// sets — but the rail heading still has to have a word for it.
 			label: { signal: 'Signal', craft: 'Craft', mint: 'Mint', teal: 'Teal',
-			         azure: 'Azure', iris: 'Iris', rose: 'Rose' },
-			art: function (v) { return '<span class="dot" style="background:' + PALETTE[v] + '"></span>'; }
+			         azure: 'Azure', iris: 'Iris', rose: 'Rose', custom: 'Custom' },
+			art: function (v) { return '<span class="dot" style="background:' + PALETTE[v] + '"></span>'; },
+			pick: function () { return picker('primary', primaryCustom); }
 		},
 		secondary: {
 			values: Object.keys(INKS),
 			label: { ink: 'Ink', signal: 'Signal', azure: 'Azure', iris: 'Iris',
-			         mint: 'Mint', craft: 'Craft' },
+			         mint: 'Mint', craft: 'Craft', custom: 'Custom' },
 			art: function (v) {
 				return '<span class="dot' + (v === 'ink' ? ' dot--ink' : '') + '"'
 					+ (INKS[v] ? ' style="background:' + INKS[v] + '"' : '') + '></span>';
-			}
+			},
+			pick: function () { return picker('secondary', secondaryCustom); }
 		},
 		motion: {
 			values: MOTIONS,
-			label: { off: 'None' },
-			// Always previewed as a LOOP, whatever the play mode is set to: an
-			// -in animation plays once and then the button sits there looking
-			// broken. The mode buttons below say what the grid will do.
-			art: function (v) {
-				return svgMarkup(MOVER, 'line', 20, motionClass(v, 'loop'));
-			}
+			label: { off: 'None', draw: 'Draw', fade: 'Fade', pop: 'Pop',
+			         spin: 'Spin', pulse: 'Pulse', tv: 'TV' }
 		},
 		mode: {
 			values: MODES,
-			art: function (v) {
-				return '<svg class="ic ic-sm" aria-hidden="true"><use href="#i-' + MODEICON[v] + '"/></svg>';
-			}
+			label: { in: 'In', out: 'Out', loop: 'Loop' }
 		}
 	};
 
@@ -458,16 +523,21 @@
 	OPTS.pmotion = OPTS.motion;
 	OPTS.pmode = OPTS.mode;
 
-	// Groups that keep a written label beside the sample. The four sidebar
-	// rails do not: they are icon-only rows, and the rail's heading names the
-	// current choice instead — one word in one place beats five words repeated
-	// under five buttons that are already showing you the answer.
-	var LABELLED = { mode: 1, pmotion: 1, pmode: 1 };
+	// Which groups are dropdowns. Motion is the one axis with no useful sample
+	// at rail size, and the two of them together were ten buttons deciding one
+	// thing; a pair of selects says it in two lines.
+	var SELECTS = { motion: 1, mode: 1, pmotion: 1, pmode: 1 };
 
 	function optText(group, v) {
 		var cfg = OPTS[group];
 		return (cfg.label && cfg.label[v]) || v;
 	}
+
+	/* ── The two renderers ────────────────────────────────────────────────
+	   Toggles and dropdowns read the same OPTS entry, so a group moves between
+	   them by naming it in SELECTS above rather than by rewriting its markup.
+	   `values` is the order in both cases, which is what the segmented weight
+	   and size groups need and what a select gets for free. */
 
 	function optButton(group, v, pressed) {
 		var text = optText(group, v);
@@ -475,86 +545,108 @@
 			// aria-label only — no title. A native tooltip would open on top of
 			// the styled one and say the same word twice.
 			+ ' aria-pressed="' + pressed + '" aria-label="' + text + '">'
-			+ '<span class="opt__art">' + OPTS[group].art(v) + '</span>'
-			+ (LABELLED[group] ? '<span class="opt__label">' + text + '</span>' : '')
-			+ '</button>';
+			+ '<span class="opt__art">' + OPTS[group].art(v) + '</span></button>';
+	}
+
+	// The eyedropper that closes a colour row. A <label> wrapping a colour
+	// input rather than a button, because that is the one control the platform
+	// will open a real colour picker for — so it takes a class instead of
+	// aria-pressed, which a screen reader cannot report on a label.
+	function picker(group, hex) {
+		var on = (group === 'primary' ? primary : secondary) === 'custom';
+		return '<label class="opt opt--pick' + (on ? ' is-on' : '') + '" aria-label="Custom">'
+			+ '<input class="opt__pick" type="color" value="' + hex + '" data-custom="' + group + '" />'
+			+ '<span class="u-sr-only">Custom ' + group + ' colour</span></label>';
 	}
 
 	// A group can appear more than once (the sidebar and the panel both show
 	// motion), so this fills every holder that asks for it.
 	function paintOpts(group, selected) {
+		var cfg = OPTS[group];
 		$$('[data-optgroup="' + group + '"]').forEach(function (holder) {
-			holder.innerHTML = OPTS[group].values.map(function (v) {
+			holder.innerHTML = cfg.values.map(function (v) {
 				return optButton(group, v, String(v === selected));
-			}).join('');
+			}).join('') + (cfg.pick ? cfg.pick() : '');
 		});
+		showNow(group, selected);
+	}
+
+	function paintSelect(group, selected) {
+		$$('[data-select="' + group + '"]').forEach(function (holder) {
+			holder.innerHTML = '<select class="sel__input" data-select-input="' + group + '">'
+				+ OPTS[group].values.map(function (v) {
+					return '<option value="' + v + '"' + (v === selected ? ' selected' : '') + '>'
+						+ optText(group, v) + '</option>';
+				}).join('') + '</select>';
+		});
+		showNow(group, selected);
+	}
+
+	function showNow(group, selected) {
 		$$('[data-now="' + group + '"]').forEach(function (el) {
 			el.textContent = optText(group, selected);
 		});
 	}
 
-	paintOpts('variant', state.variant);
-	paintOpts('psize', state.size);
-	paintOpts('colormode', state.color);
-	paintOpts('primary', primary);
-	paintOpts('secondary', secondary);
-	paintOpts('motion', state.motion);
-	paintOpts('mode', state.mode);
-	paintOpts('pmotion', panelMotion);
-	paintOpts('pmode', panelMode);
+	repaintControl('variant', state.variant);
+	repaintControl('psize', state.size);
+	repaintControl('colormode', state.color);
+	repaintControl('flicker', state.flicker);
+	repaintControl('primary', primary);
+	repaintControl('secondary', secondary);
+	repaintControl('motion', state.motion);
+	repaintControl('mode', state.mode);
+	repaintControl('pmotion', panelMotion);
+	repaintControl('pmode', panelMode);
 
 	/* ── The grid ────────────────────────────────────────────────────────── */
 
+	// Is the scanline moving? Both the roll and the flicker are declared with
+	// the animation SHORTHAND, so either of them and a motion class on the same
+	// element is one animation cancelling the other rather than two playing.
+	// This is the test the grid and the note below both ask.
+	function scanMoving() {
+		return state.color === 'scan-roll' || (isScan() && state.flicker === 'on');
+	}
+	function isScan() { return state.color === 'scan' || state.color === 'scan-roll'; }
+
+	// The scanline as a class list: the mask, and whichever of the two
+	// movements are on. Assembled once here so the grid, the note and the
+	// export all describe the same icon.
+	function scanClasses() {
+		if (!isScan()) return [];
+		var cls = ['ic-scan'];
+		if (state.color === 'scan-roll') cls.push('ic-scan-roll');
+		if (state.flicker === 'on') cls.push('ic-flicker');
+		return cls;
+	}
+
 	function cellsFor(rows) {
-		// Scanline and RGB drive their own animation, so a motion selection
-		// would fight them for the same property.
-		var selfAnimating = state.color === 'scan' || state.color === 'rgb';
-		var mcls = selfAnimating ? '' : motionClass(state.motion, state.mode);
+		var mcls = scanMoving() ? '' : motionClass(state.motion, state.mode);
 		var multi = state.color === 'multi';
-		var rgb = state.color === 'rgb';
-		// Scanline and TV were two picks for one look — the mask is what makes
-		// the roll possible and the roll is what makes the mask read as a
-		// screen, so they are one style now.
-		var scanned = state.color === 'scan';
-		var filled = state.color === 'fill' || scanned;
+		var scan = scanClasses();
 		return rows.map(function (i, n) {
-			var v = state.variant;
-			var canFill = i.variants.indexOf('solid') !== -1;
-			// Fill style means the shape carries the primary rather than the
-			// outline, so it draws the solid form wherever the geometry allows
-			// one. An open path cannot be filled without becoming a blob, so
-			// those keep their stroke and take the colour on that instead.
-			if (filled && canFill) v = 'solid';
-			// An icon with no solid falls back to line rather than vanishing —
-			// a hole in the grid would read as a missing icon, not a missing
-			// variant.
-			if (v === 'solid' && !canFill) v = 'line';
-			// Multicolour is added as CLASSES rather than by swapping the
-			// variant, so it composes with whatever weight is selected instead
-			// of overriding it. The wash only goes on icons that enclose an
-			// area; on an open path it would flood the region the path merely
-			// implies.
+			// Every style is added as CLASSES on one drawing rather than by
+			// swapping in a different one, so they compose with whatever weight
+			// the weight group is on instead of overriding it. That is the whole
+			// reason the set has three weights and no fourth "solid" form: a
+			// style should change how an icon is dressed, never which icon it
+			// is.
 			var cls = [mcls];
 			if (multi) {
 				cls.push('ic-multi');
-				if (canFill && v !== 'solid') cls.push('ic-multi-fill');
+				// The wash only goes on icons that enclose an area; on an open
+				// path it would flood the region the path merely implies.
+				if (i.closed) cls.push('ic-multi-fill');
 			}
-			if (filled) cls.push('ic-primary');
-			// Scanline is a mask, so it needs something solid to band — on a
-			// bare stroke it just dashes the line. `filled` is already true for
-			// this mode, so the colour class is on; only the mask is left.
-			// Both of these carry their own animation via the shorthand, so a
-			// motion class alongside would simply cancel one of them. The rail
-			// says so, and cellsFor drops the motion class below.
-			if (scanned) cls.push('ic-scan', 'ic-tv-loop');
-			if (rgb) cls.push('ic-rgb', 'ic-rgb-loop');
-			// A tiny per-cell delay so a grid of 61 icons arrives as a sweep
+			cls = cls.concat(scan);
+			// A tiny per-cell delay so a grid of 103 icons arrives as a sweep
 			// rather than as one flash. Capped, or the last cell waits a
 			// second and a half to appear.
 			var delay = state.motion === 'off' ? '' :
 				' style="--ic-delay:' + Math.min(n * 18, 420) + 'ms"';
 			return '<button class="cell" type="button" data-name="' + i.name + '" data-cat="' + i.category + '" title="' + i.name + '"' + delay + '>'
-				+ svgMarkup(i, v, 24, cls.filter(Boolean).join(' '))
+				+ svgMarkup(i, state.variant, 24, cls.filter(Boolean).join(' '))
 				+ '<span class="cell__name">' + i.name + '</span></button>';
 		}).join('');
 	}
@@ -591,16 +683,20 @@
 
 		$('[data-count]').textContent = rows.length + (rows.length === 1 ? ' icon' : ' icons');
 		$('[data-empty]').hidden = rows.length > 0;
+
+		// The scanline's own controls, present only while it is the style.
+		$('[data-scanopts]').hidden = !isScan();
+
+		/* There used to be a warning here about the raster going invisible
+		   below a certain size. It is gone because the condition it warned
+		   about is gone: .ic-scan's pitch has a 1.2px floor, so the gap between
+		   scan lines is 0.42px at every size this page can show. A warning for
+		   an impossible state is a warning people learn to ignore. */
 		var note = $('[data-motion-note]');
-		if (state.color === 'scan') {
-			note.textContent = 'Scanline rolls and flickers on its own, so it overrides ' +
-				'the motion below. It is a mask over the filled form — give it lg or xl.';
-			note.hidden = false;
-		} else if (state.color === 'rgb') {
-			note.textContent = 'RGB mistracks on its own, so it overrides the motion below.';
-			note.hidden = false;
-		} else if (state.motion === 'draw' && state.variant === 'solid') {
-			note.textContent = 'Draw needs a stroke to draw, so it does nothing on the solid weight.';
+		if (scanMoving()) {
+			note.textContent = 'A moving scanline is already an animation, so it '
+				+ 'overrides the one chosen here. Set it to Steady, or use the '
+				+ 'static Scanline, to have both.';
 			note.hidden = false;
 		} else {
 			note.hidden = true;
@@ -614,9 +710,6 @@
 	function paint() {
 		if (!current) return;
 		var v = panelVariant;
-		var has = current.variants.indexOf('solid') !== -1;
-		$('[data-panel-note]').hidden = !(v === 'solid' && !has);
-		if (v === 'solid' && !has) v = 'line';
 
 		// Rendered AT the chosen size, not at a fixed preview size — dragging
 		// the slider has to change what you are looking at, or the number is
@@ -760,12 +853,10 @@
 	}
 
 	function currentSvg() {
-		var v = panelVariant;
-		if (v === 'solid' && current.variants.indexOf('solid') === -1) v = 'line';
 		// currentColor cannot survive leaving the page — there is no
 		// surrounding text in a downloaded file to inherit from — so it is
 		// always resolved, even when the picker is on ink.
-		return svgMarkup(current, v, size).replace(/currentColor/g, exportColour());
+		return svgMarkup(current, panelVariant, size).replace(/currentColor/g, exportColour());
 	}
 
 	// name-variant-colour-size. The colour is in there because exporting the

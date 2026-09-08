@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <title>Icons — browse all {count} · {name}</title>
-<meta name="description" content="Search and filter {count} icons. Pick a weight, a size, a colour style and an animation, then copy the markup or download SVG, PNG or JPG." />
+<meta name="description" content="Search and filter {count} icons. Slide through the three weights and four sizes, pick a colour and an animation, then copy the markup or download SVG, PNG or JPG." />
 <link rel="canonical" href="{site}/icons/" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="{name} — browse the set" />
@@ -42,30 +42,47 @@ try {
     <nav class="sidebar" aria-label="Filters and display">
       <div class="rail" data-catnav></div>
 
+      <!-- Every toggle in this rail renders a REAL icon in the state it
+           selects, so each control shows you its answer instead of naming it:
+           the weight buttons are drawn at their weight, the size buttons at
+           their size. Weight and size are the two ordered axes, so their
+           buttons are JOINED into one segmented control — the shared edges say
+           "these are steps on a scale", which a row of separate squares does
+           not. The rail heading names the current one. -->
       <div class="rail">
         <p class="rail__head">Weight <span class="rail__now" data-now="variant"></span></p>
-        <!-- Every toggle in this rail renders a REAL icon in the state it
-             selects, so each control shows you its answer instead of naming
-             it — the weight buttons are drawn at their weight, the motion
-             buttons play their animation. -->
-        <div class="opts" role="group" aria-label="Weight" data-optgroup="variant"></div>
+        <div class="opts opts--group" role="group" aria-label="Weight" data-optgroup="variant"></div>
       </div>
 
       <div class="rail">
         <p class="rail__head">Size <span class="rail__now" data-now="psize"></span></p>
-        <div class="opts opts--size" role="group" aria-label="Preview size" data-optgroup="psize"></div>
+        <div class="opts opts--group" role="group" aria-label="Preview size" data-optgroup="psize"></div>
       </div>
 
       <div class="rail">
         <p class="rail__head">Style <span class="rail__now" data-now="colormode"></span></p>
-        <div class="opts" role="group" aria-label="Colour style" data-optgroup="colormode"></div>
+        <div class="opts opts--row" role="group" aria-label="Colour style" data-optgroup="colormode"></div>
+
+        <!-- Scanline is the one style with anything to tune, so its control
+             appears when it is chosen and is absent otherwise. A flicker
+             toggle sitting there greyed out while you are looking at Multi is
+             just furniture.
+
+             There is no pitch control, and that is the point: the scanline is
+             ONE raster, very fine, at every size. A set of pitches was three
+             effects sharing a name. -->
+        <div class="sub" data-scanopts hidden>
+          <p class="rail__head rail__head--sub">Flicker <span class="rail__now" data-now="flicker"></span></p>
+          <div class="opts opts--row" role="group" aria-label="Scanline flicker" data-optgroup="flicker"></div>
+        </div>
       </div>
 
       <div class="rail">
         <!-- Choosing here sets --accent on :root. Everything downstream reads
              it — the icons through --ic-primary, and this page's own chrome —
              so one click rebrands the lot. Signal red is the design system's
-             own accent and the default. -->
+             own accent and the default; the eyedropper at the end of each row
+             is the escape hatch for a colour the row does not carry. -->
         <p class="rail__head">Primary <span class="rail__now" data-now="primary"></span></p>
         <div class="opts opts--swatch" role="group" aria-label="Primary colour" data-optgroup="primary"></div>
 
@@ -74,10 +91,16 @@ try {
       </div>
 
       <div class="rail">
-        <p class="rail__head">Motion <span class="rail__now" data-now="motion"></span></p>
-        <div class="opts" role="group" aria-label="Animation" data-optgroup="motion"></div>
-        <div class="modes" role="group" aria-label="Play mode" data-optgroup="mode"></div>
-        <p class="rail__note" data-motion-note hidden>Draw needs a stroke to draw, so it does nothing on the solid weight.</p>
+        <!-- Two dropdowns rather than ten buttons. Motion is the one group
+             where the sample cannot show its answer at rail size anyway — a
+             20px icon playing a 3-second loop is a smudge — so the space the
+             buttons cost bought nothing. -->
+        <p class="rail__head">Animation</p>
+        <div class="selects">
+          <label class="sel"><span class="sel__label">Effect</span><span data-select="motion"></span></label>
+          <label class="sel"><span class="sel__label">Play</span><span data-select="mode"></span></label>
+        </div>
+        <p class="rail__note" data-motion-note hidden></p>
       </div>
     </nav>
 
@@ -122,12 +145,10 @@ try {
       </div>
 
       <p class="field__label">Weight</p>
-      <div class="cluster" role="group" aria-label="Variant">
+      <div class="cluster" role="group" aria-label="Weight">
         <button class="chip" type="button" data-pvariant="thin">thin</button>
-        <button class="chip" type="button" data-pvariant="line" aria-pressed="true">line</button>
+        <button class="chip" type="button" data-pvariant="line" aria-pressed="true">regular</button>
         <button class="chip" type="button" data-pvariant="bold">bold</button>
-        <button class="chip" type="button" data-pvariant="solid">solid</button>
-        <button class="chip" type="button" data-pvariant="duo">duo</button>
       </div>
 
       <!-- The colour row. These are the tokens the package actually ships
@@ -148,11 +169,11 @@ try {
         </label>
       </div>
 
-      <p class="field__label">Motion</p>
-      <div class="cluster" role="group" aria-label="Animation" data-optgroup="pmotion"></div>
-      <div class="cluster" role="group" aria-label="Play mode" data-optgroup="pmode"></div>
-
-      <p class="panel__note" data-panel-note hidden>This icon has no solid variant — its paths are open, and a filled open path is a blob rather than an icon. A solid needs its own declared geometry.</p>
+      <p class="field__label">Animation</p>
+      <div class="selects">
+        <label class="sel"><span class="sel__label">Effect</span><span data-select="pmotion"></span></label>
+        <label class="sel"><span class="sel__label">Play</span><span data-select="pmode"></span></label>
+      </div>
     </div>
 
     <div class="panel__preview">

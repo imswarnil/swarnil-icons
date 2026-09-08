@@ -203,5 +203,17 @@
 /* ── Close ────────────────────────────────────────────────────────────────── */
 
 .uclose { padding-block: 3.5rem 5rem; border-top: 1px solid var(--line-subtle); max-width: 46rem; }
-.uclose__title { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; letter-spacing: -.02em; }
-.uclose__text { color: var(--fg-muted); margin-top: .5rem; }
+.uclose__title { font-family: var(--font-display); font-size: 1.75rem; font-weight: 600; letter-spacing: -.02em; margin-top: 1rem; }
+.uclose__text { color: var(--fg-muted); margin-top: .75rem; text-wrap: pretty; }
+
+/* The star sits in the accent wash the marketing tiles use, so the ask reads
+   as part of the page rather than as a banner bolted to the end of it. */
+.uclose__mark {
+	display: inline-grid; place-items: center;
+	inline-size: 3.5rem; block-size: 3.5rem;
+	border-radius: var(--radius-lg);
+	background: var(--accent-soft);
+	color: var(--accent);
+}
+
+.uclose .hero__cta { margin-top: 1.75rem; }
